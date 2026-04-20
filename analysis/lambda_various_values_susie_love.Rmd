@@ -1,0 +1,252 @@
+---
+title: "Learning susie-love with various lambda"
+Author: "Dat Do"
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+---
+
+I am sorry for saying that learned $\lambda$ is either 0 or 1. I missed the logdet
+term in the objective function when trying to think about it. 
+My frustration comes from an earlier moment
+when I attempted to learn both $\lambda$ and $\nu_0$. 
+I set the upper bound of $\lambda$ to be 0.1. The learned $\lambda$ just kept 
+increasing to this upper bound
+as the loss function decreases (and $\nu_0$ also increases). This makes the 
+algorithm non-robust (because we borrow too much information from LD with 
+large $\lambda$ -> wrong LD). 
+
+Although the current implement fixes $\lambda$, we will demonstrate here that
+changing $\lambda$ to a larger value gives better loss (loss = - ELBO) and less
+robust result. 
+
+Note that $R$ and $R0$ in this markdown file are covariance matrices (but
+we abuse the language/notation and refer them as LD).
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## 1. Simulate data from a coalescent model
+
+First we use `sim_2pop()` to simulate two populations that diverged 25 generations
+ago. POP1 is a large GWAS cohort (N = 25,000) and POP2 is a small LD
+reference panel (N₀ = 200).
+
+```{r simulate, fig.width=8, fig.height=6}
+library(susielove)
+
+seed  <- 1
+T_split <- 25
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0    <- 200L
+J     <- 1000L
+h2    <- 0.01
+
+res <- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+## 2. Fit SuSiE with in-sample covariance matrix (oracle baseline)
+
+When the true in-sample LD is available, standard SuSiE works perfectly:
+
+```{r susie-insample, fig.width=8, fig.height=6}
+library(susieR)
+
+fit <- susie_suff_stat(
+  XtX = N * R,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit, y = "PIP", b = beta_true, main = "In-sample cov mat")
+```
+
+## 3. Fit SuSiE with out-of-sample covariance matrix
+
+Using the mismatched LD reference directly leads to spurious signals:
+
+```{r susie-outsample, fig.width=8, fig.height=6}
+fit_R0 <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5
+)
+susie_plot(fit_R0, y = "PIP", b = beta_true, main = "Out-of-sample cov mat")
+```
+
+## 4. Diagonal correction
+
+Here we use Matthew's suggestion that we can adjust the diagonal of the out-of-sample
+to the diagonal of the in-sample. It works a bit better.
+
+```{r diag-correction, fig.width=8, fig.height=6}
+d0_inv_sqrt <- 1 / sqrt(diag(R0))
+LD0 <- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
+d_sqrt <- sqrt(diag(R))
+R_tilde <- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+fit_R_tilde <- susie_suff_stat(
+  XtX = N * R_tilde,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit_R_tilde, y = "PIP", b = beta_true,
+           main = "Out-of-sample cov mat (corrected diag)")
+```
+
+## 5. Fit SuSiE-LovE
+
+`susie_love_lambda` jointly learns the covariance matrix while performing
+fine-mapping. Here $\lambda$ is set to $1 / (N_0 + 1) \approx 1 / 200 = 0.005$
+
+```{r susie-love, fig.width=8, fig.height=6}
+
+lambda <- 1 / (N0 + 1)
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+
+love_res <- susie_love_lambda(v, R_out, diag_R,
+                              lambda,
+                              N, L = 5,
+                              k,
+                              nu_0_init = 1000,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res$b_res
+R_q   <- love_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with lambda = ", lambda)
+)
+```
+The result looks good. The spurious CS is gone. 
+
+## 6. Fit susie-love with higher lambda
+
+We attempt to fit the susie-love model with $\lambda = 0.02$ (4 times larger than
+above). We observe that the loss is smaller than the fit above. $\nu_0$ is much
+larger. And we might have spurious CS (or at least spurious non-zero PIP for many SNPs) again.
+
+```{r lambda 002, fig.width=8, fig.height=6}
+lambda <- 0.02
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+
+love_res <- susie_love_lambda(v, R_out, diag_R,
+                              lambda,
+                              N, L = 5,
+                              k,
+                              nu_0_init = 1000,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res$b_res
+R_q   <- love_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with lambda = ", lambda)
+)
+```
+Now we set $\lambda = 0.05$, even higher. We often have better loss. 
+
+```{r lambda 005, fig.width=8, fig.height=6}
+lambda <- 0.05
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+
+love_res <- susie_love_lambda(v, R_out, diag_R,
+                              lambda,
+                              N, L = 5,
+                              k,
+                              nu_0_init = 1000,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res$b_res
+R_q   <- love_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with lambda = ", lambda)
+)
+```
+
+The loss does not increase further if we keep increase $\lambda$. But the learned
+$\nu_0$ is still large compare to the case where we set $\lambda = 1 / (N_0 + 1)$.
+
+```{r lambda 01, fig.width=8, fig.height=6}
+lambda <- 0.1
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+
+love_res <- susie_love_lambda(v, R_out, diag_R,
+                              lambda,
+                              N, L = 5,
+                              k,
+                              nu_0_init = 1000,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res$b_res
+R_q   <- love_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with lambda = ", lambda)
+)
+```
+
+
