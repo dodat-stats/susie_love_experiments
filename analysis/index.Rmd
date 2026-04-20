@@ -8,4 +8,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+**Analyses:**
+
++ [Try susie-love with various lambda](lambda_various_values_susie_love.html)
+
