@@ -518,15 +518,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree97db34153e97fbad4912ad8d2c55a2de57c2e676targetblank97db341a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree9fd24ee0bbff04efb175a8c4b0bcb5b78a8dc072targetblank9fd24eea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/97db34153e97fbad4912ad8d2c55a2de57c2e676" target="_blank">97db341</a>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/9fd24ee0bbff04efb175a8c4b0bcb5b78a8dc072" target="_blank">9fd24ee</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree97db34153e97fbad4912ad8d2c55a2de57c2e676targetblank97db341a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree9fd24ee0bbff04efb175a8c4b0bcb5b78a8dc072targetblank9fd24eea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -536,7 +536,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/97db34153e97fbad4912ad8d2c55a2de57c2e676" target="_blank">97db341</a>.
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/9fd24ee0bbff04efb175a8c4b0bcb5b78a8dc072" target="_blank">9fd24ee</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -552,6 +552,9 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 <p>
@@ -597,6 +600,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/9fd24ee0bbff04efb175a8c4b0bcb5b78a8dc072/analysis/special-settings-prior-learn.Rmd" target="_blank">9fd24ee</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-04-21
+</td>
+<td>
+wflow_publish(c("analysis/special-settings-prior-learn.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/dodat-stats/susie_love_experiments/46cb166df19b6659d903f6a78ff577c69ce28fbf/docs/special-settings-prior-learn.html" target="_blank">46cb166</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-04-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1006,6 +1043,50 @@ $lambda_opt
 
 $neg_log_lik
 [1] -1906.019
+
+$convergence
+[1] 0
+
+$message
+[1] &quot;CONVERGENCE: REL_REDUCTION_OF_F &lt;= FACTR*EPSMCH&quot;</code></pre>
+<p>Change the true <span class="math inline">\(\lambda\)</span> and
+<span class="math inline">\(\nu_0\)</span> to see that we still have
+good results. (Idk why estimation of <span
+class="math inline">\(\lambda\)</span> is off in this case tho. <span
+class="math inline">\(\nu_0\)</span> is good.)</p>
+<pre class="r"><code>J &lt;- 1000
+set.seed(1)
+N = 10000
+lambda = 0.03
+nu0 = 1000
+
+## sample R0
+X &lt;- matrix(rnorm(N * J), N, J)
+X_std &lt;- scale(X)
+R0 &lt;- cov(X_std)
+R_bar = (1 - lambda) * R0 + lambda * diag(J) 
+
+## sample R
+library(MCMCpack)
+R &lt;- riwish(v = nu0 + J + 1, S = nu0 * R_bar)
+R_first_col = R[1, ]
+
+results &lt;- optimize_params_single_effect(
+  R_col1      = R_first_col, 
+  R0          = R0, 
+  init_nu0    = 1000, 
+  init_lambda = 0.5
+)
+
+print(results)</code></pre>
+<pre><code>$nu_0_opt
+[1] 1031.082
+
+$lambda_opt
+[1] 1e-04
+
+$neg_log_lik
+[1] -2109.357
 
 $convergence
 [1] 0
