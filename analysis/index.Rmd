@@ -12,3 +12,4 @@ editor_options:
 
 + [Try susie-love with various lambda](lambda_various_values_susie_love.html)
 
++ [Learn lambda and nu0 in special settings](special-settings-prior-learn.html)
