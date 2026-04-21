@@ -1,0 +1,388 @@
+---
+title: "Learning lambda and nu0 in some special settings"
+Author: "Dat Do"
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+---
+
+# 1. MLE in the null case
+Consider the model
+$$v | R \sim \mathcal{N}(0, R/N), \quad R | R_0 \sim \mathcal{IW}(\nu_0 \overline{R}, \nu_0 + J + 1), $$
+for $\overline{R} = (1 - \lambda) R_0 + \lambda I$. The following code finds the MLE of $\nu_0$ and $\lambda$.
+
+```{r}
+maximize_log_pdf <- function(R0, v, N) {
+  J <- length(v)
+  
+  R0 <- (R0 + t(R0)) / 2
+  eig <- eigen(R0, symmetric = TRUE)
+  
+  # Clamp any floating-point negative eigenvalues to exactly 0
+  d <- pmax(eig$values, 0) 
+  v_tilde <- as.numeric(crossprod(eig$vectors, v))
+  
+  # Optimize over log_nu0 to keep parameter scales identical
+  neg_log_pdf <- function(params) {
+    lambda <- params[1]
+    nu0 <- exp(params[2]) # Decode log(nu0)
+    
+    d_lambda <- (1 - lambda) * d + lambda
+    
+    log_det <- sum(log(d_lambda))
+    qf <- N * sum((v_tilde^2) / d_lambda)
+    
+    inner_log <- 1 + (1 / nu0) * qf
+    
+    term1 <- lgamma((nu0 + J + 2) / 2)
+    term2 <- lgamma((nu0 + 2) / 2)
+    term3 <- (J / 2) * log(nu0 * pi)
+    term4 <- 0.5 * log_det
+    term5 <- ((nu0 + J + 2) / 2) * log(inner_log)
+    
+    log_lik <- term1 - term2 - term3 - term4 - term5
+    
+    # Scale objective by J to prevent gradient collapse in finite-differencing
+    return(-log_lik / J)
+  }
+  
+  init_lambda <- 0.5
+  init_log_nu0 <- log(5.0) 
+  
+  epsilon <- 1e-5 
+  
+  # nlminb is significantly more robust for this topology
+  opt_res <- nlminb(
+    start = c(init_lambda, init_log_nu0),
+    objective = neg_log_pdf,
+    lower = c(epsilon, log(epsilon)),
+    upper = c(1 - epsilon, log(1e5))
+  )
+  
+  return(list(
+    lambda = opt_res$par[1],
+    nu_0 = exp(opt_res$par[2]),
+    # Scale the objective back up by J to get true log likelihood
+    max_log_pdf = -opt_res$objective * J,
+    convergence = opt_res$convergence, # 0 means successful
+    message = opt_res$message
+  ))
+}
+```
+
+Now we simulate under this exact model with some true $\lambda$ and $\nu_0$ to ensure that $\lambda$ can be learned correctly. Estimation of $\nu_0$ is off.
+
+```{r}
+# ---- 1. True model simulation check
+J <- 1000
+set.seed(1)
+N = 1000
+lambda = 0.01
+nu0 = 100
+
+## sample R0
+X <- matrix(rnorm(N * J), N, J)
+X_std <- scale(X)
+R0 <- cov(X_std)
+R_bar = (1 - lambda) * R0 + lambda * diag(J) 
+
+## sample R
+library(MCMCpack)
+R <- riwish(v = nu0 + J + 1, S = nu0 * R_bar)
+
+## sample v
+diag(R) <- diag(R) + 1e-10  ##safety
+L <- t(chol(R))
+z <- rnorm(J)
+v <- as.numeric(L %*% z) / sqrt(N)
+
+result <- maximize_log_pdf(R0, v, N)
+print(result)
+```
+
+Change the true $\lambda$: The MLE still can learn the correct $\lambda$.
+```{r}
+J <- 1000
+set.seed(1)
+N = 1000
+lambda = 0.02
+nu0 = 100
+
+## sample R0
+X <- matrix(rnorm(N * J), N, J)
+X_std <- scale(X)
+R0 <- cov(X_std)
+R_bar = (1 - lambda) * R0 + lambda * diag(J) 
+
+## sample R
+library(MCMCpack)
+R <- riwish(v = nu0 + J + 1, S = nu0 * R_bar)
+
+## sample v
+diag(R) <- diag(R) + 1e-10  ##safety
+L <- t(chol(R))
+z <- rnorm(J)
+v <- as.numeric(L %*% z) / sqrt(N)
+
+result <- maximize_log_pdf(R0, v, N)
+print(result)
+```
+
+Now we try to learn $\lambda$ and $\nu_0$ from a null observation from coalescent simulation (note that in this case we do not have true $\lambda$ and $\nu_0$, but it helps with the intuition on how large $\lambda$ should be in this case).
+
+First we try with the out-of-sample size being 200. We see that the optimal $\lambda = 0.05$ when $N_0 = 200$.
+
+
+```{r}
+library(susielove)
+N = 5000
+J = 1000
+ret = sim_2pop(chrom = "chr22",
+               start = 20e6,
+               end = 21e6,
+               T_split = 25,
+               n_gwas = N,
+               n_ref = 200,
+               J = J,
+               h2 = .01,
+               seed = 1)
+
+R0 = ret$R0
+R = ret$R
+
+R0 = cov2cor(R0)
+R = cov2cor(R)
+
+diag(R) <- diag(R) + 1e-10  ##safety
+L <- t(chol(R))
+z <- rnorm(J)
+v <- as.numeric(L %*% z) / sqrt(N)
+
+result <- maximize_log_pdf(R0, v, N)
+print(result)
+```
+Next we try with the out-of-sample size being 2000. We see that the optimal $\lambda = 0.0001$ when $N_0 = 2000$. Both cases have very small $\nu_0$ though.
+
+```{r}
+library(susielove)
+N = 5000
+J = 1000
+ret = sim_2pop(chrom = "chr22",
+               start = 20e6,
+               end = 21e6,
+               T_split = 25,
+               n_gwas = N,
+               n_ref = 2000,
+               J = J,
+               h2 = .01,
+               seed = 1)
+
+R0 = ret$R0
+R = ret$R
+
+R0 = cov2cor(R0)
+R = cov2cor(R)
+
+diag(R) <- diag(R) + 1e-10  ##safety
+L <- t(chol(R))
+z <- rnorm(J)
+v <- as.numeric(L %*% z) / sqrt(N)
+
+result <- maximize_log_pdf(R0, v, N)
+print(result)
+
+```
+
+# 2. MLE in the single effect case (without noise)
+
+Here we implement the MLE of the setting assuming that we know the single true effect and $N\to \infty$ (so that the variance of $v$ is 0). This is equivalent to observing the first column of $R$. The formula appears in Section 2 of the new small writeup.
+
+```{r}
+optimize_params_single_effect <- function(R_col1, R0, init_nu0 = 50, init_lambda = 0.5) {
+  
+  # Length of the column vector (p dimension)
+  p <- length(R_col1)
+  
+  # Identity matrix of dimension p
+  I_p <- diag(p)
+  
+  # Partition the observed first column of R
+  r_11 <- R_col1[1]
+  R_21 <- R_col1[-1]
+  
+  # ---------------------------------------------------------
+  # Objective Function (Negative Log-Likelihood)
+  # ---------------------------------------------------------
+  neg_log_lik <- function(params) {
+    nu_0   <- params[1]
+    lambda <- params[2]
+    
+    # 1. Dynamically construct Rbar based on the current lambda
+    Rbar <- (1 - lambda) * R0 + lambda * I_p
+    
+    # 2. Partition the dynamic Rbar matrix
+    rbar_11 <- Rbar[1, 1]
+    Rbar_21 <- Rbar[-1, 1, drop = FALSE] # Keep as a column matrix
+    Rbar_22 <- Rbar[-1, -1, drop = FALSE]
+    
+    # 3. Compute the Schur Complement of Rbar dynamically
+    # Rbar_22.1 = Rbar_22 - Rbar_21 * (1/rbar_11) * Rbar_12
+    Rbar_22.1 <- Rbar_22 - (Rbar_21 %*% t(Rbar_21)) / rbar_11
+    
+    # Compute inverse and log-determinant (safely)
+    inv_Rbar_22.1 <- solve(Rbar_22.1)
+    log_det_Rbar_22.1 <- as.numeric(determinant(Rbar_22.1, logarithm = TRUE)$modulus)
+    
+    # --- A. Log-Likelihood of r_11 (Inverse-Gamma) ---
+    alpha <- (nu_0 + 2) / 2
+    beta  <- (nu_0 * rbar_11) / 2
+    
+    ll_r11 <- alpha * log(beta) - lgamma(alpha) - 
+      (alpha + 1) * log(r_11) - (beta / r_11)
+    
+    # --- B. Log-Likelihood of R_21 | r_11 (Multivariate t) ---
+    mu <- Rbar_21 * (r_11 / rbar_11)
+    diff <- R_21 - mu
+    
+    # Quadratic form: (R_21 - mu)^T %*% Rbar_22.1^{-1} %*% (R_21 - mu)
+    Q <- as.numeric(t(diff) %*% inv_Rbar_22.1 %*% diff)
+    
+    term1 <- lgamma((nu_0 + p + 2) / 2) - lgamma((nu_0 + 3) / 2)
+    term2 <- - ((p - 1) / 2) * log(pi)
+    term3 <- - ((p - 1) / 2) * log(r_11 / rbar_11)
+    term4 <- - 0.5 * log_det_Rbar_22.1
+    term5 <- - ((nu_0 + p + 2) / 2) * log(1 + (rbar_11 / r_11) * Q)
+    
+    ll_R21_given_r11 <- term1 + term2 + term3 + term4 + term5
+    
+    # Return total negative log-likelihood
+    return(-(ll_r11 + ll_R21_given_r11))
+  }
+  
+  # ---------------------------------------------------------
+  # Execution of the Optimizer
+  # ---------------------------------------------------------
+  # "L-BFGS-B" allows us to set both lower and upper bounds
+  # nu_0 must be > 0. lambda must be in [0, 1].
+  opt_result <- optim(
+    par       = c(init_nu0, init_lambda),
+    fn        = neg_log_lik,
+    method    = "L-BFGS-B",
+    lower     = c(1e-4, 1e-4),    # Keep strictly > 0
+    upper     = c(Inf, 0.9999),   # lambda caps at 1
+    control   = list(maxit = 10000)
+  )
+  
+  return(list(
+    nu_0_opt    = opt_result$par[1],
+    lambda_opt  = opt_result$par[2],
+    neg_log_lik = opt_result$value,
+    convergence = opt_result$convergence,
+    message     = opt_result$message
+  ))
+}
+```
+
+We first simulate under the correct model to check the estimation of $\lambda$ and $\nu_0$. It is awesome that the MLE can learn both of them pretty accurately. The estimation of $\nu_0$ is way better compared to the null case.
+
+```{r}
+# ---- 1. True model simulation check
+J <- 1000
+set.seed(1)
+N = 1000
+lambda = 0.01
+nu0 = 400
+
+## sample R0
+X <- matrix(rnorm(N * J), N, J)
+X_std <- scale(X)
+R0 <- cov(X_std)
+R_bar = (1 - lambda) * R0 + lambda * diag(J) 
+
+## sample R
+library(MCMCpack)
+R <- riwish(v = nu0 + J + 1, S = nu0 * R_bar)
+R_first_col = R[1, ]
+
+results <- optimize_params_single_effect(
+  R_col1      = R_first_col, 
+  R0          = R0, 
+  init_nu0    = 50, 
+  init_lambda = 0.5
+)
+
+print(results)
+```
+
+
+Now we turn into coalescent simulation to get an idea about the estimation of $\nu_0$ and $\lambda$. First try with $N_0 = 200$. This leads to similar $\lambda$ to the null case, but will a larger $\nu_0$.
+
+We try with larger $N_0$, which leads to smaller $\lambda$ and larger $\nu_0$.
+
+```{r}
+
+# ---- 2. Coalescent simulation
+library(susielove)
+N = 5000
+J = 1000
+ret = sim_2pop(chrom = "chr22",
+               start = 20e6,
+               end = 21e6,
+               T_split = 25,
+               n_gwas = N,
+               n_ref = 200,
+               J = J,
+               h2 = .01,
+               seed = 1)
+
+R0 = ret$R0
+R = ret$R
+
+R0 = cov2cor(R0)
+R = cov2cor(R)
+
+R_first_col = R[1, ]
+
+results <- optimize_params_single_effect(
+  R_col1      = R_first_col, 
+  R0          = R0, 
+  init_nu0    = 100, 
+  init_lambda = 0.1
+)
+
+print(results)
+```
+```{r}
+library(susielove)
+N = 5000
+J = 1000
+ret = sim_2pop(chrom = "chr22",
+               start = 20e6,
+               end = 21e6,
+               T_split = 25,
+               n_gwas = N,
+               n_ref = 2000,
+               J = J,
+               h2 = .01,
+               seed = 1)
+
+R0 = ret$R0
+R = ret$R
+
+R0 = cov2cor(R0)
+R = cov2cor(R)
+
+R_first_col = R[1, ]
+
+results <- optimize_params_single_effect(
+  R_col1      = R_first_col, 
+  R0          = R0, 
+  init_nu0    = 100, 
+  init_lambda = 0.1
+)
+
+print(results)
+
+```
+
