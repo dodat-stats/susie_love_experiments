@@ -314,6 +314,36 @@ results <- optimize_params_single_effect(
 
 print(results)
 ```
+Change the true $\lambda$ and $\nu_0$ to see that we still have good results. (Idk why estimation of $\lambda$ is off in this case tho. $\nu_0$ is good.)
+
+```{r}
+J <- 1000
+set.seed(1)
+N = 10000
+lambda = 0.03
+nu0 = 1000
+
+## sample R0
+X <- matrix(rnorm(N * J), N, J)
+X_std <- scale(X)
+R0 <- cov(X_std)
+R_bar = (1 - lambda) * R0 + lambda * diag(J) 
+
+## sample R
+library(MCMCpack)
+R <- riwish(v = nu0 + J + 1, S = nu0 * R_bar)
+R_first_col = R[1, ]
+
+results <- optimize_params_single_effect(
+  R_col1      = R_first_col, 
+  R0          = R0, 
+  init_nu0    = 1000, 
+  init_lambda = 0.5
+)
+
+print(results)
+```
+
 
 
 Now we turn into coalescent simulation to get an idea about the estimation of $\nu_0$ and $\lambda$. First try with $N_0 = 200$. This leads to similar $\lambda$ to the null case, but will a larger $\nu_0$.
