@@ -518,15 +518,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree7d9e8c0c46d6a680c0acd69d2b3bc4bdd51163b3targetblank7d9e8c0a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreeb9f6b5c5ac9537746b60fcaa91560ff48d59c331targetblankb9f6b5ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/7d9e8c0c46d6a680c0acd69d2b3bc4bdd51163b3" target="_blank">7d9e8c0</a>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/b9f6b5c5ac9537746b60fcaa91560ff48d59c331" target="_blank">b9f6b5c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree7d9e8c0c46d6a680c0acd69d2b3bc4bdd51163b3targetblank7d9e8c0a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreeb9f6b5c5ac9537746b60fcaa91560ff48d59c331targetblankb9f6b5ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -536,7 +536,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/7d9e8c0c46d6a680c0acd69d2b3bc4bdd51163b3" target="_blank">7d9e8c0</a>.
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/b9f6b5c5ac9537746b60fcaa91560ff48d59c331" target="_blank">b9f6b5c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -552,7 +552,9 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
+    Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
 
 </code></pre>
 <p>
@@ -597,6 +599,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/b9f6b5c5ac9537746b60fcaa91560ff48d59c331/analysis/small_nu.Rmd" target="_blank">b9f6b5c</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+<td>
+wflow_publish("analysis/small_nu.Rmd", republish = TRUE)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/dodat-stats/susie_love_experiments/302fc3659da095eb9246c0d49b1b829126157ab0/docs/small_nu.html" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -653,6 +689,43 @@ true_SNP = which(beta_true != 0)
 plot(v, pch = 16)
 points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = &quot;red&quot;)</code></pre>
 <p><img src="figure/small_nu.Rmd/simulate-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-simulate-1">
+Past versions of simulate-1.png
+</button>
+</p>
+<div id="fig-simulate-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/simulate-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="susie-with-out-of-sample-ld" class="section level2">
 <h2>2. SuSiE with out-of-sample LD:</h2>
@@ -671,6 +744,43 @@ fit_R_tilde &lt;- susie_suff_stat(
 susie_plot(fit_R_tilde, y = &quot;PIP&quot;, b = beta_true,
            main = &quot;Out-of-sample cov mat (corrected diag)&quot;)</code></pre>
 <p><img src="figure/small_nu.Rmd/diag-correction-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-diag-correction-1">
+Past versions of diag-correction-1.png
+</button>
+</p>
+<div id="fig-diag-correction-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/diag-correction-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="susie-love-with-leared-nu0" class="section level2">
 <h2>3. SuSiE-Love with leared nu0</h2>
@@ -708,6 +818,43 @@ susie_plot_alpha(
   main = paste0(&quot;SuSiE-LovE with lambda = &quot;, lambda)
 )</code></pre>
 <p><img src="figure/small_nu.Rmd/susie-love-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-love-1">
+Past versions of susie-love-1.png
+</button>
+</p>
+<div id="fig-susie-love-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/susie-love-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="susie-love-with-fixed-and-small-nu0" class="section level2">
 <h2>4. SuSiE-LovE with fixed and small nu0</h2>
@@ -1069,9 +1216,46 @@ susie_plot_alpha(
   b = beta_true,
   main = paste0(&quot;SuSiE-LovE with small nu0 = &quot;, nu_0)
 )</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-1-1.png" alt="" width="672" style="display: block; margin: auto;" />
-The algorithm needs more iterations to converge. But it does lead to L =
-1.</p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-1-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-1-1">
+Past versions of unnamed-chunk-1-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-1-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The algorithm needs more iterations to converge. But it does lead to
+L = 1.</p>
 </div>
 <div
 id="investigate-rq-the-estimated-covariance-matrix-in-susie-love-having-conservative-behaviour"
@@ -1101,6 +1285,43 @@ par(mfrow = c(1, 2))
 image(R_null[1:100, 1:100], main = &quot;Null cov mat&quot;, col = heat.colors(20), zlim = zlim)
 image(R_q[1:100, 1:100], main = &quot;Learned cov mat&quot;, col = heat.colors(20), zlim = zlim)</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-2-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-2-1">
+Past versions of unnamed-chunk-2-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-2-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>par(mfrow = c(1, 1))</code></pre>
 <p>Ok they don’t look similar at all. Let check the rank of the learned
 matrix</p>
@@ -1109,6 +1330,43 @@ envals = eig$values
 
 plot(c(1:J), envals, pch = 16)</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-3-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
+Past versions of unnamed-chunk-3-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-3-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>print(envals[c(1:10)])</code></pre>
 <pre><code> [1] 309.80274450  10.29975818   0.06883379   0.05771295   0.05052953
  [6]   0.04649216   0.04263521   0.04221553   0.03919536   0.03559714</code></pre>
@@ -1119,6 +1377,43 @@ envals_null = eig_null$values
 
 plot(c(1:J), envals_null, pch = 16)</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-4-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
+Past versions of unnamed-chunk-4-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-4-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>print(envals_null[c(1:10)])</code></pre>
 <pre><code> [1] 11.5335469  1.2312461  1.1973052  0.7955000  0.5252321  0.5055150
  [7]  0.5046940  0.5039532  0.5024649  0.5019058</code></pre>
@@ -1135,27 +1430,249 @@ class="math inline">\(v\)</span>.</p>
 <pre class="r"><code>plot(c(1:J), R_q[true_SNP[1], ] * beta_true[true_SNP[1]], col = &#39;red&#39;)
 points(c(1:J), v, col=&#39;blue&#39;)</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-5-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
+Past versions of unnamed-chunk-5-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-5-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="other-rows" class="section level3">
 <h3>Other rows</h3>
 <p>For all other rows it has this weird behaviour:</p>
 <pre class="r"><code>plot(c(1:J), R_q[1, ])</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-6-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-6-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot(c(1:J), R_q[2, ], col = &#39;black&#39;)
 points(c(1:J), R_q[3, ] / R_q[3, 1] * R_q[2, 1], col = &#39;red&#39;)</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-7-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
+Past versions of unnamed-chunk-7-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-7-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot(c(1:J), R_q[2, ], col = &#39;black&#39;)
 points(c(1:J), R_q[3, ] / R_q[3, 1] * R_q[2, 1], col = &#39;red&#39;)</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-8-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-8-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>The R_null that we proposed before has all rows similar to v (in each
 row, the biggest value is the same as the corresponding value on the
 diagonal of R).</p>
 <pre class="r"><code>plot(c(1:J), R_null[1, ])</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-9-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-9-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>which.max(R_null[1, ])</code></pre>
 <pre><code>[1] 1</code></pre>
 <pre class="r"><code>plot(c(1:J), R_null[2, ])</code></pre>
 <p><img src="figure/small_nu.Rmd/unnamed-chunk-10-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/302fc3659da095eb9246c0d49b1b829126157ab0/docs/figure/small_nu.Rmd/unnamed-chunk-10-1.png" target="_blank">302fc36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>which.max(R_null[2, ])</code></pre>
 <pre><code>[1] 2</code></pre>
 </div>
@@ -1211,6 +1728,7 @@ constructed so that <span class="math display">\[\text{diag}(u u^\top +
 class="math display">\[u_j^2 = R_{jj} - \eta v_j^2, \quad \forall
 j,\]</span> and the signs of each <span
 class="math inline">\(u_j\)</span> can be arbitrary.</p>
+<pre class="r"><code>uuT = R_q - eta * tcrossprod(v)</code></pre>
 </div>
 </div>
 <div id="conclusion" class="section level1">
@@ -1218,11 +1736,51 @@ class="math inline">\(u_j\)</span> can be arbitrary.</p>
 <p>The conservative covariance matrix that we get from susie-love is
 approximately of the form rank-one-plus-vvT: <span
 class="math display">\[R_{conservative} = uu^\top + \eta vv^\top,
-\]</span> where <span class="math inline">\(\eta\)</span> is a number
-that I can not interpret right now. But given <span
-class="math inline">\(\eta\)</span>, <span
-class="math inline">\(u\)</span> is identified (up to signs) because of
-the diagonal constraint as seen above.</p>
+\]</span> Here is a theoretical characterization of <span
+class="math inline">\(u\)</span> and <span
+class="math inline">\(\eta\)</span>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Firstly, because <span class="math inline">\(\eta\)</span>
+capture the maximmal information of <span
+class="math inline">\(vv^\top\)</span> in <span
+class="math inline">\(R_{conservative}\)</span>, we have <span
+class="math display">\[v^\top (R_{conservative} - \eta vv^\top) v =
+0\]</span> which leads to <span class="math inline">\((v^\top u)^2 =
+0\)</span>. This implies <span class="math inline">\(u \perp
+v\)</span>.</p></li>
+<li><p>Suppose that the learned <span class="math inline">\(\bar{b} =
+\beta_1 \gamma_1\)</span> with <span class="math inline">\(\gamma_1 =
+e_k\)</span> has 1 at <span class="math inline">\(k\)</span> and 0
+otherwise and <span class="math inline">\(\beta_1 \in
+\mathbb{R}\)</span>. The fact that (I change <span
+class="math inline">\(\approx\)</span> to <span
+class="math inline">\(=\)</span> for simplicity) <span
+class="math display">\[v = R_{conservative} \overline{b} \]</span> leads
+to <span class="math display">\[v = u u^\top + \eta vv^\top (\beta_1
+e_k) = \beta_1 u_k u + \beta_1 \eta v_k v\]</span> implies <span
+class="math inline">\(u_k = 0\)</span> (since <span
+class="math inline">\(u\perp v\)</span>) and <span
+class="math inline">\(\eta = 1 / (\beta_1 * v_k)\)</span>.</p></li>
+</ol>
+<p>We can check this</p>
+<pre class="r"><code>u = uuT[1, ] / sqrt(abs(uuT[1, 1]))
+u %*% v    ## should near 0; subject to the error due to the low-rank part (R_conservative is still a full rank matrix anyway)</code></pre>
+<pre><code>          [,1]
+[1,] -1.614224</code></pre>
+<pre class="r"><code>k = true_SNP[1]
+u[k] </code></pre>
+<pre><code>[1] 6.69653e-05</code></pre>
+<p>This u_k is near 0 as it is significantly smaller than other u</p>
+<pre class="r"><code>u[1]</code></pre>
+<pre><code>[1] 0.4089211</code></pre>
+<pre class="r"><code>u[2]</code></pre>
+<pre><code>[1] 0.4870064</code></pre>
+<pre class="r"><code>u[3]</code></pre>
+<pre><code>[1] -0.3118501</code></pre>
+<p>Finally we check the identity of <span
+class="math inline">\(\eta\)</span>:</p>
+<pre class="r"><code>eta * v[k] * beta_true[k]  ## should near 1</code></pre>
+<pre><code>[1] 0.9849228</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
