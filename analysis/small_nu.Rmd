@@ -1,0 +1,256 @@
+---
+title: "Setting small nu leads to conservative behaviour"
+Author: "Dat Do"
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+---
+
+## 1. Simulate data from a coalescent model
+
+```{r simulate, fig.width=8, fig.height=6}
+library(susielove)
+
+seed  <- 1
+T_split <- 25
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0    <- 200L
+J     <- 1000L
+h2    <- 0.01
+
+res <- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+true_SNP = which(beta_true != 0)
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+## 2. SuSiE with out-of-sample LD: 
+
+```{r diag-correction, fig.width=8, fig.height=6}
+library(susieR)
+d0_inv_sqrt <- 1 / sqrt(diag(R0))
+LD0 <- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
+d_sqrt <- sqrt(diag(R))
+R_tilde <- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+fit_R_tilde <- susie_suff_stat(
+  XtX = N * R_tilde,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit_R_tilde, y = "PIP", b = beta_true,
+           main = "Out-of-sample cov mat (corrected diag)")
+```
+
+
+## 3. SuSiE-Love with leared nu0
+
+
+```{r susie-love, fig.width=8, fig.height=6}
+
+lambda <- 1 / (N0 + 1)
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+
+love_res <- susie_love_lambda(v, R_out, diag_R,
+                              lambda,
+                              N, L = 5,
+                              k,
+                              nu_0_init = 1000,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res$b_res
+R_q   <- love_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with lambda = ", lambda)
+)
+```
+
+## 4. SuSiE-LovE with fixed and small nu0
+
+Now let's try to set $\nu_0$ to very small to see if it can be more conservative:
+
+```{r}
+R_out  <- R_tilde
+## nu_0 = a * N_0 + delta, and we set delta = 1, so minimal nu_0 = 1
+nu_0 = 1.1  
+lambda <- 1 / nu_0
+diag_R <- diag(R)
+k      <- min(N0, J)
+nu_q = nu_0 + 1
+
+susie_love_small_nu <- susie_love_fix_2params(v, R_out, diag_R,
+                                   lambda, nu_q, nu_0,
+                                   N, L = 5,
+                                   k,
+                                   z_init = NULL,
+                                   step_susie = 20,
+                                   step_R = 30,
+                                   step_nu = 50,
+                                   max_iter = 500,
+                                   max_iter_init = 100,
+                                   tol = 1e-4)
+
+b_res <- susie_love_small_nu$b_res
+R_q   <- susie_love_small_nu$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with small nu0 = ", nu_0)
+)
+```
+The algorithm needs more iterations to converge. But it does lead to L = 1. 
+
+
+## 5. Investigate Rq (the estimated covariance matrix in susie-love having conservative behaviour)
+
+Now let's check if the learned LD is similar to our guess (discussion with Matthew):
+
+$$R_{null} = S + \eta vv^\top, $$
+where $\eta$ is chosen to be as large as possible, and $S$ is a digonal matrix so that the diagonal of this $R_{null}$ equals to the diagonal of the in-sample LD matrix $\diag(R)$. 
+
+```{r}
+eta = min(diag_R / v^2)
+## check
+diag_diff = diag_R - diag(eta * tcrossprod(v))
+min(diag_diff)  ## should = 0
+
+R_null = eta * tcrossprod(v)
+diag(R_null) = diag_R
+zlim <- range(R_null, R_q)
+
+par(mfrow = c(1, 2))
+
+## first 100 x 100 values
+image(R_null[1:100, 1:100], main = "Null cov mat", col = heat.colors(20), zlim = zlim)
+image(R_q[1:100, 1:100], main = "Learned cov mat", col = heat.colors(20), zlim = zlim)
+par(mfrow = c(1, 1))
+```
+
+Ok they don't look similar at all. Let check the rank of the learned matrix
+
+```{r}
+eig = eigen(R_q)
+envals = eig$values
+
+plot(c(1:J), envals, pch = 16)
+print(envals[c(1:10)])
+```
+
+Indeed $R_q$ has rank close to 1. Rank of the guessed null matrix: 
+
+```{r}
+eig_null = eigen(R_null)
+envals_null = eig_null$values
+
+plot(c(1:J), envals_null, pch = 16)
+print(envals_null[c(1:10)])
+```
+It is also close to 1. I am still investigate to see what is the form of this matrix $R_q$.
+
+## More visualization of the learned Rq
+
+### Row of Rq at the true SNP
+
+I visualize the value of Rq at the row of the true causal SNP that it catches. Indeed the value is very close to $v$.
+
+```{r}
+plot(c(1:J), R_q[true_SNP[1], ] * beta_true[true_SNP[1]], col = 'red')
+points(c(1:J), v, col='blue')
+```
+
+
+
+### Other rows
+
+For all other rows it has this weird behaviour:
+
+```{r}
+plot(c(1:J), R_q[1, ])
+
+```
+
+```{r}
+plot(c(1:J), R_q[2, ], col = 'black')
+points(c(1:J), R_q[3, ] / R_q[3, 1] * R_q[2, 1], col = 'red')
+
+```
+
+```{r}
+plot(c(1:J), R_q[2, ], col = 'black')
+points(c(1:J), R_q[3, ] / R_q[3, 1] * R_q[2, 1], col = 'red')
+```
+
+The R_null that we proposed before has all rows similar to v (in each row, the biggest value is the same as the corresponding value on the diagonal of R).
+
+```{r}
+plot(c(1:J), R_null[1, ])
+which.max(R_null[1, ])
+```
+```{r}
+plot(c(1:J), R_null[2, ])
+which.max(R_null[2, ])
+```
+### Conclusion on the Rq
+
+Because except the row/column corresponding to one of the true causal SNP being similar to v, all the other rows of $R_q$ are multiplier of others, we can conclude that $R_q$ has this form:
+$$R_q = u u^\top + \eta vv^\top, $$
+where $u \in \mathbb{R}^J$. Our intuition of R_null is like a diagonal matrix + vvT. But perhaps R_null is more like rank-one + vvT. 
+
+Anyway, this R_q still has the effect that $v \approx R_q b_1$, where $b_1$ is a single effect vector (i.e., after taking this single effect out, there is no left signal to learn the second single effect).
+
+```{r}
+b_bar = colSums(b_res$alpha * b_res$mu)
+leftover_signal = v - R_q %*% b_bar
+t(leftover_signal)[1:100]
+```
+
+One simple way to make inference about $\eta$ (the multiplier of $vv^\top$) in $R_q$ is as follows:
+
+```{r}
+eta = as.numeric(1 / v %*% solve(R_q + 1e-10 * diag(J), v))
+eta
+```
+
+After having this $\eta$, the vector $u = (u_j)_{j=1}^{J}$ is constructed so that 
+$$\text{diag}(u u^\top + \eta vv^\top) = \text{diag}(R)$$
+in other words,
+$$u_j^2 = R_{jj} - \eta v_j^2, \quad \forall j,$$
+and the signs of each $u_j$ can be arbitrary.
+
+# Conclusion
+
+The conservative covariance matrix that we get from susie-love is approximately of the form rank-one-plus-vvT:
+$$R_{conservative} = uu^\top + \eta vv^\top, $$
+where $\eta$ is a number that I can not interpret right now. But given $\eta$, $u$ is identified (up to signs) because of the diagonal constraint as seen above.
+
+
