@@ -5,6 +5,9 @@ output:
   workflowr::wflow_html:
     toc: true
     toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ## 1. Simulate data from a coalescent model
@@ -41,7 +44,7 @@ plot(v, pch = 16)
 points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
 ```
 
-## 2. SuSiE with out-of-sample LD: 
+## 2. SuSiE with out-of-sample LD:
 
 ```{r diag-correction, fig.width=8, fig.height=6}
 library(susieR)
@@ -60,9 +63,7 @@ susie_plot(fit_R_tilde, y = "PIP", b = beta_true,
            main = "Out-of-sample cov mat (corrected diag)")
 ```
 
-
 ## 3. SuSiE-Love with leared nu0
-
 
 ```{r susie-love, fig.width=8, fig.height=6}
 
@@ -95,7 +96,8 @@ susie_plot_alpha(
 
 ## 4. SuSiE-LovE with fixed and small nu0
 
-Now let's try to set $\nu_0$ to very small to see if it can be more conservative:
+Now let's try to set $\nu_0$ to very small to see if it can be more
+conservative:
 
 ```{r}
 R_out  <- R_tilde
@@ -128,15 +130,18 @@ susie_plot_alpha(
   main = paste0("SuSiE-LovE with small nu0 = ", nu_0)
 )
 ```
-The algorithm needs more iterations to converge. But it does lead to L = 1. 
 
+The algorithm needs more iterations to converge. But it does lead to L =
+1.
 
 ## 5. Investigate Rq (the estimated covariance matrix in susie-love having conservative behaviour)
 
-Now let's check if the learned LD is similar to our guess (discussion with Matthew):
+Now let's check if the learned LD is similar to our guess (discussion
+with Matthew):
 
-$$R_{null} = S + \eta vv^\top, $$
-where $\eta$ is chosen to be as large as possible, and $S$ is a digonal matrix so that the diagonal of this $R_{null}$ equals to the diagonal of the in-sample LD matrix $\diag(R)$. 
+$$R_{null} = S + \eta vv^\top, $$ where $\eta$ is chosen to be as large
+as possible, and $S$ is a digonal matrix so that the diagonal of this
+$R_{null}$ equals to the diagonal of the in-sample LD matrix $\diag(R)$.
 
 ```{r}
 eta = min(diag_R / v^2)
@@ -156,7 +161,8 @@ image(R_q[1:100, 1:100], main = "Learned cov mat", col = heat.colors(20), zlim =
 par(mfrow = c(1, 1))
 ```
 
-Ok they don't look similar at all. Let check the rank of the learned matrix
+Ok they don't look similar at all. Let check the rank of the learned
+matrix
 
 ```{r}
 eig = eigen(R_q)
@@ -166,7 +172,7 @@ plot(c(1:J), envals, pch = 16)
 print(envals[c(1:10)])
 ```
 
-Indeed $R_q$ has rank close to 1. Rank of the guessed null matrix: 
+Indeed $R_q$ has rank close to 1. Rank of the guessed null matrix:
 
 ```{r}
 eig_null = eigen(R_null)
@@ -175,20 +181,21 @@ envals_null = eig_null$values
 plot(c(1:J), envals_null, pch = 16)
 print(envals_null[c(1:10)])
 ```
-It is also close to 1. I am still investigate to see what is the form of this matrix $R_q$.
+
+It is also close to 1. I am still investigate to see what is the form of
+this matrix $R_q$.
 
 ## More visualization of the learned Rq
 
 ### Row of Rq at the true SNP
 
-I visualize the value of Rq at the row of the true causal SNP that it catches. Indeed the value is very close to $v$.
+I visualize the value of Rq at the row of the true causal SNP that it
+catches. Indeed the value is very close to $v$.
 
 ```{r}
 plot(c(1:J), R_q[true_SNP[1], ] * beta_true[true_SNP[1]], col = 'red')
 points(c(1:J), v, col='blue')
 ```
-
-
 
 ### Other rows
 
@@ -210,23 +217,32 @@ plot(c(1:J), R_q[2, ], col = 'black')
 points(c(1:J), R_q[3, ] / R_q[3, 1] * R_q[2, 1], col = 'red')
 ```
 
-The R_null that we proposed before has all rows similar to v (in each row, the biggest value is the same as the corresponding value on the diagonal of R).
+The R_null that we proposed before has all rows similar to v (in each
+row, the biggest value is the same as the corresponding value on the
+diagonal of R).
 
 ```{r}
 plot(c(1:J), R_null[1, ])
 which.max(R_null[1, ])
 ```
+
 ```{r}
 plot(c(1:J), R_null[2, ])
 which.max(R_null[2, ])
 ```
+
 ### Conclusion on the Rq
 
-Because except the row/column corresponding to one of the true causal SNP being similar to v, all the other rows of $R_q$ are multiplier of others, we can conclude that $R_q$ has this form:
-$$R_q = u u^\top + \eta vv^\top, $$
-where $u \in \mathbb{R}^J$. Our intuition of R_null is like a diagonal matrix + vvT. But perhaps R_null is more like rank-one + vvT. 
+Because except the row/column corresponding to one of the true causal
+SNP being similar to v, all the other rows of $R_q$ are multiplier of
+others, we can conclude that $R_q$ has this form:
+$$R_q = u u^\top + \eta vv^\top, $$ where $u \in \mathbb{R}^J$. Our
+intuition of R_null is like a diagonal matrix + vvT. But perhaps R_null
+is more like rank-one + vvT.
 
-Anyway, this R_q still has the effect that $v \approx R_q b_1$, where $b_1$ is a single effect vector (i.e., after taking this single effect out, there is no left signal to learn the second single effect).
+Anyway, this R_q still has the effect that $v \approx R_q b_1$, where
+$b_1$ is a single effect vector (i.e., after taking this single effect
+out, there is no left signal to learn the second single effect).
 
 ```{r}
 b_bar = colSums(b_res$alpha * b_res$mu)
@@ -234,23 +250,65 @@ leftover_signal = v - R_q %*% b_bar
 t(leftover_signal)[1:100]
 ```
 
-One simple way to make inference about $\eta$ (the multiplier of $vv^\top$) in $R_q$ is as follows:
+One simple way to make inference about $\eta$ (the multiplier of
+$vv^\top$) in $R_q$ is as follows:
 
 ```{r}
 eta = as.numeric(1 / v %*% solve(R_q + 1e-10 * diag(J), v))
 eta
 ```
 
-After having this $\eta$, the vector $u = (u_j)_{j=1}^{J}$ is constructed so that 
-$$\text{diag}(u u^\top + \eta vv^\top) = \text{diag}(R)$$
-in other words,
-$$u_j^2 = R_{jj} - \eta v_j^2, \quad \forall j,$$
-and the signs of each $u_j$ can be arbitrary.
+After having this $\eta$, the vector $u = (u_j)_{j=1}^{J}$ is
+constructed so that
+$$\text{diag}(u u^\top + \eta vv^\top) = \text{diag}(R)$$ in other
+words, $$u_j^2 = R_{jj} - \eta v_j^2, \quad \forall j,$$ and the signs
+of each $u_j$ can be arbitrary.
+
+```{r}
+uuT = R_q - eta * tcrossprod(v)
+```
 
 # Conclusion
 
-The conservative covariance matrix that we get from susie-love is approximately of the form rank-one-plus-vvT:
-$$R_{conservative} = uu^\top + \eta vv^\top, $$
-where $\eta$ is a number that I can not interpret right now. But given $\eta$, $u$ is identified (up to signs) because of the diagonal constraint as seen above.
+The conservative covariance matrix that we get from susie-love is
+approximately of the form rank-one-plus-vvT:
+$$R_{conservative} = uu^\top + \eta vv^\top, $$ Here is a theoretical
+characterization of $u$ and $\eta$:
 
+1.  Firstly, because $\eta$ capture the maximmal information of
+    $vv^\top$ in $R_{conservative}$, we have
+    $$v^\top (R_{conservative} - \eta vv^\top) v = 0$$ which leads to
+    $(v^\top u)^2 = 0$. This implies $u \perp v$.
 
+2.  Suppose that the learned $\bar{b} = \beta_1 \gamma_1$ with
+    $\gamma_1 = e_k$ has 1 at $k$ and 0 otherwise and
+    $\beta_1 \in \mathbb{R}$. The fact that (I change $\approx$ to $=$ for simplicity)
+    $$v = R_{conservative} \overline{b} $$ leads to
+    $$v = u u^\top + \eta vv^\top (\beta_1 e_k) = \beta_1 u_k u + \beta_1 \eta v_k v$$
+implies $u_k = 0$ (since $u\perp v$) and $\eta = 1 / (\beta_1 * v_k)$. 
+
+We can check this
+
+```{r}
+u = uuT[1, ] / sqrt(abs(uuT[1, 1]))
+u %*% v    ## should near 0; subject to the error due to the low-rank part (R_conservative is still a full rank matrix anyway)
+```
+
+```{r}
+k = true_SNP[1]
+u[k] 
+```
+
+This u_k is near 0 as it is significantly smaller than other u
+
+```{r}
+u[1]
+u[2]
+u[3]
+```
+
+Finally we check the identity of $\eta$:
+
+```{r}
+eta * v[k] * beta_true[k]  ## should near 1
+```
