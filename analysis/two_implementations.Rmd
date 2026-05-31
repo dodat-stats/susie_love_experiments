@@ -1,0 +1,430 @@
+---
+title: "Two stable implementations and their pros/cons"
+Author: "Dat Do"
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+---
+
+## 0. Current software implementations and discussions
+Right now we have two versions of the implementation (within package susielove) with the names `susie_love_lambda` and `susie_XL`. Let me explain what are the differences and why it actually matters and sheds some more light to the modeling perspective.
+
+Recall the prior for the unknown in-sample $R$:
+$$R | R_0, \nu_0, \delta \sim \mathcal{IW}(\nu_0 R_0 + \delta D_0, \nu_0 + \delta +J + 1). $$
+Both implementations minimize the loss function being the negative ELBO, where the ELBO is:
+
+\begin{align*}
+\mathcal{E}(q(b), R_q, \nu_q, \nu_0) & = \log \Gamma_{\! J}\left(\dfrac{\nu_q +J + 1}{2}\right) - \log \Gamma_{\! J}\left(\dfrac{\nu_{\delta} + J + 1}{2}\right) - \dfrac{\nu_q - \nu_{\delta} - 1}{2} \psi_{\! J}\left(\dfrac{\nu_q + J + 1}{2}\right) \nonumber\\
+& - \dfrac{(\nu_{\delta} + J + 1)J}{2} \log |\nu_q|  + \dfrac{(\nu_q + J + 1)J}{2} + \dfrac{\nu_{\delta} + J + 1}{2} \log |\nu_0 R_0 + \delta D_0| \nonumber\\
+& - \dfrac{\nu_{\delta} + J + 2}{2} \log |R_q| - \dfrac{N}{2} \text{trace}(R_q \boldsymbol{B}) - \dfrac{1}{2}\text{trace}(R_q^{-1} \boldsymbol{V})\\
+& + N v^\top \overline{b} - \mathrm{KL}(q(b) \| p(b)),
+\end{align*}
+(up to a constant only depends on $J$ and $N$), where $\nu_{\delta} = \nu_0 + \delta$, 
+\begin{equation}
+    \boldsymbol{V} = \dfrac{\nu_q + J + 1}{\nu_q} \left(\nu_0 R_0 + \delta D_0 + N vv^\top\right),
+\end{equation}
+and 
+$$\boldsymbol{B} = \mathbb{E}_{q(b)} [bb^\top].$$
+The **difference in implementation** is:
+
+1. The `susie_love_lambda` function implementation fixes $\lambda = \dfrac{\delta}{\nu_0 + \delta}$ and only optimize the sum $\nu_{\delta}:= \nu_0 + \delta$.
+
+2. The `susie_XL` function implementation fixes $\delta$ and only optimize $\nu_0$. 
+
+They are just two way of parametrizing the same problem (they are different in what are fixed though). But I was surprise intitially that this created a large impact:
+
+1. In `susie_love_lambda`, the optimal $\nu_{\delta}$ is obtained very easily and converges to the same value regardless of the intialization.
+
+2. In `susie_XL`, the optimal $\nu_{0}$ hardly moves away from the initialization. Therefore it is very sensitive to the initialization.
+
+I have put more thought into it and conclude that it is because the loss landscape of $\nu_0$ in `susie_XL` is much flatter than that of $\nu_{\delta}$ in `susie_love_lambda` (under the setting that the dimension $J$ is large and $R_0$ is near low-rank). I will present the math at the end of this workflowr file after demonstrate the two methods.
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## 1. Simulate data from a coalescent model
+
+First we use `sim_2pop()` to simulate two populations that diverged 25 generations
+ago. POP1 is a large GWAS cohort (N = 25,000) and POP2 is a small LD
+reference panel (N₀ = 200).
+
+```{r simulate, fig.width=8, fig.height=6}
+library(susielove)
+
+seed  <- 1
+T_split <- 25
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0    <- 200L
+J     <- 1000L
+h2    <- 0.01
+
+res <- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+## 2. Fit SuSiE with in-sample covariance matrix (oracle baseline)
+
+When the true in-sample LD is available, standard SuSiE works perfectly:
+
+```{r susie-insample, fig.width=8, fig.height=6}
+library(susieR)
+
+fit <- susie_suff_stat(
+  XtX = N * R,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit, y = "PIP", b = beta_true, main = "In-sample cov mat")
+```
+
+## 3. Fit SuSiE with out-of-sample covariance matrix
+
+Using the mismatched LD reference directly leads to spurious signals:
+
+```{r susie-outsample, fig.width=8, fig.height=6}
+fit_R0 <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5
+)
+susie_plot(fit_R0, y = "PIP", b = beta_true, main = "Out-of-sample cov mat")
+```
+
+## 4. Diagonal correction
+
+Here we use Matthew's suggestion that we can adjust the diagonal of the out-of-sample
+to the diagonal of the in-sample. It works a bit better.
+
+```{r diag-correction, fig.width=8, fig.height=6}
+d0_inv_sqrt <- 1 / sqrt(diag(R0))
+LD0 <- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
+d_sqrt <- sqrt(diag(R))
+R_tilde <- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+fit_R_tilde <- susie_suff_stat(
+  XtX = N * R_tilde,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit_R_tilde, y = "PIP", b = beta_true,
+           main = "Out-of-sample cov mat (corrected diag)")
+```
+
+## 5. Fit susie_love_lambda
+
+`susie_love_lambda` jointly learns the covariance matrix while performing
+fine-mapping. Here $\lambda$ is set to $1 / (N_0 + 1) \approx 1 / 200 = 0.005$
+
+```{r susie-love, fig.width=8, fig.height=6}
+
+nu_delta_init = 1000
+lambda <- 1 / (N0 + 1)
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+
+love_res <- susie_love_lambda(v, R_out, diag_R,
+                              lambda,
+                              N, L = 5,
+                              k,
+                              nu_delta_init = nu_delta_init,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res$b_res
+R_q   <- love_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with lambda = ", lambda)
+)
+```
+
+**On the convergence of $\nu_{\delta}$**: We initialize $\nu_{\delta}$ at 1000 and very quickly it converges to 652. Let us try to initialize at a different point.
+
+```{r susie-love-diff-init, fig.width=8, fig.height=6}
+
+nu_delta_init = 100
+lambda <- 1 / (N0 + 1)
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+
+love_res <- susie_love_lambda(v, R_out, diag_R,
+                              lambda,
+                              N, L = 5,
+                              k,
+                              nu_delta_init = nu_delta_init,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res$b_res
+R_q   <- love_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with lambda = ", lambda)
+)
+```
+
+**Observation**: Here we initialize $\nu_{\delta}$ at 100 and very quickly it converges to around 610, very close to the first run with vastly different initialization. I like this feature a lot since we will not worry too much about initialization.
+
+Unfortunately it is not the case for the susie_XL implementation. Let us see in the following.
+
+## 6. Fit susie_XL
+
+`susie_XL` fixes $\delta$ and learn $\nu_0$. Throughout we will fix $\delta$ at 0.01 and varies the initialization of $\nu_0$.
+
+```{r susie-XL-1000, fig.width=8, fig.height=6}
+
+nu_0_init = 1000
+delta = 1e-2
+max_iter = 100
+
+XL_res <- susie_XL(v, R_out, diag_R,
+                              delta,
+                              N, L = 5,
+                              k,
+                              nu_0_init = nu_0_init,
+                              max_iter_init=500,
+                              step_susie = 20,
+                              step_R = 50,
+                              estimate_nu_0 = T,
+                              estimate_delta = F,
+                              nu_grad = T,
+                              step_nu = 100,
+                              delta_lower = 1e-4,
+                              delta_upper = 10,
+                              max_iter = max_iter, 
+                              tol = 1e-5)
+
+
+b_res <- XL_res$b_res
+R_q   <- XL_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-XL with delta = ", round(XL_res$delta, 3))
+)
+```
+
+The loss decreases slowly (does not converge within 100 iterations of the outer loop) when we set `nu_0_init` to 1000, where convergence here means the objective function decreases less than `tol=1e-4`. The optimal `nu_0` also rarely changes from the initial value. We can try changing it
+
+```{r susie-XL-100, fig.width=8, fig.height=6}
+
+nu_0_init = 100
+delta = 1e-2
+max_iter = 100
+
+XL_res <- susie_XL(v, R_out, diag_R,
+                              delta,
+                              N, L = 5,
+                              k,
+                              nu_0_init = nu_0_init,
+                              max_iter_init=500,
+                              step_susie = 20,
+                              step_R = 50,
+                              estimate_nu_0 = T,
+                              estimate_delta = F,
+                              nu_grad = T,
+                              step_nu = 100,
+                              delta_lower = 1e-4,
+                              delta_upper = 10,
+                              max_iter = max_iter, 
+                              tol = 1e-5)
+
+
+b_res <- XL_res$b_res
+R_q   <- XL_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-XL with delta = ", round(XL_res$delta, 3))
+)
+```
+
+When changing `nu_0_init` to 100, the algorithm converges in 22 iterations. But `nu_0` also does not change much. Therefore, by fixing $\delta$ and learn $\nu_0$ this way, it is actually not much different from just fixing both of them...
+
+Why is it the case?
+
+## 7. The loss landscape
+
+To be fair I will change the $\delta$ and $\nu_0$ in susie_XL to match with the final value of susie_love ($\lambda = 0.005$ and $\nu_0\approx 610$)
+
+```{r susie-XL-matched, fig.width=8, fig.height=6}
+
+nu_0_init = 620
+delta = nu_0_init / N0
+# delta = 3
+## so that delta / (delta + nu_0_init) = 1 / (N0 + 1) = lambda
+max_iter = 100
+
+XL_res <- susie_XL(v, R_out, diag_R,
+                              delta,
+                              N, L = 5,
+                              k,
+                              nu_0_init = nu_0_init,
+                              max_iter_init=500,
+                              step_susie = 20,
+                              step_R = 50,
+                              estimate_nu_0 = T,
+                              estimate_delta = F,
+                              nu_grad = T,
+                              step_nu = 100,
+                              delta_lower = 1e-4,
+                              delta_upper = 10,
+                              max_iter = max_iter, 
+                              tol = 1e-5)
+
+
+b_res <- XL_res$b_res
+R_q   <- XL_res$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-XL with delta = ", round(XL_res$delta, 3))
+)
+```
+
+
+We can take a look at the loss function by varying $\nu_0$ and keeps all other variables fixed. 
+
+```{r}
+length_nu_0 = 100
+nu_0_list = seq(500, 700, length.out = length_nu_0)
+loss_fn_vals_love = rep(0, length_nu_0)
+R_bar = (1-lambda) * R_out + lambda * diag(diag_R)
+
+for (i in c(1:length_nu_0)){
+  nu_delta = nu_0_list[i]
+  
+  loss_fn_vals_love[i] = susielove:::compute_loss(love_res$b_res, 
+               love_res$Z_final, 
+               love_res$nu_q, 
+               nu_delta, 
+               v, N, R_bar, diag_R)
+  
+}
+
+plot(nu_0_list, loss_fn_vals_love, type='l')
+
+```
+```{r}
+
+length_nu_0 = 100
+nu_0_list = seq(500, 700, length.out = length_nu_0)
+loss_fn_vals_XL = rep(0, length_nu_0)
+
+## some supporting code
+D0 = diag(diag_R)
+# PRECOMPUTE: eigen_vals of R0_tilde = D0^{-1/2} R0 D0^{-1/2} 
+# so the log_det term of nu_0 * R0 + delta * D0 will be calculated easily
+d_inv_sqrt <- 1 / sqrt(diag(D0))
+R0_tilde <- d_inv_sqrt * R_out * rep(d_inv_sqrt, each = J)
+eigen_vals_R0_tilde = eigen(R0_tilde, symmetric = TRUE, only.values = TRUE)$values
+  
+for (i in c(1:length_nu_0)){
+  nu_0 = nu_0_list[i]
+  
+  loss_fn_vals_XL[i] = susielove:::compute_loss_XL(XL_res$b_res, 
+               XL_res$Z_final, 
+               XL_res$nu_q, 
+               nu_0, 
+               delta,
+               v, N, eigen_vals_R0_tilde, R_out, D0, diag_R)
+  
+}
+
+plot(nu_0_list, loss_fn_vals_XL, type='l')
+
+```
+Combined plot
+
+```{r}
+ylim_range <- range(c(loss_fn_vals_XL, loss_fn_vals_love))
+plot(nu_0_list, loss_fn_vals_XL, type = 'l', col = 'red',
+     ylim = ylim_range, xlab = "nu_0", ylab = "Loss", main = "Loss Functions")
+lines(nu_0_list, loss_fn_vals_love, col = 'blue')
+legend("topright", legend = c("XL", "Love"), col = c("red", "blue"), lty = 1)
+```
+
+In general, the loss landscape of XL has smaller curvature, making the optimization struggle more.
+
+## 8. Mathematical explanation
+
+Recall the ELBO:
+
+\begin{align*}
+\mathcal{E}(q(b), R_q, \nu_q, \nu_0) & = \log \Gamma_{\! J}\left(\dfrac{\nu_q +J + 1}{2}\right) - \log \Gamma_{\! J}\left(\dfrac{\nu_{\delta} + J + 1}{2}\right) - \dfrac{\nu_q - \nu_{\delta} - 1}{2} \psi_{\! J}\left(\dfrac{\nu_q + J + 1}{2}\right) \nonumber\\
+& - \dfrac{(\nu_{\delta} + J + 1)J}{2} \log |\nu_q|  + \dfrac{(\nu_q + J + 1)J}{2} + \dfrac{\nu_{\delta} + J + 1}{2} \log |\nu_0 R_0 + \delta D_0| \nonumber\\
+& - \dfrac{\nu_{\delta} + J + 2}{2} \log |R_q| - \dfrac{N}{2} \text{trace}(R_q \boldsymbol{B}) - \dfrac{1}{2}\text{trace}(R_q^{-1} \boldsymbol{V})\\
+& + N v^\top \overline{b} - \mathrm{KL}(q(b) \| p(b)),
+\end{align*}
+(up to a constant only depends on $J$ and $N$), where $\nu_{\delta} = \nu_0 + \delta$, 
+\begin{equation}
+    \boldsymbol{V} = \dfrac{\nu_q + J + 1}{\nu_q} \left(\nu_0 R_0 + \delta D_0 + N vv^\top\right),
+\end{equation}
+and 
+$$\boldsymbol{B} = \mathbb{E}_{q(b)} [bb^\top].$$
+
+In `susie_love_lambda`, because the prior mean $\bar{R} = (1-\lambda) R_0 + \lambda D_0$ is fixed, the landscape of the loss function $\mathcal{L}_{love} = - ELBO$ is easy to understand. If we write the loss function wrt $\nu_{\delta}$, we have
+
+$$\mathcal{L}_{love} = \log \Gamma_{\! J} \left(\dfrac{\nu_\delta + J + 1}{2}\right) - \dfrac{J}{2}(\nu_\delta + J + 1) \log \nu_{\delta} + \text{linear term of } (\nu_{\delta})$$
+Hence, 
+$$\dfrac{\partial^2 \mathcal{L}_{love}}{(\partial \nu_\delta)^2} = \dfrac{1}{4}\sum_{j=1}^{J} \psi'\left(\dfrac{\nu_\delta + J + 2 - j}{2}\right) - \dfrac{J (\nu_\delta - J - 1)}{2 \nu_\delta^2}. $$
+We can use the known inequality $\psi'(z) > 1/z$ of the trigamma function to prove that this is positive, hence $\mathcal{L}_{love}$ is convex in $\nu_\delta$. 
+
+Now let's consider the `XL` parametrization (using $\nu_0$ and $\delta$). To streamline the argument, let us assume $D_0$ being the identity matrix, and let $(\eta_j)_{j=1}^{J}$ be the eigenvalues of $R_0$. Then the second-order derivative is
+
+$$\dfrac{\partial^2 \mathcal{L}_{XL}}{(\partial \nu_0)^2} = \dfrac{1}{4}\sum_{j=1}^{J} \psi'\left(\dfrac{\nu_\delta + J + 2 - j}{2}\right) - \sum_{j=1}^{J}\dfrac{\eta_j}{\nu_0 \eta_j + \delta} + \sum_{j=1}^{J}\dfrac{\nu_0 + \delta + J + 1}{2}\dfrac{\eta_j^2}{(\nu_0 \eta_j + \delta)^2}. $$
+One can also show that this is positive thanks to the inequality $\psi'(z) > 1/z$ of the trigamma function. To compare to $\dfrac{\partial^2 \mathcal{L}_{love}}{(\partial \nu_\delta)^2}$, it is convenient to rearrange this as 
+
+$$\dfrac{\partial^2 \mathcal{L}_{XL}}{(\partial \nu_0)^2} = \dfrac{1}{4}\sum_{j=1}^{J} \psi'\left(\dfrac{\nu_\delta + J + 2 - j}{2}\right) - \sum_{j=1}^{J}\dfrac{\eta_j}{2(\nu_0 \eta_j + \delta)} + \sum_{j=1}^{J}\dfrac{\delta \eta_j^2 - \delta \eta_j + (J + 1)\eta_j^2}{2(\nu_0 \eta_j + \delta)^2}. $$
+
+I think in the setting where many $\eta_j$ are close to 0 (which is our case where $R_0$ is near singular), it can be shown that the derivative $\dfrac{\partial \mathcal{L}_{XL}}{\partial \nu_0}$ is generally smaller (in absolute value) than $\dfrac{\partial \mathcal{L}_{love}}{\partial \nu_{\delta}}$. I need to check this more rigorously tho. 
+
+
+

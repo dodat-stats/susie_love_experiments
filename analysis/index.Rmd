@@ -15,3 +15,5 @@ editor_options:
 + [Learn lambda and nu0 in special settings](special-settings-prior-learn.html)
 
 + [Setting small nu leads to conservative behaviour](small_nu.html)
+
++ [Two ways to parametrize and their behavior](two_implementations.html)
