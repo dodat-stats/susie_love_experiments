@@ -17,3 +17,5 @@ editor_options:
 + [Setting small nu leads to conservative behaviour](small_nu.html)
 
 + [Two ways to parametrize and their behavior](two_implementations.html)
+
++ [Various shrinkage estimates for the out-of-sample correlation matrix](various-shrinkage.html)
