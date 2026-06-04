@@ -23,3 +23,5 @@ editor_options:
 + [First systematic comparison of various shrinkage strategies](systematic-compare-shrinkage-methods.html)
 
 + [Increased mismatch leads to decreased nu_0](divergence_increase-nu_decrease.html)
+
+

@@ -24,13 +24,14 @@ We are going to investigate if the amount of mismatch increases then the the est
 Recall 3 shrinkage (choosing $\lambda$) rules:
 
 1. Naive shrinkage: 
-$$\Psi_{naive} = \left(1-\dfrac{1}{N_0}) R_0 + \dfrac{1}{N_0} I$$
+$$\Psi_{naive} = \left(1-\dfrac{1}{N_0}\right) R_0 + \dfrac{1}{N_0} I$$
 
 2. Wen and Stephens (2010) shrinkage: 
-$$\Psi_{WS} = \left(1- \lambda)^2 R_0 + (1 - (1-\lambda)^2) I,$$
+$$\Psi_{WS} = \left(1- \lambda\right) ^2 R_0 + (1 - (1-\lambda)^2) I,$$
 where $\lambda = \dfrac{\theta}{\theta + 2 N_0}$ and $\theta$ is the Watterson's estimator $\theta = \left(\sum_{i=1}^{2N_0 - 1} \dfrac{1}{i}\right)^{-1} \approx (\log(2N_0) + 0.57)^{-1} $.
 
-3. Ledoit and Wolf (2004) linear shrinkage: $$\Psi_{linear-LW} = \left(1- \lambda) R_0 + \lambda I,$$ where $\lambda \asymp \dfrac{1}{N_0}$. 
+3. Ledoit and Wolf (2004) linear shrinkage:
+$$\Psi_{linear-LW} = \left(1- \lambda\right)  R_0 + \lambda I,$$ where $\lambda \asymp \dfrac{1}{N_0}$. 
 
 
 ```{r}
@@ -94,13 +95,15 @@ compute_lw_linear_from_R0 <- function(R_0, N_ref) {
 
 # 1. Running and comparing 3 methods on many simulation
 
-See the end of the result.
+We increase the divergence time in every simulation (incremental by 25). 
 
-```{r simulate}
+See next section for the result.
+
+```{r simulate, results='hide', message=FALSE, warning=FALSE}
 library(susielove)
 library(susieR)
 
-num_reps = 25
+num_reps = 50
 coverages = matrix(0, nrow = num_reps, ncol = 5)
 powers = matrix(0, nrow = num_reps, ncol = 5)
 no_CSs = matrix(0, nrow = num_reps, ncol = 5)
@@ -121,7 +124,7 @@ h2    <- 0.01
 for (seed in c(1:num_reps)){
   print(paste0("Seed ", seed))
   
-  T_split = seed * 20
+  T_split = seed * 25
   N0 = 200
   # N0 = 100 + (num_reps - seed) * 10
   
