@@ -522,15 +522,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree95155c1480cbd056bf6a99a980757a8fa8e9806atargetblank95155c1a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree72cfa507634fb24c0bd495dc537050f8e21ad6c2targetblank72cfa50a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/95155c1480cbd056bf6a99a980757a8fa8e9806a" target="_blank">95155c1</a>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/72cfa507634fb24c0bd495dc537050f8e21ad6c2" target="_blank">72cfa50</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree95155c1480cbd056bf6a99a980757a8fa8e9806atargetblank95155c1a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree72cfa507634fb24c0bd495dc537050f8e21ad6c2targetblank72cfa50a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -540,7 +540,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/95155c1480cbd056bf6a99a980757a8fa8e9806a" target="_blank">95155c1</a>.
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/72cfa507634fb24c0bd495dc537050f8e21ad6c2" target="_blank">72cfa50</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -606,6 +606,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/72cfa507634fb24c0bd495dc537050f8e21ad6c2/analysis/systematic-compare-shrinkage-methods.Rmd" target="_blank">72cfa50</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-04
+</td>
+<td>
+Add systematic shrinkage comparison and
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/dodat-stats/susie_love_experiments/36aad368f03e05a7fb91a9202c22d211e564fe16/docs/systematic-compare-shrinkage-methods.html" target="_blank">36aad36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-04
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1792,27 +1826,74 @@ for (seed in c(1:num_reps)){
 list_mat = list(coverages, powers, no_CSs, no_SNPs_CS)
 list_name = c(&quot;Coverages&quot;, &quot;Power&quot;, &quot;Number of CSs&quot;, &quot;Number of SNPs per CS&quot;)
 plots = list()
+B &lt;- 2000
 for (i in 1:4){
   m = list_mat[[i]]
   colnames(m) &lt;- c(&#39;In-&#39;, &#39;Out-&#39;, &#39;naive&#39;, &#39;WS&#39;, &#39;LW&#39;)
   means &lt;- colMeans(m)
-  sds   &lt;- apply(m, 2, sd)
+
+  ci_lower &lt;- numeric(ncol(m))
+  ci_upper &lt;- numeric(ncol(m))
+  for (j in 1:ncol(m)) {
+    boot_means &lt;- replicate(B, mean(sample(m[, j], replace = TRUE)))
+    ci_lower[j] &lt;- quantile(boot_means, 0.05)
+    ci_upper[j] &lt;- quantile(boot_means, 0.95)
+  }
+
   df &lt;- data.frame(
     variable = factor(colnames(m), levels = colnames(m)),
     mean = means,
-    sd = sds
+    lower = ci_lower,
+    upper = ci_upper
   )
-  
+
   plots[[i]] = ggplot(df, aes(x = variable, y = mean)) +
     geom_point(size = 3, color = &quot;blue&quot;) +
-    geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+    geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) +
     labs(title = list_name[i],
-         x = &quot;Methods&quot;, y = &quot;Mean ± SD&quot;)
+         x = &quot;Methods&quot;, y = &quot;Mean (90% bootstrap CI)&quot;)
 }
 
 library(patchwork)
 wrap_plots(plots, ncol = 2)</code></pre>
 <p><img src="figure/systematic-compare-shrinkage-methods.Rmd/results-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-results-1">
+Past versions of results-1.png
+</button>
+</p>
+<div id="fig-results-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/36aad368f03e05a7fb91a9202c22d211e564fe16/docs/figure/systematic-compare-shrinkage-methods.Rmd/results-1.png" target="_blank">36aad36</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
