@@ -19,3 +19,6 @@ editor_options:
 + [Two ways to parametrize and their behavior](two_implementations.html)
 
 + [Various shrinkage estimates for the out-of-sample correlation matrix](various-shrinkage.html)
+
+
++ [First systematic comparison of various shrinkage strategies](systematic-compare-shrinkage-methods.html)
