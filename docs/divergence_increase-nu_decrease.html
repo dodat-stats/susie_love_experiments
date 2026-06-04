@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="dodat-stats" />
+
+<meta name="date" content="2026-06-04" />
+
+<title>nu_0 decreases as mismatch increases</title>
+
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">susie_love_experiments</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dodat-stats/susie_love_experiments">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">nu_0 decreases as mismatch increases</h1>
+<h4 class="author">dodat-stats</h4>
+<h4 class="date">2026-06-04</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-06-04
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>susie_love_experiments/</code>
+<span class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.2). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260419code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260419)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260419code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260419)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreef8cd03ef53132f674073b68b56bac54198ced464targetblankf8cd03ea">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/f8cd03ef53132f674073b68b56bac54198ced464" target="_blank">f8cd03e</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreef8cd03ef53132f674073b68b56bac54198ced464targetblankf8cd03ea"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/f8cd03ef53132f674073b68b56bac54198ced464" target="_blank">f8cd03e</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  analysis/test.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/divergence_increase-nu_decrease.Rmd</code>) and HTML
+(<code>docs/divergence_increase-nu_decrease.html</code>) files. If
+you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/f8cd03ef53132f674073b68b56bac54198ced464/analysis/divergence_increase-nu_decrease.Rmd" target="_blank">f8cd03e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-04
+</td>
+<td>
+vary divergence
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="aim" class="section level2">
+<h2>1. Aim</h2>
+<p>We are going to investigate if the amount of mismatch increases then
+the the estimated <span class="math inline">\(\nu_0\)</span> decreases?
+We will increase the divergence time in the coalescent simulation.</p>
+<p>Recall 3 shrinkage (choosing <span
+class="math inline">\(\lambda\)</span>) rules:</p>
+<ol style="list-style-type: decimal">
+<li><p>Naive shrinkage: <span class="math display">\[\Psi_{naive} =
+\left(1-\dfrac{1}{N_0}) R_0 + \dfrac{1}{N_0} I\]</span></p></li>
+<li><p>Wen and Stephens (2010) shrinkage: <span
+class="math display">\[\Psi_{WS} = \left(1- \lambda)^2 R_0 + (1 -
+(1-\lambda)^2) I,\]</span> where <span class="math inline">\(\lambda =
+\dfrac{\theta}{\theta + 2 N_0}\)</span> and <span
+class="math inline">\(\theta\)</span> is the Watterson’s estimator $=
+(_{i=1}^{2N_0 - 1} )^{-1} ((2N_0) + 0.57)^{-1} $.</p></li>
+<li><p>Ledoit and Wolf (2004) linear shrinkage: <span
+class="math display">\[\Psi_{linear-LW} = \left(1- \lambda) R_0 +
+\lambda I,\]</span> where <span class="math inline">\(\lambda \asymp
+\dfrac{1}{N_0}\)</span>.</p></li>
+</ol>
+<pre class="r"><code>
+
+compute_wen_stephens &lt;- function(R_0, N_ref) {
+  # Number of haplotypes (diploid population)
+  d &lt;- 2 * N_ref
+  
+  # Calculate Watterson&#39;s estimator constant (Harmonic sum)
+  harmonic_sum &lt;- sum(1 / (1:(d - 1)))
+  theta        &lt;- 1 / harmonic_sum
+  
+  # Calculate the exact mutation shrinkage parameter lambda
+  lambda &lt;- theta / (theta + 2 * N_ref)
+  
+  # Apply local uniform shrinkage: Psi = (1-lambda)^2 * R_0 + (1 - (1-lambda)^2) * I
+  p &lt;- ncol(R_0)
+  R_ws &lt;- (1 - lambda)^2 * R_0 + (1 - (1 - lambda)^2) * diag(p)
+  
+  return(R_ws)
+}
+
+
+compute_lw_linear_from_R0 &lt;- function(R_0, N_ref) {
+  p &lt;- ncol(R_0)
+  
+  # 1. Sum of the squared off-diagonal elements of R_0
+  # (This is the Frobenius norm of the off-diagonals)
+  sum_sq_off_diag &lt;- sum(R_0^2) - p
+  
+  # 2. Estimate the sampling variance (noise) parameter under normality
+  # In correlation space, the sum of variances of r_ij is approximated by:
+  beta_sq &lt;- (1 / N_ref) * (p + sum_sq_off_diag)
+  
+  # 3. Calculate the distance to the identity target matrix
+  # Since diag(R_0) is all 1s and diag(I) is all 1s, the distance is just 
+  # the sum of the squared off-diagonal elements.
+  delta_sq &lt;- sum_sq_off_diag
+  
+  # 4. Compute the optimal shrinkage intensity alpha
+  # Guard against division by zero if R_0 is already the identity matrix
+  if (delta_sq == 0) {
+    alpha &lt;- 1
+  } else {
+    alpha &lt;- min(1, beta_sq / delta_sq)
+  }
+  
+  # 5. Construct the shrunk matrix: alpha * I + (1 - alpha) * R_0
+  R_lw_linear &lt;- (1 - alpha) * R_0 + alpha * diag(p)
+  
+  # Print the learned alpha for transparency
+  cat(&quot;Ledoit-Wolf Linear Alpha estimated from R_0:&quot;, alpha, &quot;\n&quot;)
+  
+  return(R_lw_linear)
+}
+</code></pre>
+</div>
+<div id="running-and-comparing-3-methods-on-many-simulation"
+class="section level1">
+<h1>1. Running and comparing 3 methods on many simulation</h1>
+<p>See the end of the result.</p>
+<pre class="r"><code>library(susielove)
+library(susieR)
+
+num_reps = 25
+coverages = matrix(0, nrow = num_reps, ncol = 5)
+powers = matrix(0, nrow = num_reps, ncol = 5)
+no_CSs = matrix(0, nrow = num_reps, ncol = 5)
+no_SNPs_CS = matrix(0, nrow = num_reps, ncol = 5)
+dist_R = matrix(0, nrow = num_reps, ncol = 4)
+
+est_nu_0 = matrix(0, nrow = num_reps, ncol = 3)
+
+
+
+chrom &lt;- &quot;chr22&quot;
+start &lt;- 20e6
+end   &lt;- 21e6
+N     &lt;- 25000L
+J     &lt;- 1000L
+h2    &lt;- 0.01
+
+for (seed in c(1:num_reps)){
+  print(paste0(&quot;Seed &quot;, seed))
+  
+  T_split = seed * 20
+  N0 = 200
+  # N0 = 100 + (num_reps - seed) * 10
+  
+  res &lt;- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+  v               &lt;- res$v
+  R               &lt;- res$R
+  R0              &lt;- res$R0
+  beta_true       &lt;- res$beta_true
+  causal_SNPs_loc &lt;- res$causal_SNPs_loc
+  
+  ## standardized
+  d = 1 / sqrt(diag(R))
+  v = d * v
+  R = cov2cor(R)
+  R0 = cov2cor(R0)
+  
+  ## 1. in-sample LD
+  fit &lt;- susie_suff_stat(
+    XtX = N * R,
+    Xty = N * v,
+    n = N,
+    yty = N
+  )
+  
+  ## 2. Out-of-sample LD
+  fit_R0 &lt;- susie_suff_stat(
+    XtX = N * R0,
+    Xty = N * v,
+    n = N,
+    yty = N,
+    L = 5
+  )
+  dist_R[seed, 1] = sum((R0 - R)^2)
+  
+  ## 3. Naive shrinkage
+  lambda &lt;- 1 / (N0 + 1)
+  diag_R &lt;- diag(R)
+  R_out  &lt;- R0
+  k      &lt;- min(N0, J)
+  
+  love_res &lt;- susie_love_lambda(v, R_out, diag_R,
+                                lambda,
+                                N, L = 5,
+                                k,
+                                nu_delta_init = 1000,
+                                step_susie = 20,
+                                step_R = 30,
+                                step_nu = 10,
+                                max_iter = 30, 
+                                tol = 1e-4)
+  est_nu_0[seed, 1] = love_res$nu_delta
+  dist_R[seed, 2] = sum((love_res$R_q - R)^2)
+  
+  ## 4. WS shrinkage
+  diag_R &lt;- diag(R)
+  R_out  &lt;- compute_wen_stephens(R_0 = R0, N_ref = N0)
+  k      &lt;- min(N0, J)
+  
+  love_res_WS &lt;- susie_love_lambda(v, R_out, diag_R,
+                                lambda = 0,
+                                N, L = 5,
+                                k,
+                                nu_delta_init = 1000,
+                                step_susie = 20,
+                                step_R = 30,
+                                step_nu = 10,
+                                max_iter = 30, 
+                                tol = 1e-4)
+  
+  est_nu_0[seed, 2] = love_res_WS$nu_delta
+  dist_R[seed, 3] = sum((love_res_WS$R_q - R)^2)
+  ## 5. LW shrinkage
+  diag_R &lt;- diag(R)
+  R_out  &lt;- compute_lw_linear_from_R0(R0, N0)
+  k      &lt;- min(N0, J)
+  
+  love_res_LW_linear &lt;- susie_love_lambda(v, R_out, diag_R,
+                                lambda = 0,
+                                N, L = 5,
+                                k,
+                                nu_delta_init = 1000,
+                                step_susie = 20,
+                                step_R = 30,
+                                step_nu = 10,
+                                max_iter = 30, 
+                                tol = 1e-4)
+  
+  est_nu_0[seed, 3] = love_res_LW_linear$nu_delta
+  dist_R[seed, 4] = sum((love_res_LW_linear$R_q - R)^2)
+  
+  fitted_rss = list(fit, 
+                    fit_R0, 
+                    love_res, 
+                    love_res_WS, 
+                    love_res_LW_linear)
+  
+  for (method in 1:5){
+    if (method &lt; 3) {
+      summary_all_CS = summary(fitted_rss[[method]])$cs
+      all_CS &lt;- lapply(summary_all_CS$variable, function(x) {
+        as.numeric(unlist(strsplit(x, &quot;,&quot;)))})
+    } else {
+      all_CS = get_cs(fitted_rss[[method]]$b_res$alpha, fitted_rss[[method]]$R_q)$cs
+    }
+    
+    L_infer = length(all_CS)
+    if (is.null(all_CS) || length(all_CS) == 0) {
+      coverages[seed, method] = 0
+      powers[seed, method] = 0
+      no_CSs[seed, method] = 0
+      no_SNPs_CS[seed, method] = 0
+    } else{
+      num_contains = 0
+      all_selected_SNPs = c()
+      for (ell in 1:L_infer){
+        this_CS = all_CS[[ell]]
+        all_selected_SNPs = c(all_selected_SNPs, this_CS)
+        num_contains = num_contains + (length(intersect(this_CS, causal_SNPs_loc)) &gt; 0)
+      }
+      ## coverage = proportion of CS that contains a true casual SNP
+      coverages[seed, method] = num_contains / L_infer
+      ## power = proportion of casual SNP that is contained in a CS
+      selected = length(intersect(all_selected_SNPs, causal_SNPs_loc)) 
+      powers[seed, method] = selected / length(causal_SNPs_loc)
+      
+      ## number of CSs
+      no_CSs[seed, method] = L_infer
+      
+      ## number of SNPs per CSs
+      no_SNPs_CS[seed, method] = length(all_selected_SNPs) / L_infer
+    }
+  }
+}
+#&gt; [1] &quot;Seed 1&quot;
+#&gt; Iter 1 | Loss: -1.9308 | nu_q: 766.2 | nu_delta: 764.5
+#&gt; Iter 2 | Loss: -1.9886 | nu_q: 657.1 | nu_delta: 654.3
+#&gt; Iter 3 | Loss: -2.0074 | nu_q: 600.0 | nu_delta: 596.5
+#&gt; Iter 4 | Loss: -2.0134 | nu_q: 570.2 | nu_delta: 566.2
+#&gt; Iter 5 | Loss: -2.0149 | nu_q: 556.5 | nu_delta: 552.3
+#&gt; Iter 6 | Loss: -2.0156 | nu_q: 548.9 | nu_delta: 544.3
+#&gt; Iter 7 | Loss: -2.0158 | nu_q: 545.0 | nu_delta: 540.3
+#&gt; Iter 8 | Loss: -2.0158 | nu_q: 545.0 | nu_delta: 540.3
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 9.8372 | nu_q: 232.2 | nu_delta: 234.0
+#&gt; Iter 2 | Loss: 6.5428 | nu_q: 144.9 | nu_delta: 145.4
+#&gt; Iter 3 | Loss: 4.3946 | nu_q: 140.5 | nu_delta: 140.9
+#&gt; Iter 4 | Loss: 1.9132 | nu_q: 191.1 | nu_delta: 191.1
+#&gt; Iter 5 | Loss: 0.1989 | nu_q: 203.2 | nu_delta: 203.2
+#&gt; Iter 6 | Loss: -1.1891 | nu_q: 260.8 | nu_delta: 260.4
+#&gt; Iter 7 | Loss: -1.4019 | nu_q: 281.1 | nu_delta: 280.3
+#&gt; Iter 8 | Loss: -1.4555 | nu_q: 308.1 | nu_delta: 306.7
+#&gt; Iter 9 | Loss: -1.4717 | nu_q: 316.7 | nu_delta: 314.9
+#&gt; Iter 10 | Loss: -1.4783 | nu_q: 322.9 | nu_delta: 320.8
+#&gt; Iter 11 | Loss: -1.4817 | nu_q: 327.0 | nu_delta: 324.5
+#&gt; Iter 12 | Loss: -1.4836 | nu_q: 328.9 | nu_delta: 326.2
+#&gt; Iter 13 | Loss: -1.4849 | nu_q: 330.9 | nu_delta: 327.7
+#&gt; Iter 14 | Loss: -1.4855 | nu_q: 331.6 | nu_delta: 328.2
+#&gt; Iter 15 | Loss: -1.4857 | nu_q: 331.9 | nu_delta: 328.5
+#&gt; Iter 16 | Loss: -1.4857 | nu_q: 331.9 | nu_delta: 328.5
+#&gt; Converged at iteration 16 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005239731 
+#&gt; Iter 1 | Loss: -1.9524 | nu_q: 775.4 | nu_delta: 773.6
+#&gt; Iter 2 | Loss: -2.0073 | nu_q: 665.8 | nu_delta: 662.8
+#&gt; Iter 3 | Loss: -2.0242 | nu_q: 610.5 | nu_delta: 606.9
+#&gt; Iter 4 | Loss: -2.0294 | nu_q: 582.5 | nu_delta: 578.4
+#&gt; Iter 5 | Loss: -2.0308 | nu_q: 568.3 | nu_delta: 564.0
+#&gt; Iter 6 | Loss: -2.0317 | nu_q: 559.6 | nu_delta: 555.1
+#&gt; Iter 7 | Loss: -2.0319 | nu_q: 555.1 | nu_delta: 550.5
+#&gt; Iter 8 | Loss: -2.0319 | nu_q: 555.1 | nu_delta: 550.5
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 2&quot;
+#&gt; Iter 1 | Loss: -1.9195 | nu_q: 783.5 | nu_delta: 781.7
+#&gt; Iter 2 | Loss: -1.9775 | nu_q: 679.2 | nu_delta: 675.9
+#&gt; Iter 3 | Loss: -1.9931 | nu_q: 628.4 | nu_delta: 624.4
+#&gt; Iter 4 | Loss: -1.9985 | nu_q: 602.2 | nu_delta: 597.5
+#&gt; Iter 5 | Loss: -2.0002 | nu_q: 589.9 | nu_delta: 584.8
+#&gt; Iter 6 | Loss: -2.0009 | nu_q: 582.6 | nu_delta: 577.3
+#&gt; Iter 7 | Loss: -2.0010 | nu_q: 579.4 | nu_delta: 574.0
+#&gt; Iter 8 | Loss: -2.0011 | nu_q: 579.4 | nu_delta: 574.0
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 11.4191 | nu_q: 243.5 | nu_delta: 245.2
+#&gt; Iter 2 | Loss: 1.5923 | nu_q: 263.0 | nu_delta: 269.4
+#&gt; Iter 3 | Loss: 0.5173 | nu_q: 285.0 | nu_delta: 290.5
+#&gt; Iter 4 | Loss: -0.8092 | nu_q: 306.9 | nu_delta: 310.3
+#&gt; Iter 5 | Loss: -1.3336 | nu_q: 347.6 | nu_delta: 351.1
+#&gt; Iter 6 | Loss: -1.3626 | nu_q: 360.8 | nu_delta: 363.6
+#&gt; Iter 7 | Loss: -1.3744 | nu_q: 367.6 | nu_delta: 369.1
+#&gt; Iter 8 | Loss: -1.3804 | nu_q: 368.8 | nu_delta: 369.2
+#&gt; Iter 9 | Loss: -1.3847 | nu_q: 369.6 | nu_delta: 369.2
+#&gt; Iter 10 | Loss: -1.3881 | nu_q: 370.0 | nu_delta: 368.8
+#&gt; Iter 11 | Loss: -1.3904 | nu_q: 370.3 | nu_delta: 368.5
+#&gt; Iter 12 | Loss: -1.3921 | nu_q: 370.5 | nu_delta: 368.3
+#&gt; Iter 13 | Loss: -1.3934 | nu_q: 370.2 | nu_delta: 367.4
+#&gt; Iter 14 | Loss: -1.3940 | nu_q: 370.3 | nu_delta: 367.3
+#&gt; Iter 15 | Loss: -1.3952 | nu_q: 370.0 | nu_delta: 366.5
+#&gt; Iter 16 | Loss: -1.3955 | nu_q: 369.8 | nu_delta: 366.2
+#&gt; Iter 17 | Loss: -1.3955 | nu_q: 369.8 | nu_delta: 366.2
+#&gt; Converged at iteration 17 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005269152 
+#&gt; Iter 1 | Loss: -1.9465 | nu_q: 792.8 | nu_delta: 790.9
+#&gt; Iter 2 | Loss: -1.9991 | nu_q: 692.3 | nu_delta: 688.8
+#&gt; Iter 3 | Loss: -2.0142 | nu_q: 640.2 | nu_delta: 636.0
+#&gt; Iter 4 | Loss: -2.0190 | nu_q: 615.0 | nu_delta: 610.3
+#&gt; Iter 5 | Loss: -2.0206 | nu_q: 601.4 | nu_delta: 596.3
+#&gt; Iter 6 | Loss: -2.0209 | nu_q: 595.7 | nu_delta: 590.6
+#&gt; Iter 7 | Loss: -2.0210 | nu_q: 593.1 | nu_delta: 587.9
+#&gt; Converged at iteration 7 
+#&gt; [1] &quot;Seed 3&quot;
+#&gt; Iter 1 | Loss: -2.0787 | nu_q: 797.6 | nu_delta: 796.0
+#&gt; Iter 2 | Loss: -2.1263 | nu_q: 693.5 | nu_delta: 690.6
+#&gt; Iter 3 | Loss: -2.1421 | nu_q: 637.5 | nu_delta: 633.9
+#&gt; Iter 4 | Loss: -2.1473 | nu_q: 607.3 | nu_delta: 603.2
+#&gt; Iter 5 | Loss: -2.1490 | nu_q: 591.6 | nu_delta: 587.2
+#&gt; Iter 6 | Loss: -2.1493 | nu_q: 584.6 | nu_delta: 580.2
+#&gt; Iter 7 | Loss: -2.1496 | nu_q: 580.4 | nu_delta: 575.7
+#&gt; Iter 8 | Loss: -2.1497 | nu_q: 577.3 | nu_delta: 572.6
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 3.8185 | nu_q: 313.6 | nu_delta: 321.2
+#&gt; Iter 2 | Loss: -0.5824 | nu_q: 260.1 | nu_delta: 265.8
+#&gt; Iter 3 | Loss: -1.4176 | nu_q: 309.8 | nu_delta: 315.9
+#&gt; Iter 4 | Loss: -1.5169 | nu_q: 341.7 | nu_delta: 347.0
+#&gt; Iter 5 | Loss: -1.5419 | nu_q: 333.6 | nu_delta: 337.5
+#&gt; Iter 6 | Loss: -1.5546 | nu_q: 338.4 | nu_delta: 341.1
+#&gt; Iter 7 | Loss: -1.5621 | nu_q: 336.5 | nu_delta: 338.0
+#&gt; Iter 8 | Loss: -1.5673 | nu_q: 338.2 | nu_delta: 338.9
+#&gt; Iter 9 | Loss: -1.5708 | nu_q: 337.1 | nu_delta: 337.0
+#&gt; Iter 10 | Loss: -1.5735 | nu_q: 337.5 | nu_delta: 336.7
+#&gt; Iter 11 | Loss: -1.5754 | nu_q: 336.9 | nu_delta: 335.5
+#&gt; Iter 12 | Loss: -1.5770 | nu_q: 337.1 | nu_delta: 335.2
+#&gt; Iter 13 | Loss: -1.5782 | nu_q: 336.7 | nu_delta: 334.3
+#&gt; Iter 14 | Loss: -1.5783 | nu_q: 336.7 | nu_delta: 334.3
+#&gt; Converged at iteration 14 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005233453 
+#&gt; Iter 1 | Loss: -2.1026 | nu_q: 805.0 | nu_delta: 803.3
+#&gt; Iter 2 | Loss: -2.1454 | nu_q: 706.4 | nu_delta: 703.6
+#&gt; Iter 3 | Loss: -2.1602 | nu_q: 651.2 | nu_delta: 647.5
+#&gt; Iter 4 | Loss: -2.1652 | nu_q: 620.7 | nu_delta: 616.5
+#&gt; Iter 5 | Loss: -2.1666 | nu_q: 606.4 | nu_delta: 602.1
+#&gt; Iter 6 | Loss: -2.1669 | nu_q: 599.4 | nu_delta: 595.1
+#&gt; Iter 7 | Loss: -2.1674 | nu_q: 592.7 | nu_delta: 588.0
+#&gt; Iter 8 | Loss: -2.1675 | nu_q: 589.4 | nu_delta: 584.6
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 4&quot;
+#&gt; Iter 1 | Loss: -1.7340 | nu_q: 749.8 | nu_delta: 747.9
+#&gt; Iter 2 | Loss: -1.8084 | nu_q: 635.7 | nu_delta: 632.7
+#&gt; Iter 3 | Loss: -1.8307 | nu_q: 578.1 | nu_delta: 574.3
+#&gt; Iter 4 | Loss: -1.8374 | nu_q: 550.9 | nu_delta: 546.5
+#&gt; Iter 5 | Loss: -1.8393 | nu_q: 538.5 | nu_delta: 533.7
+#&gt; Iter 6 | Loss: -1.8403 | nu_q: 531.5 | nu_delta: 526.3
+#&gt; Iter 7 | Loss: -1.8404 | nu_q: 529.3 | nu_delta: 524.1
+#&gt; Iter 8 | Loss: -1.8404 | nu_q: 529.3 | nu_delta: 524.1
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 4.8750 | nu_q: 246.8 | nu_delta: 258.2
+#&gt; Iter 2 | Loss: 2.0154 | nu_q: 234.8 | nu_delta: 244.6
+#&gt; Iter 3 | Loss: 0.7339 | nu_q: 253.2 | nu_delta: 262.9
+#&gt; Iter 4 | Loss: -0.8512 | nu_q: 288.0 | nu_delta: 293.7
+#&gt; Iter 5 | Loss: -1.1798 | nu_q: 310.5 | nu_delta: 315.9
+#&gt; Iter 6 | Loss: -1.2398 | nu_q: 325.8 | nu_delta: 329.7
+#&gt; Iter 7 | Loss: -1.2551 | nu_q: 329.8 | nu_delta: 332.6
+#&gt; Iter 8 | Loss: -1.2640 | nu_q: 333.6 | nu_delta: 335.2
+#&gt; Iter 9 | Loss: -1.2699 | nu_q: 335.0 | nu_delta: 335.7
+#&gt; Iter 10 | Loss: -1.2743 | nu_q: 336.7 | nu_delta: 336.4
+#&gt; Iter 11 | Loss: -1.2774 | nu_q: 337.0 | nu_delta: 336.0
+#&gt; Iter 12 | Loss: -1.2795 | nu_q: 337.3 | nu_delta: 335.7
+#&gt; Iter 13 | Loss: -1.2811 | nu_q: 337.6 | nu_delta: 335.4
+#&gt; Iter 14 | Loss: -1.2823 | nu_q: 337.8 | nu_delta: 335.2
+#&gt; Iter 15 | Loss: -1.2834 | nu_q: 338.0 | nu_delta: 335.0
+#&gt; Iter 16 | Loss: -1.2842 | nu_q: 338.2 | nu_delta: 334.8
+#&gt; Iter 17 | Loss: -1.2842 | nu_q: 338.2 | nu_delta: 334.8
+#&gt; Converged at iteration 17 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.00526594 
+#&gt; Iter 1 | Loss: -1.7541 | nu_q: 767.5 | nu_delta: 765.6
+#&gt; Iter 2 | Loss: -1.8290 | nu_q: 647.0 | nu_delta: 643.8
+#&gt; Iter 3 | Loss: -1.8504 | nu_q: 589.7 | nu_delta: 585.8
+#&gt; Iter 4 | Loss: -1.8565 | nu_q: 562.5 | nu_delta: 558.0
+#&gt; Iter 5 | Loss: -1.8586 | nu_q: 549.1 | nu_delta: 544.3
+#&gt; Iter 6 | Loss: -1.8591 | nu_q: 542.8 | nu_delta: 537.8
+#&gt; Iter 7 | Loss: -1.8592 | nu_q: 540.7 | nu_delta: 535.7
+#&gt; Converged at iteration 7 
+#&gt; [1] &quot;Seed 5&quot;
+#&gt; Iter 1 | Loss: -2.1083 | nu_q: 802.8 | nu_delta: 801.0
+#&gt; Iter 2 | Loss: -2.1530 | nu_q: 699.8 | nu_delta: 696.6
+#&gt; Iter 3 | Loss: -2.1667 | nu_q: 646.4 | nu_delta: 642.7
+#&gt; Iter 4 | Loss: -2.1719 | nu_q: 615.7 | nu_delta: 611.5
+#&gt; Iter 5 | Loss: -2.1733 | nu_q: 600.3 | nu_delta: 595.9
+#&gt; Iter 6 | Loss: -2.1737 | nu_q: 593.2 | nu_delta: 588.7
+#&gt; Iter 7 | Loss: -2.1741 | nu_q: 587.8 | nu_delta: 583.1
+#&gt; Iter 8 | Loss: -2.1742 | nu_q: 584.5 | nu_delta: 579.8
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 2.6658 | nu_q: 282.2 | nu_delta: 282.7
+#&gt; Iter 2 | Loss: 0.2762 | nu_q: 260.0 | nu_delta: 260.2
+#&gt; Iter 3 | Loss: -1.2708 | nu_q: 318.9 | nu_delta: 318.4
+#&gt; Iter 4 | Loss: -1.5803 | nu_q: 329.3 | nu_delta: 328.5
+#&gt; Iter 5 | Loss: -1.5976 | nu_q: 338.5 | nu_delta: 336.9
+#&gt; Iter 6 | Loss: -1.6021 | nu_q: 340.7 | nu_delta: 338.7
+#&gt; Iter 7 | Loss: -1.6047 | nu_q: 340.9 | nu_delta: 338.5
+#&gt; Iter 8 | Loss: -1.6063 | nu_q: 341.5 | nu_delta: 338.8
+#&gt; Iter 9 | Loss: -1.6075 | nu_q: 341.4 | nu_delta: 338.4
+#&gt; Iter 10 | Loss: -1.6075 | nu_q: 341.4 | nu_delta: 338.4
+#&gt; Converged at iteration 10 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005242346 
+#&gt; Iter 1 | Loss: -2.1342 | nu_q: 807.4 | nu_delta: 805.7
+#&gt; Iter 2 | Loss: -2.1741 | nu_q: 707.0 | nu_delta: 703.9
+#&gt; Iter 3 | Loss: -2.1862 | nu_q: 656.1 | nu_delta: 652.4
+#&gt; Iter 4 | Loss: -2.1904 | nu_q: 628.2 | nu_delta: 623.9
+#&gt; Iter 5 | Loss: -2.1915 | nu_q: 614.0 | nu_delta: 609.6
+#&gt; Iter 6 | Loss: -2.1921 | nu_q: 605.3 | nu_delta: 600.6
+#&gt; Iter 7 | Loss: -2.1923 | nu_q: 600.1 | nu_delta: 595.4
+#&gt; Iter 8 | Loss: -2.1923 | nu_q: 600.1 | nu_delta: 595.4
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 6&quot;
+#&gt; Iter 1 | Loss: -1.8392 | nu_q: 755.4 | nu_delta: 753.4
+#&gt; Iter 2 | Loss: -1.9059 | nu_q: 642.8 | nu_delta: 639.7
+#&gt; Iter 3 | Loss: -1.9263 | nu_q: 585.3 | nu_delta: 581.5
+#&gt; Iter 4 | Loss: -1.9324 | nu_q: 557.9 | nu_delta: 553.7
+#&gt; Iter 5 | Loss: -1.9339 | nu_q: 544.7 | nu_delta: 540.4
+#&gt; Iter 6 | Loss: -1.9350 | nu_q: 536.5 | nu_delta: 531.9
+#&gt; Iter 7 | Loss: -1.9353 | nu_q: 531.8 | nu_delta: 527.0
+#&gt; Iter 8 | Loss: -1.9353 | nu_q: 531.8 | nu_delta: 527.0
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 5.6980 | nu_q: 219.1 | nu_delta: 230.0
+#&gt; Iter 2 | Loss: 1.7208 | nu_q: 219.6 | nu_delta: 230.1
+#&gt; Iter 3 | Loss: 0.7346 | nu_q: 241.7 | nu_delta: 251.4
+#&gt; Iter 4 | Loss: -0.1922 | nu_q: 245.3 | nu_delta: 252.5
+#&gt; Iter 5 | Loss: -1.2784 | nu_q: 292.5 | nu_delta: 299.9
+#&gt; Iter 6 | Loss: -1.3142 | nu_q: 312.7 | nu_delta: 319.5
+#&gt; Iter 7 | Loss: -1.3359 | nu_q: 322.2 | nu_delta: 327.3
+#&gt; Iter 8 | Loss: -1.3475 | nu_q: 327.4 | nu_delta: 331.1
+#&gt; Iter 9 | Loss: -1.3556 | nu_q: 328.8 | nu_delta: 331.3
+#&gt; Iter 10 | Loss: -1.3610 | nu_q: 331.2 | nu_delta: 332.7
+#&gt; Iter 11 | Loss: -1.3656 | nu_q: 331.7 | nu_delta: 332.3
+#&gt; Iter 12 | Loss: -1.3692 | nu_q: 333.0 | nu_delta: 332.7
+#&gt; Iter 13 | Loss: -1.3717 | nu_q: 333.4 | nu_delta: 332.4
+#&gt; Iter 14 | Loss: -1.3735 | nu_q: 333.7 | nu_delta: 332.1
+#&gt; Iter 15 | Loss: -1.3749 | nu_q: 333.9 | nu_delta: 331.9
+#&gt; Iter 16 | Loss: -1.3759 | nu_q: 334.1 | nu_delta: 331.6
+#&gt; Iter 17 | Loss: -1.3760 | nu_q: 334.0 | nu_delta: 331.5
+#&gt; Converged at iteration 17 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005266077 
+#&gt; Iter 1 | Loss: -1.8678 | nu_q: 760.8 | nu_delta: 758.8
+#&gt; Iter 2 | Loss: -1.9282 | nu_q: 650.7 | nu_delta: 647.6
+#&gt; Iter 3 | Loss: -1.9462 | nu_q: 595.4 | nu_delta: 591.7
+#&gt; Iter 4 | Loss: -1.9520 | nu_q: 567.6 | nu_delta: 563.3
+#&gt; Iter 5 | Loss: -1.9537 | nu_q: 553.4 | nu_delta: 548.8
+#&gt; Iter 6 | Loss: -1.9541 | nu_q: 547.0 | nu_delta: 542.2
+#&gt; Iter 7 | Loss: -1.9542 | nu_q: 544.8 | nu_delta: 540.1
+#&gt; Converged at iteration 7 
+#&gt; [1] &quot;Seed 7&quot;
+#&gt; Iter 1 | Loss: -1.4805 | nu_q: 713.2 | nu_delta: 711.4
+#&gt; Iter 2 | Loss: -1.5953 | nu_q: 571.0 | nu_delta: 568.3
+#&gt; Iter 3 | Loss: -1.6278 | nu_q: 506.8 | nu_delta: 503.6
+#&gt; Iter 4 | Loss: -1.6381 | nu_q: 475.4 | nu_delta: 471.8
+#&gt; Iter 5 | Loss: -1.6413 | nu_q: 459.2 | nu_delta: 455.3
+#&gt; Iter 6 | Loss: -1.6421 | nu_q: 452.5 | nu_delta: 448.3
+#&gt; Iter 7 | Loss: -1.6423 | nu_q: 449.8 | nu_delta: 445.4
+#&gt; Iter 8 | Loss: -1.6423 | nu_q: 449.8 | nu_delta: 445.4
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 16.0046 | nu_q: 207.1 | nu_delta: 212.1
+#&gt; Iter 2 | Loss: 2.7801 | nu_q: 195.5 | nu_delta: 202.8
+#&gt; Iter 3 | Loss: 1.1272 | nu_q: 220.6 | nu_delta: 227.9
+#&gt; Iter 4 | Loss: -0.1466 | nu_q: 240.7 | nu_delta: 245.6
+#&gt; Iter 5 | Loss: -1.0208 | nu_q: 270.1 | nu_delta: 275.1
+#&gt; Iter 6 | Loss: -1.0788 | nu_q: 283.3 | nu_delta: 287.6
+#&gt; Iter 7 | Loss: -1.0997 | nu_q: 289.5 | nu_delta: 292.5
+#&gt; Iter 8 | Loss: -1.1072 | nu_q: 291.7 | nu_delta: 294.0
+#&gt; Iter 9 | Loss: -1.1128 | nu_q: 292.7 | nu_delta: 294.2
+#&gt; Iter 10 | Loss: -1.1180 | nu_q: 293.9 | nu_delta: 294.6
+#&gt; Iter 11 | Loss: -1.1220 | nu_q: 294.3 | nu_delta: 294.2
+#&gt; Iter 12 | Loss: -1.1247 | nu_q: 294.7 | nu_delta: 293.8
+#&gt; Iter 13 | Loss: -1.1267 | nu_q: 294.9 | nu_delta: 293.6
+#&gt; Iter 14 | Loss: -1.1282 | nu_q: 295.1 | nu_delta: 293.3
+#&gt; Iter 15 | Loss: -1.1294 | nu_q: 295.0 | nu_delta: 292.7
+#&gt; Iter 16 | Loss: -1.1301 | nu_q: 295.1 | nu_delta: 292.6
+#&gt; Iter 17 | Loss: -1.1301 | nu_q: 295.1 | nu_delta: 292.6
+#&gt; Converged at iteration 17 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005272711 
+#&gt; Iter 1 | Loss: -1.5140 | nu_q: 713.1 | nu_delta: 711.2
+#&gt; Iter 2 | Loss: -1.6155 | nu_q: 579.8 | nu_delta: 577.0
+#&gt; Iter 3 | Loss: -1.6464 | nu_q: 515.2 | nu_delta: 511.9
+#&gt; Iter 4 | Loss: -1.6560 | nu_q: 484.6 | nu_delta: 481.0
+#&gt; Iter 5 | Loss: -1.6591 | nu_q: 468.3 | nu_delta: 464.3
+#&gt; Iter 6 | Loss: -1.6600 | nu_q: 460.7 | nu_delta: 456.4
+#&gt; Iter 7 | Loss: -1.6602 | nu_q: 457.7 | nu_delta: 453.3
+#&gt; Iter 8 | Loss: -1.6602 | nu_q: 457.7 | nu_delta: 453.3
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 8&quot;
+#&gt; Iter 1 | Loss: -1.5564 | nu_q: 716.6 | nu_delta: 714.4
+#&gt; Iter 2 | Loss: -1.6525 | nu_q: 589.3 | nu_delta: 586.3
+#&gt; Iter 3 | Loss: -1.6838 | nu_q: 525.2 | nu_delta: 521.7
+#&gt; Iter 4 | Loss: -1.6931 | nu_q: 494.6 | nu_delta: 490.5
+#&gt; Iter 5 | Loss: -1.6959 | nu_q: 479.3 | nu_delta: 474.9
+#&gt; Iter 6 | Loss: -1.6966 | nu_q: 473.2 | nu_delta: 468.6
+#&gt; Iter 7 | Loss: -1.6969 | nu_q: 469.4 | nu_delta: 464.6
+#&gt; Iter 8 | Loss: -1.6970 | nu_q: 468.1 | nu_delta: 463.2
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 53.5303 | nu_q: 175.6 | nu_delta: 176.2
+#&gt; Iter 2 | Loss: 10.3154 | nu_q: 138.2 | nu_delta: 148.0
+#&gt; Iter 3 | Loss: 4.7162 | nu_q: 148.5 | nu_delta: 158.3
+#&gt; Iter 4 | Loss: 2.8316 | nu_q: 165.9 | nu_delta: 176.0
+#&gt; Iter 5 | Loss: 1.6715 | nu_q: 180.2 | nu_delta: 190.4
+#&gt; Iter 6 | Loss: 0.2618 | nu_q: 209.3 | nu_delta: 218.5
+#&gt; Iter 7 | Loss: -0.8194 | nu_q: 253.0 | nu_delta: 261.9
+#&gt; Iter 8 | Loss: -1.0614 | nu_q: 266.6 | nu_delta: 275.1
+#&gt; Iter 9 | Loss: -1.0981 | nu_q: 281.8 | nu_delta: 288.7
+#&gt; Iter 10 | Loss: -1.1171 | nu_q: 286.2 | nu_delta: 291.7
+#&gt; Iter 11 | Loss: -1.1303 | nu_q: 291.2 | nu_delta: 295.4
+#&gt; Iter 12 | Loss: -1.1410 | nu_q: 294.5 | nu_delta: 297.3
+#&gt; Iter 13 | Loss: -1.1486 | nu_q: 297.2 | nu_delta: 298.9
+#&gt; Iter 14 | Loss: -1.1535 | nu_q: 298.5 | nu_delta: 299.3
+#&gt; Iter 15 | Loss: -1.1579 | nu_q: 300.0 | nu_delta: 300.0
+#&gt; Iter 16 | Loss: -1.1607 | nu_q: 300.4 | nu_delta: 299.6
+#&gt; Iter 17 | Loss: -1.1627 | nu_q: 301.2 | nu_delta: 299.9
+#&gt; Iter 18 | Loss: -1.1647 | nu_q: 301.5 | nu_delta: 299.6
+#&gt; Iter 19 | Loss: -1.1662 | nu_q: 301.8 | nu_delta: 299.4
+#&gt; Iter 20 | Loss: -1.1663 | nu_q: 302.0 | nu_delta: 299.5
+#&gt; Iter 21 | Loss: -1.1664 | nu_q: 302.0 | nu_delta: 299.5
+#&gt; Converged at iteration 21 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005298017 
+#&gt; Iter 1 | Loss: -1.5946 | nu_q: 710.9 | nu_delta: 709.6
+#&gt; Iter 2 | Loss: -1.6799 | nu_q: 588.3 | nu_delta: 585.7
+#&gt; Iter 3 | Loss: -1.7053 | nu_q: 531.7 | nu_delta: 528.3
+#&gt; Iter 4 | Loss: -1.7131 | nu_q: 503.2 | nu_delta: 499.3
+#&gt; Iter 5 | Loss: -1.7157 | nu_q: 488.6 | nu_delta: 484.3
+#&gt; Iter 6 | Loss: -1.7162 | nu_q: 482.7 | nu_delta: 478.2
+#&gt; Iter 7 | Loss: -1.7166 | nu_q: 479.4 | nu_delta: 474.7
+#&gt; Iter 8 | Loss: -1.7166 | nu_q: 479.4 | nu_delta: 474.7
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 9&quot;
+#&gt; Iter 1 | Loss: -1.5472 | nu_q: 731.8 | nu_delta: 729.9
+#&gt; Iter 2 | Loss: -1.6525 | nu_q: 603.4 | nu_delta: 600.0
+#&gt; Iter 3 | Loss: -1.6824 | nu_q: 544.3 | nu_delta: 540.2
+#&gt; Iter 4 | Loss: -1.6907 | nu_q: 519.0 | nu_delta: 514.4
+#&gt; Iter 5 | Loss: -1.6940 | nu_q: 505.5 | nu_delta: 500.5
+#&gt; Iter 6 | Loss: -1.6957 | nu_q: 496.2 | nu_delta: 491.0
+#&gt; Iter 7 | Loss: -1.6961 | nu_q: 492.6 | nu_delta: 487.2
+#&gt; Iter 8 | Loss: -1.6961 | nu_q: 491.7 | nu_delta: 486.3
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 18.4091 | nu_q: 205.7 | nu_delta: 207.8
+#&gt; Iter 2 | Loss: 1.5274 | nu_q: 287.8 | nu_delta: 299.8
+#&gt; Iter 3 | Loss: -0.5644 | nu_q: 360.1 | nu_delta: 373.8
+#&gt; Iter 4 | Loss: -0.9531 | nu_q: 343.6 | nu_delta: 354.5
+#&gt; Iter 5 | Loss: -1.0317 | nu_q: 351.7 | nu_delta: 359.8
+#&gt; Iter 6 | Loss: -1.0608 | nu_q: 346.6 | nu_delta: 352.9
+#&gt; Iter 7 | Loss: -1.0857 | nu_q: 346.6 | nu_delta: 350.7
+#&gt; Iter 8 | Loss: -1.1018 | nu_q: 344.2 | nu_delta: 346.7
+#&gt; Iter 9 | Loss: -1.1130 | nu_q: 342.9 | nu_delta: 344.2
+#&gt; Iter 10 | Loss: -1.1207 | nu_q: 341.4 | nu_delta: 341.7
+#&gt; Iter 11 | Loss: -1.1264 | nu_q: 339.9 | nu_delta: 339.3
+#&gt; Iter 12 | Loss: -1.1304 | nu_q: 339.1 | nu_delta: 337.8
+#&gt; Iter 13 | Loss: -1.1355 | nu_q: 337.1 | nu_delta: 335.1
+#&gt; Iter 14 | Loss: -1.1380 | nu_q: 336.3 | nu_delta: 333.8
+#&gt; Iter 15 | Loss: -1.1399 | nu_q: 335.2 | nu_delta: 332.2
+#&gt; Iter 16 | Loss: -1.1413 | nu_q: 334.5 | nu_delta: 331.1
+#&gt; Iter 17 | Loss: -1.1425 | nu_q: 333.6 | nu_delta: 329.9
+#&gt; Iter 18 | Loss: -1.1429 | nu_q: 333.3 | nu_delta: 329.4
+#&gt; Iter 19 | Loss: -1.1429 | nu_q: 333.3 | nu_delta: 329.4
+#&gt; Converged at iteration 19 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.00525441 
+#&gt; Iter 1 | Loss: -1.5762 | nu_q: 737.0 | nu_delta: 735.1
+#&gt; Iter 2 | Loss: -1.6754 | nu_q: 607.1 | nu_delta: 603.7
+#&gt; Iter 3 | Loss: -1.7008 | nu_q: 551.3 | nu_delta: 547.1
+#&gt; Iter 4 | Loss: -1.7089 | nu_q: 525.2 | nu_delta: 520.5
+#&gt; Iter 5 | Loss: -1.7116 | nu_q: 512.6 | nu_delta: 507.7
+#&gt; Iter 6 | Loss: -1.7124 | nu_q: 506.7 | nu_delta: 501.6
+#&gt; Iter 7 | Loss: -1.7135 | nu_q: 499.1 | nu_delta: 493.7
+#&gt; Iter 8 | Loss: -1.7138 | nu_q: 497.0 | nu_delta: 491.5
+#&gt; Iter 9 | Loss: -1.7138 | nu_q: 497.0 | nu_delta: 491.5
+#&gt; Converged at iteration 9 
+#&gt; [1] &quot;Seed 10&quot;
+#&gt; Iter 1 | Loss: -1.3708 | nu_q: 692.6 | nu_delta: 690.8
+#&gt; Iter 2 | Loss: -1.4922 | nu_q: 555.3 | nu_delta: 552.6
+#&gt; Iter 3 | Loss: -1.5254 | nu_q: 494.8 | nu_delta: 491.5
+#&gt; Iter 4 | Loss: -1.5350 | nu_q: 467.6 | nu_delta: 463.8
+#&gt; Iter 5 | Loss: -1.5378 | nu_q: 454.6 | nu_delta: 450.4
+#&gt; Iter 6 | Loss: -1.5386 | nu_q: 448.8 | nu_delta: 444.3
+#&gt; Iter 7 | Loss: -1.5387 | nu_q: 448.8 | nu_delta: 444.3
+#&gt; Converged at iteration 7 
+#&gt; Iter 1 | Loss: 40.4621 | nu_q: 160.3 | nu_delta: 158.5
+#&gt; Iter 2 | Loss: 9.0632 | nu_q: 147.4 | nu_delta: 154.6
+#&gt; Iter 3 | Loss: 5.9746 | nu_q: 153.2 | nu_delta: 160.3
+#&gt; Iter 4 | Loss: 3.6619 | nu_q: 168.3 | nu_delta: 175.1
+#&gt; Iter 5 | Loss: 0.8060 | nu_q: 210.5 | nu_delta: 218.9
+#&gt; Iter 6 | Loss: -0.7965 | nu_q: 291.9 | nu_delta: 298.8
+#&gt; Iter 7 | Loss: -0.9465 | nu_q: 285.8 | nu_delta: 291.6
+#&gt; Iter 8 | Loss: -0.9789 | nu_q: 289.3 | nu_delta: 293.8
+#&gt; Iter 9 | Loss: -0.9928 | nu_q: 292.9 | nu_delta: 296.2
+#&gt; Iter 10 | Loss: -1.0013 | nu_q: 295.7 | nu_delta: 298.1
+#&gt; Iter 11 | Loss: -1.0077 | nu_q: 297.1 | nu_delta: 298.6
+#&gt; Iter 12 | Loss: -1.0128 | nu_q: 298.8 | nu_delta: 299.5
+#&gt; Iter 13 | Loss: -1.0164 | nu_q: 299.5 | nu_delta: 299.5
+#&gt; Iter 14 | Loss: -1.0195 | nu_q: 300.4 | nu_delta: 299.7
+#&gt; Iter 15 | Loss: -1.0217 | nu_q: 300.7 | nu_delta: 299.4
+#&gt; Iter 16 | Loss: -1.0234 | nu_q: 300.9 | nu_delta: 299.2
+#&gt; Iter 17 | Loss: -1.0247 | nu_q: 301.1 | nu_delta: 299.0
+#&gt; Iter 18 | Loss: -1.0259 | nu_q: 301.3 | nu_delta: 298.8
+#&gt; Iter 19 | Loss: -1.0268 | nu_q: 301.5 | nu_delta: 298.6
+#&gt; Iter 20 | Loss: -1.0268 | nu_q: 301.5 | nu_delta: 298.6
+#&gt; Converged at iteration 20 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005276001 
+#&gt; Iter 1 | Loss: -1.3869 | nu_q: 712.8 | nu_delta: 711.0
+#&gt; Iter 2 | Loss: -1.5055 | nu_q: 574.5 | nu_delta: 571.9
+#&gt; Iter 3 | Loss: -1.5412 | nu_q: 509.3 | nu_delta: 506.1
+#&gt; Iter 4 | Loss: -1.5522 | nu_q: 477.8 | nu_delta: 474.1
+#&gt; Iter 5 | Loss: -1.5555 | nu_q: 463.2 | nu_delta: 459.1
+#&gt; Iter 6 | Loss: -1.5563 | nu_q: 457.9 | nu_delta: 453.4
+#&gt; Iter 7 | Loss: -1.5565 | nu_q: 455.6 | nu_delta: 451.0
+#&gt; Iter 8 | Loss: -1.5566 | nu_q: 454.4 | nu_delta: 449.6
+#&gt; Iter 9 | Loss: -1.5566 | nu_q: 454.4 | nu_delta: 449.6
+#&gt; Converged at iteration 9 
+#&gt; [1] &quot;Seed 11&quot;
+#&gt; Iter 1 | Loss: -1.3481 | nu_q: 710.7 | nu_delta: 709.2
+#&gt; Iter 2 | Loss: -1.4712 | nu_q: 574.4 | nu_delta: 571.7
+#&gt; Iter 3 | Loss: -1.5093 | nu_q: 512.4 | nu_delta: 508.9
+#&gt; Iter 4 | Loss: -1.5177 | nu_q: 487.4 | nu_delta: 483.3
+#&gt; Iter 5 | Loss: -1.5192 | nu_q: 478.4 | nu_delta: 473.9
+#&gt; Iter 6 | Loss: -1.5200 | nu_q: 474.2 | nu_delta: 469.3
+#&gt; Iter 7 | Loss: -1.5201 | nu_q: 473.2 | nu_delta: 468.4
+#&gt; Converged at iteration 7 
+#&gt; Iter 1 | Loss: 31.8776 | nu_q: 136.5 | nu_delta: 142.9
+#&gt; Iter 2 | Loss: 9.6955 | nu_q: 149.9 | nu_delta: 162.4
+#&gt; Iter 3 | Loss: 5.1127 | nu_q: 164.4 | nu_delta: 177.0
+#&gt; Iter 4 | Loss: 3.2508 | nu_q: 181.6 | nu_delta: 194.5
+#&gt; Iter 5 | Loss: 2.3552 | nu_q: 193.7 | nu_delta: 206.5
+#&gt; Iter 6 | Loss: 0.9518 | nu_q: 222.9 | nu_delta: 233.6
+#&gt; Iter 7 | Loss: 0.2597 | nu_q: 240.6 | nu_delta: 251.4
+#&gt; Iter 8 | Loss: -0.7233 | nu_q: 284.4 | nu_delta: 294.2
+#&gt; Iter 9 | Loss: -0.8751 | nu_q: 296.3 | nu_delta: 305.8
+#&gt; Iter 10 | Loss: -0.9056 | nu_q: 308.9 | nu_delta: 316.6
+#&gt; Iter 11 | Loss: -0.9214 | nu_q: 312.1 | nu_delta: 318.4
+#&gt; Iter 12 | Loss: -0.9354 | nu_q: 317.1 | nu_delta: 322.0
+#&gt; Iter 13 | Loss: -0.9467 | nu_q: 319.6 | nu_delta: 323.0
+#&gt; Iter 14 | Loss: -0.9539 | nu_q: 322.5 | nu_delta: 324.8
+#&gt; Iter 15 | Loss: -0.9592 | nu_q: 323.4 | nu_delta: 324.7
+#&gt; Iter 16 | Loss: -0.9632 | nu_q: 325.0 | nu_delta: 325.5
+#&gt; Iter 17 | Loss: -0.9669 | nu_q: 325.4 | nu_delta: 325.1
+#&gt; Iter 18 | Loss: -0.9694 | nu_q: 326.5 | nu_delta: 325.6
+#&gt; Iter 19 | Loss: -0.9715 | nu_q: 326.8 | nu_delta: 325.3
+#&gt; Iter 20 | Loss: -0.9731 | nu_q: 327.0 | nu_delta: 325.0
+#&gt; Iter 21 | Loss: -0.9743 | nu_q: 327.2 | nu_delta: 324.8
+#&gt; Iter 22 | Loss: -0.9753 | nu_q: 327.4 | nu_delta: 324.6
+#&gt; Iter 23 | Loss: -0.9753 | nu_q: 327.4 | nu_delta: 324.6
+#&gt; Converged at iteration 23 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005276245 
+#&gt; Iter 1 | Loss: -1.3904 | nu_q: 701.1 | nu_delta: 699.8
+#&gt; Iter 2 | Loss: -1.4984 | nu_q: 571.8 | nu_delta: 569.2
+#&gt; Iter 3 | Loss: -1.5279 | nu_q: 521.5 | nu_delta: 518.1
+#&gt; Iter 4 | Loss: -1.5362 | nu_q: 495.8 | nu_delta: 491.8
+#&gt; Iter 5 | Loss: -1.5383 | nu_q: 485.0 | nu_delta: 480.5
+#&gt; Iter 6 | Loss: -1.5385 | nu_q: 482.0 | nu_delta: 477.5
+#&gt; Iter 7 | Loss: -1.5387 | nu_q: 480.3 | nu_delta: 475.5
+#&gt; Iter 8 | Loss: -1.5387 | nu_q: 480.3 | nu_delta: 475.5
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 12&quot;
+#&gt; Iter 1 | Loss: -1.4867 | nu_q: 710.1 | nu_delta: 708.2
+#&gt; Iter 2 | Loss: -1.5928 | nu_q: 579.9 | nu_delta: 576.9
+#&gt; Iter 3 | Loss: -1.6221 | nu_q: 519.2 | nu_delta: 515.6
+#&gt; Iter 4 | Loss: -1.6287 | nu_q: 495.6 | nu_delta: 491.4
+#&gt; Iter 5 | Loss: -1.6306 | nu_q: 485.1 | nu_delta: 480.4
+#&gt; Iter 6 | Loss: -1.6310 | nu_q: 481.2 | nu_delta: 476.3
+#&gt; Iter 7 | Loss: -1.6311 | nu_q: 479.4 | nu_delta: 474.5
+#&gt; Converged at iteration 7 
+#&gt; Iter 1 | Loss: 12.9527 | nu_q: 165.6 | nu_delta: 176.8
+#&gt; Iter 2 | Loss: 6.8461 | nu_q: 154.0 | nu_delta: 164.7
+#&gt; Iter 3 | Loss: 4.4315 | nu_q: 170.0 | nu_delta: 181.0
+#&gt; Iter 4 | Loss: 2.7284 | nu_q: 186.9 | nu_delta: 197.0
+#&gt; Iter 5 | Loss: 1.9153 | nu_q: 197.8 | nu_delta: 207.4
+#&gt; Iter 6 | Loss: 0.9051 | nu_q: 221.4 | nu_delta: 230.5
+#&gt; Iter 7 | Loss: 0.3687 | nu_q: 236.2 | nu_delta: 244.9
+#&gt; Iter 8 | Loss: -0.3939 | nu_q: 275.5 | nu_delta: 282.3
+#&gt; Iter 9 | Loss: -0.9664 | nu_q: 300.2 | nu_delta: 306.7
+#&gt; Iter 10 | Loss: -1.0033 | nu_q: 313.7 | nu_delta: 319.4
+#&gt; Iter 11 | Loss: -1.0176 | nu_q: 318.6 | nu_delta: 323.3
+#&gt; Iter 12 | Loss: -1.0303 | nu_q: 324.4 | nu_delta: 327.6
+#&gt; Iter 13 | Loss: -1.0384 | nu_q: 326.6 | nu_delta: 328.7
+#&gt; Iter 14 | Loss: -1.0439 | nu_q: 329.0 | nu_delta: 330.1
+#&gt; Iter 15 | Loss: -1.0479 | nu_q: 330.0 | nu_delta: 330.3
+#&gt; Iter 16 | Loss: -1.0512 | nu_q: 331.3 | nu_delta: 330.8
+#&gt; Iter 17 | Loss: -1.0533 | nu_q: 331.6 | nu_delta: 330.5
+#&gt; Iter 18 | Loss: -1.0552 | nu_q: 332.4 | nu_delta: 330.8
+#&gt; Iter 19 | Loss: -1.0566 | nu_q: 332.6 | nu_delta: 330.5
+#&gt; Iter 20 | Loss: -1.0578 | nu_q: 332.8 | nu_delta: 330.3
+#&gt; Iter 21 | Loss: -1.0586 | nu_q: 333.0 | nu_delta: 330.2
+#&gt; Iter 22 | Loss: -1.0593 | nu_q: 333.1 | nu_delta: 330.0
+#&gt; Iter 23 | Loss: -1.0593 | nu_q: 333.1 | nu_delta: 330.0
+#&gt; Converged at iteration 23 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005271699 
+#&gt; Iter 1 | Loss: -1.5118 | nu_q: 719.2 | nu_delta: 717.3
+#&gt; Iter 2 | Loss: -1.6129 | nu_q: 589.2 | nu_delta: 586.3
+#&gt; Iter 3 | Loss: -1.6396 | nu_q: 533.1 | nu_delta: 529.6
+#&gt; Iter 4 | Loss: -1.6474 | nu_q: 504.9 | nu_delta: 500.9
+#&gt; Iter 5 | Loss: -1.6485 | nu_q: 496.0 | nu_delta: 491.8
+#&gt; Iter 6 | Loss: -1.6496 | nu_q: 490.4 | nu_delta: 485.9
+#&gt; Iter 7 | Loss: -1.6498 | nu_q: 486.7 | nu_delta: 482.1
+#&gt; Iter 8 | Loss: -1.6499 | nu_q: 486.7 | nu_delta: 482.1
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 13&quot;
+#&gt; Iter 1 | Loss: -1.5065 | nu_q: 706.4 | nu_delta: 705.2
+#&gt; Iter 2 | Loss: -1.6009 | nu_q: 587.9 | nu_delta: 585.5
+#&gt; Iter 3 | Loss: -1.6296 | nu_q: 527.8 | nu_delta: 524.6
+#&gt; Iter 4 | Loss: -1.6381 | nu_q: 500.4 | nu_delta: 496.6
+#&gt; Iter 5 | Loss: -1.6405 | nu_q: 488.6 | nu_delta: 484.3
+#&gt; Iter 6 | Loss: -1.6413 | nu_q: 482.5 | nu_delta: 477.9
+#&gt; Iter 7 | Loss: -1.6415 | nu_q: 480.1 | nu_delta: 475.4
+#&gt; Iter 8 | Loss: -1.6415 | nu_q: 480.1 | nu_delta: 475.4
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 32.3716 | nu_q: 139.6 | nu_delta: 142.4
+#&gt; Iter 2 | Loss: 12.4818 | nu_q: 127.7 | nu_delta: 133.9
+#&gt; Iter 3 | Loss: 8.7675 | nu_q: 134.1 | nu_delta: 139.8
+#&gt; Iter 4 | Loss: 6.1048 | nu_q: 142.6 | nu_delta: 148.4
+#&gt; Iter 5 | Loss: 4.4453 | nu_q: 155.9 | nu_delta: 161.6
+#&gt; Iter 6 | Loss: 3.2406 | nu_q: 170.3 | nu_delta: 175.2
+#&gt; Iter 7 | Loss: 2.5117 | nu_q: 179.5 | nu_delta: 184.3
+#&gt; Iter 8 | Loss: 1.3256 | nu_q: 206.2 | nu_delta: 208.9
+#&gt; Iter 9 | Loss: 0.4129 | nu_q: 225.4 | nu_delta: 228.0
+#&gt; Iter 10 | Loss: -0.1770 | nu_q: 259.7 | nu_delta: 260.4
+#&gt; Iter 11 | Loss: -0.9516 | nu_q: 289.5 | nu_delta: 289.8
+#&gt; Iter 12 | Loss: -1.0529 | nu_q: 304.5 | nu_delta: 304.5
+#&gt; Iter 13 | Loss: -1.0679 | nu_q: 314.7 | nu_delta: 314.1
+#&gt; Iter 14 | Loss: -1.0743 | nu_q: 317.4 | nu_delta: 316.3
+#&gt; Iter 15 | Loss: -1.0781 | nu_q: 320.0 | nu_delta: 318.4
+#&gt; Iter 16 | Loss: -1.0814 | nu_q: 322.3 | nu_delta: 320.1
+#&gt; Iter 17 | Loss: -1.0837 | nu_q: 323.9 | nu_delta: 321.2
+#&gt; Iter 18 | Loss: -1.0849 | nu_q: 324.0 | nu_delta: 321.1
+#&gt; Iter 19 | Loss: -1.0849 | nu_q: 324.0 | nu_delta: 321.1
+#&gt; Converged at iteration 19 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005283256 
+#&gt; Iter 1 | Loss: -1.5360 | nu_q: 712.4 | nu_delta: 710.5
+#&gt; Iter 2 | Loss: -1.6265 | nu_q: 589.4 | nu_delta: 586.5
+#&gt; Iter 3 | Loss: -1.6502 | nu_q: 535.4 | nu_delta: 531.9
+#&gt; Iter 4 | Loss: -1.6577 | nu_q: 509.3 | nu_delta: 505.3
+#&gt; Iter 5 | Loss: -1.6600 | nu_q: 496.8 | nu_delta: 492.4
+#&gt; Iter 6 | Loss: -1.6604 | nu_q: 492.2 | nu_delta: 487.7
+#&gt; Iter 7 | Loss: -1.6606 | nu_q: 489.5 | nu_delta: 484.7
+#&gt; Iter 8 | Loss: -1.6608 | nu_q: 488.1 | nu_delta: 483.1
+#&gt; Iter 9 | Loss: -1.6608 | nu_q: 488.1 | nu_delta: 483.1
+#&gt; Converged at iteration 9 
+#&gt; [1] &quot;Seed 14&quot;
+#&gt; Iter 1 | Loss: -1.2405 | nu_q: 700.3 | nu_delta: 697.9
+#&gt; Iter 2 | Loss: -1.3900 | nu_q: 551.1 | nu_delta: 548.0
+#&gt; Iter 3 | Loss: -1.4343 | nu_q: 485.5 | nu_delta: 481.9
+#&gt; Iter 4 | Loss: -1.4440 | nu_q: 460.8 | nu_delta: 456.7
+#&gt; Iter 5 | Loss: -1.4469 | nu_q: 449.1 | nu_delta: 444.6
+#&gt; Iter 6 | Loss: -1.4473 | nu_q: 445.6 | nu_delta: 441.0
+#&gt; Iter 7 | Loss: -1.4480 | nu_q: 441.0 | nu_delta: 436.2
+#&gt; Iter 8 | Loss: -1.4482 | nu_q: 439.9 | nu_delta: 434.9
+#&gt; Iter 9 | Loss: -1.4482 | nu_q: 439.9 | nu_delta: 434.9
+#&gt; Converged at iteration 9 
+#&gt; Iter 1 | Loss: 42.3950 | nu_q: 118.4 | nu_delta: 119.1
+#&gt; Iter 2 | Loss: 11.9793 | nu_q: 138.3 | nu_delta: 146.3
+#&gt; Iter 3 | Loss: 7.7547 | nu_q: 147.9 | nu_delta: 155.9
+#&gt; Iter 4 | Loss: 4.8437 | nu_q: 162.0 | nu_delta: 170.1
+#&gt; Iter 5 | Loss: 3.4337 | nu_q: 175.0 | nu_delta: 182.2
+#&gt; Iter 6 | Loss: 2.4751 | nu_q: 183.5 | nu_delta: 190.6
+#&gt; Iter 7 | Loss: 1.1319 | nu_q: 210.6 | nu_delta: 214.6
+#&gt; Iter 8 | Loss: -0.0444 | nu_q: 235.7 | nu_delta: 239.7
+#&gt; Iter 9 | Loss: -0.7071 | nu_q: 266.5 | nu_delta: 270.0
+#&gt; Iter 10 | Loss: -0.8707 | nu_q: 280.0 | nu_delta: 283.0
+#&gt; Iter 11 | Loss: -0.8917 | nu_q: 290.6 | nu_delta: 292.8
+#&gt; Iter 12 | Loss: -0.9038 | nu_q: 294.4 | nu_delta: 295.5
+#&gt; Iter 13 | Loss: -0.9109 | nu_q: 298.8 | nu_delta: 299.2
+#&gt; Iter 14 | Loss: -0.9158 | nu_q: 300.2 | nu_delta: 299.8
+#&gt; Iter 15 | Loss: -0.9191 | nu_q: 302.4 | nu_delta: 301.4
+#&gt; Iter 16 | Loss: -0.9217 | nu_q: 303.0 | nu_delta: 301.5
+#&gt; Iter 17 | Loss: -0.9236 | nu_q: 304.3 | nu_delta: 302.3
+#&gt; Iter 18 | Loss: -0.9250 | nu_q: 304.5 | nu_delta: 302.1
+#&gt; Iter 19 | Loss: -0.9263 | nu_q: 305.4 | nu_delta: 302.6
+#&gt; Iter 20 | Loss: -0.9273 | nu_q: 305.6 | nu_delta: 302.4
+#&gt; Iter 21 | Loss: -0.9278 | nu_q: 306.0 | nu_delta: 302.6
+#&gt; Iter 22 | Loss: -0.9278 | nu_q: 306.0 | nu_delta: 302.6
+#&gt; Converged at iteration 22 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005260998 
+#&gt; Iter 1 | Loss: -1.2817 | nu_q: 691.7 | nu_delta: 690.2
+#&gt; Iter 2 | Loss: -1.4108 | nu_q: 555.6 | nu_delta: 553.0
+#&gt; Iter 3 | Loss: -1.4502 | nu_q: 495.8 | nu_delta: 492.5
+#&gt; Iter 4 | Loss: -1.4611 | nu_q: 466.7 | nu_delta: 462.7
+#&gt; Iter 5 | Loss: -1.4639 | nu_q: 455.1 | nu_delta: 450.6
+#&gt; Iter 6 | Loss: -1.4644 | nu_q: 451.1 | nu_delta: 446.4
+#&gt; Iter 7 | Loss: -1.4648 | nu_q: 448.3 | nu_delta: 443.3
+#&gt; Iter 8 | Loss: -1.4648 | nu_q: 448.3 | nu_delta: 443.3
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 15&quot;
+#&gt; Iter 1 | Loss: -1.3747 | nu_q: 683.7 | nu_delta: 682.0
+#&gt; Iter 2 | Loss: -1.4911 | nu_q: 551.5 | nu_delta: 548.9
+#&gt; Iter 3 | Loss: -1.5255 | nu_q: 489.9 | nu_delta: 486.7
+#&gt; Iter 4 | Loss: -1.5355 | nu_q: 461.1 | nu_delta: 457.3
+#&gt; Iter 5 | Loss: -1.5389 | nu_q: 447.3 | nu_delta: 443.2
+#&gt; Iter 6 | Loss: -1.5394 | nu_q: 442.9 | nu_delta: 438.6
+#&gt; Iter 7 | Loss: -1.5399 | nu_q: 440.0 | nu_delta: 435.3
+#&gt; Iter 8 | Loss: -1.5400 | nu_q: 440.0 | nu_delta: 435.3
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 24.0999 | nu_q: 145.6 | nu_delta: 157.0
+#&gt; Iter 2 | Loss: 11.3781 | nu_q: 123.3 | nu_delta: 134.2
+#&gt; Iter 3 | Loss: 6.7084 | nu_q: 134.7 | nu_delta: 145.6
+#&gt; Iter 4 | Loss: 4.3663 | nu_q: 148.9 | nu_delta: 160.2
+#&gt; Iter 5 | Loss: 3.0032 | nu_q: 160.6 | nu_delta: 171.8
+#&gt; Iter 6 | Loss: 1.8909 | nu_q: 176.5 | nu_delta: 183.7
+#&gt; Iter 7 | Loss: 0.5850 | nu_q: 197.1 | nu_delta: 204.2
+#&gt; Iter 8 | Loss: 0.0422 | nu_q: 216.0 | nu_delta: 222.8
+#&gt; Iter 9 | Loss: -0.6950 | nu_q: 241.4 | nu_delta: 247.5
+#&gt; Iter 10 | Loss: -0.9405 | nu_q: 260.3 | nu_delta: 266.2
+#&gt; Iter 11 | Loss: -0.9699 | nu_q: 273.4 | nu_delta: 278.3
+#&gt; Iter 12 | Loss: -0.9863 | nu_q: 278.3 | nu_delta: 282.0
+#&gt; Iter 13 | Loss: -0.9963 | nu_q: 283.1 | nu_delta: 285.9
+#&gt; Iter 14 | Loss: -1.0043 | nu_q: 285.4 | nu_delta: 287.3
+#&gt; Iter 15 | Loss: -1.0109 | nu_q: 288.4 | nu_delta: 289.4
+#&gt; Iter 16 | Loss: -1.0152 | nu_q: 289.6 | nu_delta: 289.9
+#&gt; Iter 17 | Loss: -1.0184 | nu_q: 291.1 | nu_delta: 290.7
+#&gt; Iter 18 | Loss: -1.0213 | nu_q: 291.9 | nu_delta: 290.9
+#&gt; Iter 19 | Loss: -1.0234 | nu_q: 293.0 | nu_delta: 291.4
+#&gt; Iter 20 | Loss: -1.0249 | nu_q: 293.2 | nu_delta: 291.1
+#&gt; Iter 21 | Loss: -1.0261 | nu_q: 293.8 | nu_delta: 291.4
+#&gt; Iter 22 | Loss: -1.0269 | nu_q: 293.9 | nu_delta: 291.2
+#&gt; Iter 23 | Loss: -1.0269 | nu_q: 293.9 | nu_delta: 291.2
+#&gt; Converged at iteration 23 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005274283 
+#&gt; Iter 1 | Loss: -1.3947 | nu_q: 698.8 | nu_delta: 696.4
+#&gt; Iter 2 | Loss: -1.5095 | nu_q: 562.9 | nu_delta: 559.9
+#&gt; Iter 3 | Loss: -1.5435 | nu_q: 499.6 | nu_delta: 496.1
+#&gt; Iter 4 | Loss: -1.5529 | nu_q: 471.8 | nu_delta: 467.9
+#&gt; Iter 5 | Loss: -1.5563 | nu_q: 458.3 | nu_delta: 454.1
+#&gt; Iter 6 | Loss: -1.5575 | nu_q: 450.3 | nu_delta: 445.8
+#&gt; Iter 7 | Loss: -1.5578 | nu_q: 447.1 | nu_delta: 442.5
+#&gt; Iter 8 | Loss: -1.5578 | nu_q: 447.1 | nu_delta: 442.5
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 16&quot;
+#&gt; Iter 1 | Loss: -1.5800 | nu_q: 716.1 | nu_delta: 714.6
+#&gt; Iter 2 | Loss: -1.6709 | nu_q: 591.4 | nu_delta: 588.8
+#&gt; Iter 3 | Loss: -1.7000 | nu_q: 530.6 | nu_delta: 527.4
+#&gt; Iter 4 | Loss: -1.7076 | nu_q: 503.6 | nu_delta: 499.9
+#&gt; Iter 5 | Loss: -1.7099 | nu_q: 490.8 | nu_delta: 486.7
+#&gt; Iter 6 | Loss: -1.7103 | nu_q: 485.6 | nu_delta: 481.4
+#&gt; Iter 7 | Loss: -1.7106 | nu_q: 483.0 | nu_delta: 478.5
+#&gt; Iter 8 | Loss: -1.7106 | nu_q: 482.4 | nu_delta: 477.9
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 9.6345 | nu_q: 192.5 | nu_delta: 199.5
+#&gt; Iter 2 | Loss: 3.9879 | nu_q: 174.7 | nu_delta: 180.4
+#&gt; Iter 3 | Loss: 2.1089 | nu_q: 192.5 | nu_delta: 198.3
+#&gt; Iter 4 | Loss: 0.8773 | nu_q: 217.1 | nu_delta: 221.6
+#&gt; Iter 5 | Loss: 0.1827 | nu_q: 226.0 | nu_delta: 230.2
+#&gt; Iter 6 | Loss: -0.7607 | nu_q: 260.9 | nu_delta: 263.2
+#&gt; Iter 7 | Loss: -1.1339 | nu_q: 285.5 | nu_delta: 287.4
+#&gt; Iter 8 | Loss: -1.1557 | nu_q: 298.2 | nu_delta: 299.6
+#&gt; Iter 9 | Loss: -1.1653 | nu_q: 303.7 | nu_delta: 304.3
+#&gt; Iter 10 | Loss: -1.1694 | nu_q: 306.9 | nu_delta: 306.9
+#&gt; Iter 11 | Loss: -1.1733 | nu_q: 308.5 | nu_delta: 307.7
+#&gt; Iter 12 | Loss: -1.1752 | nu_q: 309.9 | nu_delta: 308.7
+#&gt; Iter 13 | Loss: -1.1770 | nu_q: 310.2 | nu_delta: 308.5
+#&gt; Iter 14 | Loss: -1.1781 | nu_q: 310.9 | nu_delta: 308.9
+#&gt; Iter 15 | Loss: -1.1791 | nu_q: 311.1 | nu_delta: 308.7
+#&gt; Iter 16 | Loss: -1.1795 | nu_q: 311.4 | nu_delta: 308.8
+#&gt; Iter 17 | Loss: -1.1796 | nu_q: 311.4 | nu_delta: 308.8
+#&gt; Converged at iteration 17 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.00525904 
+#&gt; Iter 1 | Loss: -1.6104 | nu_q: 715.3 | nu_delta: 713.7
+#&gt; Iter 2 | Loss: -1.6921 | nu_q: 597.6 | nu_delta: 594.9
+#&gt; Iter 3 | Loss: -1.7180 | nu_q: 540.6 | nu_delta: 537.3
+#&gt; Iter 4 | Loss: -1.7256 | nu_q: 512.8 | nu_delta: 509.0
+#&gt; Iter 5 | Loss: -1.7275 | nu_q: 500.5 | nu_delta: 496.5
+#&gt; Iter 6 | Loss: -1.7280 | nu_q: 494.9 | nu_delta: 490.7
+#&gt; Iter 7 | Loss: -1.7280 | nu_q: 494.9 | nu_delta: 490.7
+#&gt; Converged at iteration 7 
+#&gt; [1] &quot;Seed 17&quot;
+#&gt; Iter 1 | Loss: -1.4166 | nu_q: 696.0 | nu_delta: 695.0
+#&gt; Iter 2 | Loss: -1.5238 | nu_q: 568.3 | nu_delta: 566.0
+#&gt; Iter 3 | Loss: -1.5526 | nu_q: 511.3 | nu_delta: 508.1
+#&gt; Iter 4 | Loss: -1.5659 | nu_q: 483.6 | nu_delta: 479.8
+#&gt; Iter 5 | Loss: -1.5688 | nu_q: 470.6 | nu_delta: 466.3
+#&gt; Iter 6 | Loss: -1.5697 | nu_q: 464.2 | nu_delta: 459.7
+#&gt; Iter 7 | Loss: -1.5699 | nu_q: 461.7 | nu_delta: 456.9
+#&gt; Iter 8 | Loss: -1.5700 | nu_q: 461.7 | nu_delta: 456.9
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 63.0684 | nu_q: 131.8 | nu_delta: 126.3
+#&gt; Iter 2 | Loss: 14.9584 | nu_q: 113.2 | nu_delta: 116.3
+#&gt; Iter 3 | Loss: 10.2957 | nu_q: 124.0 | nu_delta: 128.0
+#&gt; Iter 4 | Loss: 7.1890 | nu_q: 134.9 | nu_delta: 138.6
+#&gt; Iter 5 | Loss: 5.1584 | nu_q: 147.8 | nu_delta: 151.6
+#&gt; Iter 6 | Loss: 4.1758 | nu_q: 155.7 | nu_delta: 159.2
+#&gt; Iter 7 | Loss: 3.0860 | nu_q: 168.1 | nu_delta: 171.1
+#&gt; Iter 8 | Loss: 2.4942 | nu_q: 175.6 | nu_delta: 178.3
+#&gt; Iter 9 | Loss: 0.7112 | nu_q: 217.9 | nu_delta: 217.1
+#&gt; Iter 10 | Loss: -0.7015 | nu_q: 255.6 | nu_delta: 254.2
+#&gt; Iter 11 | Loss: -0.9819 | nu_q: 278.5 | nu_delta: 276.7
+#&gt; Iter 12 | Loss: -1.0179 | nu_q: 290.5 | nu_delta: 288.4
+#&gt; Iter 13 | Loss: -1.0290 | nu_q: 295.3 | nu_delta: 292.7
+#&gt; Iter 14 | Loss: -1.0349 | nu_q: 298.9 | nu_delta: 296.1
+#&gt; Iter 15 | Loss: -1.0388 | nu_q: 301.0 | nu_delta: 297.9
+#&gt; Iter 16 | Loss: -1.0413 | nu_q: 303.2 | nu_delta: 299.8
+#&gt; Iter 17 | Loss: -1.0432 | nu_q: 304.3 | nu_delta: 300.7
+#&gt; Iter 18 | Loss: -1.0434 | nu_q: 304.3 | nu_delta: 300.7
+#&gt; Iter 19 | Loss: -1.0447 | nu_q: 306.0 | nu_delta: 302.2
+#&gt; Iter 20 | Loss: -1.0457 | nu_q: 306.5 | nu_delta: 302.4
+#&gt; Iter 21 | Loss: -1.0458 | nu_q: 306.5 | nu_delta: 302.4
+#&gt; Converged at iteration 21 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005291657 
+#&gt; Iter 1 | Loss: -1.4433 | nu_q: 704.4 | nu_delta: 703.4
+#&gt; Iter 2 | Loss: -1.5441 | nu_q: 579.0 | nu_delta: 576.6
+#&gt; Iter 3 | Loss: -1.5727 | nu_q: 520.6 | nu_delta: 517.5
+#&gt; Iter 4 | Loss: -1.5854 | nu_q: 491.7 | nu_delta: 488.0
+#&gt; Iter 5 | Loss: -1.5880 | nu_q: 480.1 | nu_delta: 475.9
+#&gt; Iter 6 | Loss: -1.5890 | nu_q: 473.4 | nu_delta: 468.8
+#&gt; Iter 7 | Loss: -1.5892 | nu_q: 470.7 | nu_delta: 466.0
+#&gt; Iter 8 | Loss: -1.5892 | nu_q: 470.7 | nu_delta: 466.0
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 18&quot;
+#&gt; Iter 1 | Loss: -1.0535 | nu_q: 676.9 | nu_delta: 675.6
+#&gt; Iter 2 | Loss: -1.2120 | nu_q: 537.5 | nu_delta: 535.1
+#&gt; Iter 3 | Loss: -1.2512 | nu_q: 479.4 | nu_delta: 476.2
+#&gt; Iter 4 | Loss: -1.2607 | nu_q: 457.0 | nu_delta: 453.1
+#&gt; Iter 5 | Loss: -1.2654 | nu_q: 446.1 | nu_delta: 441.8
+#&gt; Iter 6 | Loss: -1.2667 | nu_q: 441.0 | nu_delta: 436.2
+#&gt; Iter 7 | Loss: -1.2669 | nu_q: 439.1 | nu_delta: 434.2
+#&gt; Iter 8 | Loss: -1.2669 | nu_q: 439.1 | nu_delta: 434.2
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 48.6001 | nu_q: 200.3 | nu_delta: 208.8
+#&gt; Iter 2 | Loss: 17.5412 | nu_q: 121.1 | nu_delta: 130.5
+#&gt; Iter 3 | Loss: 12.4986 | nu_q: 121.5 | nu_delta: 130.1
+#&gt; Iter 4 | Loss: 9.4157 | nu_q: 129.2 | nu_delta: 137.7
+#&gt; Iter 5 | Loss: 6.9849 | nu_q: 142.2 | nu_delta: 150.9
+#&gt; Iter 6 | Loss: 5.4808 | nu_q: 153.5 | nu_delta: 161.9
+#&gt; Iter 7 | Loss: 4.3456 | nu_q: 164.2 | nu_delta: 172.2
+#&gt; Iter 8 | Loss: 3.1405 | nu_q: 178.5 | nu_delta: 186.5
+#&gt; Iter 9 | Loss: 2.4200 | nu_q: 190.0 | nu_delta: 197.7
+#&gt; Iter 10 | Loss: 1.3898 | nu_q: 213.6 | nu_delta: 220.1
+#&gt; Iter 11 | Loss: 0.9157 | nu_q: 224.4 | nu_delta: 230.6
+#&gt; Iter 12 | Loss: 0.4725 | nu_q: 247.0 | nu_delta: 250.9
+#&gt; Iter 13 | Loss: -0.0150 | nu_q: 258.8 | nu_delta: 261.9
+#&gt; Iter 14 | Loss: -0.5412 | nu_q: 282.3 | nu_delta: 285.0
+#&gt; Iter 15 | Loss: -0.6731 | nu_q: 294.1 | nu_delta: 296.4
+#&gt; Iter 16 | Loss: -0.6950 | nu_q: 304.3 | nu_delta: 305.7
+#&gt; Iter 17 | Loss: -0.7043 | nu_q: 306.9 | nu_delta: 307.6
+#&gt; Iter 18 | Loss: -0.7105 | nu_q: 310.1 | nu_delta: 310.0
+#&gt; Iter 19 | Loss: -0.7152 | nu_q: 311.6 | nu_delta: 310.9
+#&gt; Iter 20 | Loss: -0.7183 | nu_q: 312.8 | nu_delta: 311.6
+#&gt; Iter 21 | Loss: -0.7213 | nu_q: 313.9 | nu_delta: 312.0
+#&gt; Iter 22 | Loss: -0.7230 | nu_q: 314.6 | nu_delta: 312.3
+#&gt; Iter 23 | Loss: -0.7250 | nu_q: 315.2 | nu_delta: 312.4
+#&gt; Iter 24 | Loss: -0.7259 | nu_q: 315.3 | nu_delta: 312.2
+#&gt; Iter 25 | Loss: -0.7259 | nu_q: 315.3 | nu_delta: 312.2
+#&gt; Converged at iteration 25 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005300985 
+#&gt; Iter 1 | Loss: -1.0948 | nu_q: 675.9 | nu_delta: 674.1
+#&gt; Iter 2 | Loss: -1.2370 | nu_q: 540.8 | nu_delta: 538.0
+#&gt; Iter 3 | Loss: -1.2724 | nu_q: 484.8 | nu_delta: 481.4
+#&gt; Iter 4 | Loss: -1.2811 | nu_q: 462.0 | nu_delta: 458.0
+#&gt; Iter 5 | Loss: -1.2853 | nu_q: 452.3 | nu_delta: 447.8
+#&gt; Iter 6 | Loss: -1.2864 | nu_q: 447.8 | nu_delta: 443.0
+#&gt; Iter 7 | Loss: -1.2866 | nu_q: 445.7 | nu_delta: 440.8
+#&gt; Iter 8 | Loss: -1.2866 | nu_q: 445.8 | nu_delta: 440.8
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 19&quot;
+#&gt; Iter 1 | Loss: -1.0245 | nu_q: 643.7 | nu_delta: 641.0
+#&gt; Iter 2 | Loss: -1.1765 | nu_q: 509.2 | nu_delta: 506.2
+#&gt; Iter 3 | Loss: -1.2201 | nu_q: 449.9 | nu_delta: 446.5
+#&gt; Iter 4 | Loss: -1.2321 | nu_q: 423.5 | nu_delta: 419.7
+#&gt; Iter 5 | Loss: -1.2360 | nu_q: 411.0 | nu_delta: 406.8
+#&gt; Iter 6 | Loss: -1.2371 | nu_q: 407.0 | nu_delta: 402.5
+#&gt; Iter 7 | Loss: -1.2373 | nu_q: 405.4 | nu_delta: 400.8
+#&gt; Iter 8 | Loss: -1.2374 | nu_q: 405.0 | nu_delta: 400.2
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 48.1396 | nu_q: 146.3 | nu_delta: 152.0
+#&gt; Iter 2 | Loss: 19.4361 | nu_q: 108.7 | nu_delta: 116.6
+#&gt; Iter 3 | Loss: 14.1277 | nu_q: 107.1 | nu_delta: 113.8
+#&gt; Iter 4 | Loss: 11.7563 | nu_q: 109.8 | nu_delta: 116.4
+#&gt; Iter 5 | Loss: 10.0917 | nu_q: 114.1 | nu_delta: 119.9
+#&gt; Iter 6 | Loss: 8.6523 | nu_q: 118.4 | nu_delta: 124.0
+#&gt; Iter 7 | Loss: 7.5983 | nu_q: 124.4 | nu_delta: 129.5
+#&gt; Iter 8 | Loss: 6.0106 | nu_q: 133.2 | nu_delta: 138.1
+#&gt; Iter 9 | Loss: 4.3323 | nu_q: 150.0 | nu_delta: 154.5
+#&gt; Iter 10 | Loss: 1.2236 | nu_q: 188.2 | nu_delta: 193.9
+#&gt; Iter 11 | Loss: 0.8245 | nu_q: 201.7 | nu_delta: 207.1
+#&gt; Iter 12 | Loss: 0.4072 | nu_q: 227.5 | nu_delta: 230.9
+#&gt; Iter 13 | Loss: -0.3904 | nu_q: 249.9 | nu_delta: 253.0
+#&gt; Iter 14 | Loss: -0.6677 | nu_q: 264.1 | nu_delta: 266.8
+#&gt; Iter 15 | Loss: -0.6946 | nu_q: 271.0 | nu_delta: 273.1
+#&gt; Iter 16 | Loss: -0.7088 | nu_q: 277.0 | nu_delta: 278.1
+#&gt; Iter 17 | Loss: -0.7168 | nu_q: 280.5 | nu_delta: 280.8
+#&gt; Iter 18 | Loss: -0.7217 | nu_q: 282.2 | nu_delta: 281.9
+#&gt; Iter 19 | Loss: -0.7252 | nu_q: 283.9 | nu_delta: 283.1
+#&gt; Iter 20 | Loss: -0.7279 | nu_q: 284.9 | nu_delta: 283.6
+#&gt; Iter 21 | Loss: -0.7281 | nu_q: 284.9 | nu_delta: 283.6
+#&gt; Iter 22 | Loss: -0.7308 | nu_q: 286.3 | nu_delta: 284.4
+#&gt; Iter 23 | Loss: -0.7321 | nu_q: 286.8 | nu_delta: 284.6
+#&gt; Iter 24 | Loss: -0.7322 | nu_q: 286.8 | nu_delta: 284.5
+#&gt; Converged at iteration 24 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005316346 
+#&gt; Iter 1 | Loss: -1.0620 | nu_q: 642.2 | nu_delta: 640.4
+#&gt; Iter 2 | Loss: -1.2038 | nu_q: 508.5 | nu_delta: 505.9
+#&gt; Iter 3 | Loss: -1.2432 | nu_q: 449.8 | nu_delta: 446.6
+#&gt; Iter 4 | Loss: -1.2520 | nu_q: 429.1 | nu_delta: 425.6
+#&gt; Iter 5 | Loss: -1.2553 | nu_q: 417.6 | nu_delta: 413.6
+#&gt; Iter 6 | Loss: -1.2565 | nu_q: 413.7 | nu_delta: 409.4
+#&gt; Iter 7 | Loss: -1.2567 | nu_q: 412.1 | nu_delta: 407.6
+#&gt; Iter 8 | Loss: -1.2567 | nu_q: 412.1 | nu_delta: 407.6
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 20&quot;
+#&gt; Iter 1 | Loss: -1.0639 | nu_q: 661.0 | nu_delta: 659.3
+#&gt; Iter 2 | Loss: -1.2006 | nu_q: 535.0 | nu_delta: 532.2
+#&gt; Iter 3 | Loss: -1.2339 | nu_q: 482.9 | nu_delta: 479.3
+#&gt; Iter 4 | Loss: -1.2424 | nu_q: 464.0 | nu_delta: 459.7
+#&gt; Iter 5 | Loss: -1.2441 | nu_q: 458.1 | nu_delta: 453.4
+#&gt; Iter 6 | Loss: -1.2447 | nu_q: 455.2 | nu_delta: 450.1
+#&gt; Iter 7 | Loss: -1.2447 | nu_q: 455.2 | nu_delta: 450.1
+#&gt; Converged at iteration 7 
+#&gt; Iter 1 | Loss: 91.9793 | nu_q: 195.4 | nu_delta: 185.3
+#&gt; Iter 2 | Loss: 65.6036 | nu_q: 70.7 | nu_delta: 68.7
+#&gt; Iter 3 | Loss: 23.1698 | nu_q: 106.2 | nu_delta: 110.7
+#&gt; Iter 4 | Loss: 12.5415 | nu_q: 117.4 | nu_delta: 123.5
+#&gt; Iter 5 | Loss: 8.1881 | nu_q: 140.5 | nu_delta: 147.1
+#&gt; Iter 6 | Loss: 5.7536 | nu_q: 155.8 | nu_delta: 162.8
+#&gt; Iter 7 | Loss: 4.3650 | nu_q: 170.5 | nu_delta: 177.4
+#&gt; Iter 8 | Loss: 3.2740 | nu_q: 186.9 | nu_delta: 193.2
+#&gt; Iter 9 | Loss: 2.1232 | nu_q: 206.7 | nu_delta: 212.6
+#&gt; Iter 10 | Loss: 1.4012 | nu_q: 222.5 | nu_delta: 228.3
+#&gt; Iter 11 | Loss: 1.1349 | nu_q: 234.9 | nu_delta: 240.3
+#&gt; Iter 12 | Loss: 0.7080 | nu_q: 260.0 | nu_delta: 262.7
+#&gt; Iter 13 | Loss: -0.0970 | nu_q: 288.3 | nu_delta: 290.4
+#&gt; Iter 14 | Loss: -0.5832 | nu_q: 310.2 | nu_delta: 311.9
+#&gt; Iter 15 | Loss: -0.6335 | nu_q: 318.7 | nu_delta: 320.0
+#&gt; Iter 16 | Loss: -0.6464 | nu_q: 326.1 | nu_delta: 326.4
+#&gt; Iter 17 | Loss: -0.6535 | nu_q: 328.4 | nu_delta: 328.1
+#&gt; Iter 18 | Loss: -0.6579 | nu_q: 330.2 | nu_delta: 329.3
+#&gt; Iter 19 | Loss: -0.6611 | nu_q: 331.6 | nu_delta: 330.1
+#&gt; Iter 20 | Loss: -0.6638 | nu_q: 332.4 | nu_delta: 330.5
+#&gt; Iter 21 | Loss: -0.6664 | nu_q: 333.5 | nu_delta: 330.8
+#&gt; Iter 22 | Loss: -0.6679 | nu_q: 333.7 | nu_delta: 330.6
+#&gt; Iter 23 | Loss: -0.6688 | nu_q: 334.2 | nu_delta: 330.8
+#&gt; Iter 24 | Loss: -0.6690 | nu_q: 334.2 | nu_delta: 330.8
+#&gt; Iter 25 | Loss: -0.6690 | nu_q: 334.2 | nu_delta: 330.8
+#&gt; Converged at iteration 25 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005279711 
+#&gt; Iter 1 | Loss: -1.0913 | nu_q: 670.9 | nu_delta: 668.7
+#&gt; Iter 2 | Loss: -1.2199 | nu_q: 545.6 | nu_delta: 542.6
+#&gt; Iter 3 | Loss: -1.2517 | nu_q: 494.6 | nu_delta: 491.0
+#&gt; Iter 4 | Loss: -1.2610 | nu_q: 471.3 | nu_delta: 467.1
+#&gt; Iter 5 | Loss: -1.2632 | nu_q: 463.5 | nu_delta: 458.8
+#&gt; Iter 6 | Loss: -1.2635 | nu_q: 461.4 | nu_delta: 456.4
+#&gt; Iter 7 | Loss: -1.2635 | nu_q: 461.4 | nu_delta: 456.4
+#&gt; Converged at iteration 7 
+#&gt; [1] &quot;Seed 21&quot;
+#&gt; Iter 1 | Loss: -0.9861 | nu_q: 686.1 | nu_delta: 684.0
+#&gt; Iter 2 | Loss: -1.1292 | nu_q: 560.0 | nu_delta: 557.1
+#&gt; Iter 3 | Loss: -1.1592 | nu_q: 511.0 | nu_delta: 507.3
+#&gt; Iter 4 | Loss: -1.1661 | nu_q: 492.3 | nu_delta: 487.8
+#&gt; Iter 5 | Loss: -1.1677 | nu_q: 486.6 | nu_delta: 481.6
+#&gt; Iter 6 | Loss: -1.1679 | nu_q: 484.3 | nu_delta: 479.2
+#&gt; Iter 7 | Loss: -1.1679 | nu_q: 484.3 | nu_delta: 479.2
+#&gt; Converged at iteration 7 
+#&gt; Iter 1 | Loss: 91.6646 | nu_q: 169.0 | nu_delta: 163.4
+#&gt; Iter 2 | Loss: 63.7784 | nu_q: 67.0 | nu_delta: 66.5
+#&gt; Iter 3 | Loss: 28.3005 | nu_q: 100.5 | nu_delta: 105.2
+#&gt; Iter 4 | Loss: 13.9645 | nu_q: 116.1 | nu_delta: 123.9
+#&gt; Iter 5 | Loss: 9.7156 | nu_q: 132.4 | nu_delta: 140.9
+#&gt; Iter 6 | Loss: 7.1233 | nu_q: 149.4 | nu_delta: 158.3
+#&gt; Iter 7 | Loss: 5.9497 | nu_q: 159.7 | nu_delta: 168.4
+#&gt; Iter 8 | Loss: 4.6851 | nu_q: 174.6 | nu_delta: 183.0
+#&gt; Iter 9 | Loss: 3.6773 | nu_q: 187.2 | nu_delta: 195.4
+#&gt; Iter 10 | Loss: 3.0766 | nu_q: 199.8 | nu_delta: 207.6
+#&gt; Iter 11 | Loss: 2.6171 | nu_q: 213.0 | nu_delta: 219.8
+#&gt; Iter 12 | Loss: 2.0316 | nu_q: 228.9 | nu_delta: 235.3
+#&gt; Iter 13 | Loss: 1.4083 | nu_q: 245.7 | nu_delta: 251.6
+#&gt; Iter 14 | Loss: 1.1288 | nu_q: 258.2 | nu_delta: 263.6
+#&gt; Iter 15 | Loss: 0.7871 | nu_q: 278.2 | nu_delta: 282.2
+#&gt; Iter 16 | Loss: 0.3014 | nu_q: 302.7 | nu_delta: 306.3
+#&gt; Iter 17 | Loss: -0.2243 | nu_q: 336.2 | nu_delta: 339.3
+#&gt; Iter 18 | Loss: -0.3719 | nu_q: 346.0 | nu_delta: 348.7
+#&gt; Iter 19 | Loss: -0.4087 | nu_q: 358.6 | nu_delta: 360.3
+#&gt; Iter 20 | Loss: -0.4247 | nu_q: 363.2 | nu_delta: 364.0
+#&gt; Iter 21 | Loss: -0.4331 | nu_q: 365.8 | nu_delta: 366.0
+#&gt; Iter 22 | Loss: -0.4394 | nu_q: 368.0 | nu_delta: 367.4
+#&gt; Iter 23 | Loss: -0.4444 | nu_q: 369.9 | nu_delta: 368.5
+#&gt; Iter 24 | Loss: -0.4474 | nu_q: 370.1 | nu_delta: 368.3
+#&gt; Iter 25 | Loss: -0.4509 | nu_q: 371.5 | nu_delta: 368.9
+#&gt; Iter 26 | Loss: -0.4524 | nu_q: 371.7 | nu_delta: 368.8
+#&gt; Iter 27 | Loss: -0.4539 | nu_q: 372.4 | nu_delta: 369.0
+#&gt; Iter 28 | Loss: -0.4550 | nu_q: 372.5 | nu_delta: 368.8
+#&gt; Iter 29 | Loss: -0.4552 | nu_q: 372.6 | nu_delta: 368.8
+#&gt; Iter 30 | Loss: -0.4552 | nu_q: 372.6 | nu_delta: 368.8
+#&gt; Converged at iteration 30 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005292957 
+#&gt; Iter 1 | Loss: -1.0321 | nu_q: 684.8 | nu_delta: 682.7
+#&gt; Iter 2 | Loss: -1.1548 | nu_q: 565.0 | nu_delta: 562.0
+#&gt; Iter 3 | Loss: -1.1827 | nu_q: 516.9 | nu_delta: 513.2
+#&gt; Iter 4 | Loss: -1.1886 | nu_q: 500.5 | nu_delta: 496.2
+#&gt; Iter 5 | Loss: -1.1904 | nu_q: 492.8 | nu_delta: 488.0
+#&gt; Iter 6 | Loss: -1.1907 | nu_q: 490.5 | nu_delta: 485.5
+#&gt; Iter 7 | Loss: -1.1907 | nu_q: 490.5 | nu_delta: 485.5
+#&gt; Converged at iteration 7 
+#&gt; [1] &quot;Seed 22&quot;
+#&gt; Iter 1 | Loss: -1.1929 | nu_q: 673.3 | nu_delta: 670.7
+#&gt; Iter 2 | Loss: -1.3184 | nu_q: 543.9 | nu_delta: 540.8
+#&gt; Iter 3 | Loss: -1.3526 | nu_q: 487.1 | nu_delta: 483.6
+#&gt; Iter 4 | Loss: -1.3616 | nu_q: 462.4 | nu_delta: 458.4
+#&gt; Iter 5 | Loss: -1.3638 | nu_q: 453.0 | nu_delta: 448.6
+#&gt; Iter 6 | Loss: -1.3641 | nu_q: 450.2 | nu_delta: 445.7
+#&gt; Iter 7 | Loss: -1.3642 | nu_q: 450.2 | nu_delta: 445.7
+#&gt; Converged at iteration 7 
+#&gt; Iter 1 | Loss: 75.9748 | nu_q: 199.8 | nu_delta: 188.6
+#&gt; Iter 2 | Loss: 17.8174 | nu_q: 116.1 | nu_delta: 117.8
+#&gt; Iter 3 | Loss: 12.9028 | nu_q: 122.0 | nu_delta: 124.6
+#&gt; Iter 4 | Loss: 10.2581 | nu_q: 126.7 | nu_delta: 128.9
+#&gt; Iter 5 | Loss: 7.9684 | nu_q: 140.3 | nu_delta: 142.5
+#&gt; Iter 6 | Loss: 5.9065 | nu_q: 147.3 | nu_delta: 149.1
+#&gt; Iter 7 | Loss: 4.4944 | nu_q: 161.0 | nu_delta: 162.9
+#&gt; Iter 8 | Loss: 3.2801 | nu_q: 172.4 | nu_delta: 174.0
+#&gt; Iter 9 | Loss: 2.6000 | nu_q: 183.0 | nu_delta: 184.4
+#&gt; Iter 10 | Loss: 1.7863 | nu_q: 201.1 | nu_delta: 201.1
+#&gt; Iter 11 | Loss: 1.0364 | nu_q: 217.2 | nu_delta: 217.2
+#&gt; Iter 12 | Loss: 0.7196 | nu_q: 229.7 | nu_delta: 229.3
+#&gt; Iter 13 | Loss: 0.2887 | nu_q: 251.6 | nu_delta: 250.4
+#&gt; Iter 14 | Loss: -0.5871 | nu_q: 284.6 | nu_delta: 282.7
+#&gt; Iter 15 | Loss: -0.7532 | nu_q: 297.6 | nu_delta: 295.6
+#&gt; Iter 16 | Loss: -0.7750 | nu_q: 309.5 | nu_delta: 307.0
+#&gt; Iter 17 | Loss: -0.7826 | nu_q: 311.6 | nu_delta: 308.9
+#&gt; Iter 18 | Loss: -0.7877 | nu_q: 315.1 | nu_delta: 312.1
+#&gt; Iter 19 | Loss: -0.7906 | nu_q: 317.0 | nu_delta: 313.7
+#&gt; Iter 20 | Loss: -0.7926 | nu_q: 318.5 | nu_delta: 315.0
+#&gt; Iter 21 | Loss: -0.7939 | nu_q: 319.4 | nu_delta: 315.7
+#&gt; Iter 22 | Loss: -0.7940 | nu_q: 319.4 | nu_delta: 315.7
+#&gt; Iter 23 | Loss: -0.7941 | nu_q: 319.4 | nu_delta: 315.7
+#&gt; Converged at iteration 23 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005303649 
+#&gt; Iter 1 | Loss: -1.1953 | nu_q: 701.7 | nu_delta: 698.6
+#&gt; Iter 2 | Loss: -1.3344 | nu_q: 561.9 | nu_delta: 558.6
+#&gt; Iter 3 | Loss: -1.3718 | nu_q: 499.0 | nu_delta: 495.3
+#&gt; Iter 4 | Loss: -1.3814 | nu_q: 473.1 | nu_delta: 469.1
+#&gt; Iter 5 | Loss: -1.3839 | nu_q: 461.6 | nu_delta: 457.2
+#&gt; Iter 6 | Loss: -1.3842 | nu_q: 458.1 | nu_delta: 453.6
+#&gt; Iter 7 | Loss: -1.3842 | nu_q: 458.1 | nu_delta: 453.6
+#&gt; Converged at iteration 7 
+#&gt; [1] &quot;Seed 23&quot;
+#&gt; Iter 1 | Loss: -1.1978 | nu_q: 670.0 | nu_delta: 668.4
+#&gt; Iter 2 | Loss: -1.3488 | nu_q: 526.1 | nu_delta: 523.7
+#&gt; Iter 3 | Loss: -1.3911 | nu_q: 461.2 | nu_delta: 458.4
+#&gt; Iter 4 | Loss: -1.4015 | nu_q: 433.7 | nu_delta: 430.4
+#&gt; Iter 5 | Loss: -1.4045 | nu_q: 420.6 | nu_delta: 416.9
+#&gt; Iter 6 | Loss: -1.4055 | nu_q: 415.0 | nu_delta: 411.0
+#&gt; Iter 7 | Loss: -1.4057 | nu_q: 412.9 | nu_delta: 408.9
+#&gt; Iter 8 | Loss: -1.4057 | nu_q: 412.9 | nu_delta: 408.9
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 60.2049 | nu_q: 270.1 | nu_delta: 270.2
+#&gt; Iter 2 | Loss: 16.3106 | nu_q: 120.2 | nu_delta: 125.4
+#&gt; Iter 3 | Loss: 11.0184 | nu_q: 113.5 | nu_delta: 118.0
+#&gt; Iter 4 | Loss: 7.7951 | nu_q: 123.9 | nu_delta: 128.2
+#&gt; Iter 5 | Loss: 5.8633 | nu_q: 130.3 | nu_delta: 134.3
+#&gt; Iter 6 | Loss: 4.5305 | nu_q: 139.0 | nu_delta: 142.9
+#&gt; Iter 7 | Loss: 3.1633 | nu_q: 153.7 | nu_delta: 157.3
+#&gt; Iter 8 | Loss: 2.2217 | nu_q: 164.9 | nu_delta: 168.2
+#&gt; Iter 9 | Loss: 1.6867 | nu_q: 177.5 | nu_delta: 180.4
+#&gt; Iter 10 | Loss: 0.7517 | nu_q: 194.9 | nu_delta: 197.3
+#&gt; Iter 11 | Loss: 0.3175 | nu_q: 208.7 | nu_delta: 210.8
+#&gt; Iter 12 | Loss: -0.3469 | nu_q: 234.9 | nu_delta: 235.6
+#&gt; Iter 13 | Loss: -0.8279 | nu_q: 256.3 | nu_delta: 256.7
+#&gt; Iter 14 | Loss: -0.8783 | nu_q: 265.1 | nu_delta: 265.1
+#&gt; Iter 15 | Loss: -0.8902 | nu_q: 271.6 | nu_delta: 271.1
+#&gt; Iter 16 | Loss: -0.8959 | nu_q: 274.8 | nu_delta: 273.8
+#&gt; Iter 17 | Loss: -0.8999 | nu_q: 277.2 | nu_delta: 275.7
+#&gt; Iter 18 | Loss: -0.9023 | nu_q: 278.7 | nu_delta: 276.9
+#&gt; Iter 19 | Loss: -0.9043 | nu_q: 279.8 | nu_delta: 277.7
+#&gt; Iter 20 | Loss: -0.9055 | nu_q: 280.6 | nu_delta: 278.2
+#&gt; Iter 21 | Loss: -0.9066 | nu_q: 281.2 | nu_delta: 278.5
+#&gt; Iter 22 | Loss: -0.9073 | nu_q: 281.7 | nu_delta: 278.7
+#&gt; Iter 23 | Loss: -0.9073 | nu_q: 281.7 | nu_delta: 278.7
+#&gt; Converged at iteration 23 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005331546 
+#&gt; Iter 1 | Loss: -1.2407 | nu_q: 671.5 | nu_delta: 669.2
+#&gt; Iter 2 | Loss: -1.3745 | nu_q: 531.7 | nu_delta: 528.9
+#&gt; Iter 3 | Loss: -1.4128 | nu_q: 468.9 | nu_delta: 465.8
+#&gt; Iter 4 | Loss: -1.4226 | nu_q: 440.5 | nu_delta: 437.1
+#&gt; Iter 5 | Loss: -1.4251 | nu_q: 428.0 | nu_delta: 424.2
+#&gt; Iter 6 | Loss: -1.4258 | nu_q: 422.8 | nu_delta: 418.8
+#&gt; Iter 7 | Loss: -1.4260 | nu_q: 420.9 | nu_delta: 416.8
+#&gt; Iter 8 | Loss: -1.4260 | nu_q: 420.9 | nu_delta: 416.8
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 24&quot;
+#&gt; Iter 1 | Loss: 3.0840 | nu_q: 288.8 | nu_delta: 298.6
+#&gt; Iter 2 | Loss: -0.9535 | nu_q: 314.9 | nu_delta: 321.5
+#&gt; Iter 3 | Loss: -1.2414 | nu_q: 364.9 | nu_delta: 370.4
+#&gt; Iter 4 | Loss: -1.2640 | nu_q: 387.0 | nu_delta: 390.9
+#&gt; Iter 5 | Loss: -1.2741 | nu_q: 398.7 | nu_delta: 401.0
+#&gt; Iter 6 | Loss: -1.2798 | nu_q: 404.6 | nu_delta: 405.5
+#&gt; Iter 7 | Loss: -1.2833 | nu_q: 408.0 | nu_delta: 407.8
+#&gt; Iter 8 | Loss: -1.2856 | nu_q: 409.8 | nu_delta: 408.7
+#&gt; Iter 9 | Loss: -1.2871 | nu_q: 410.9 | nu_delta: 409.0
+#&gt; Iter 10 | Loss: -1.2881 | nu_q: 411.2 | nu_delta: 408.7
+#&gt; Iter 11 | Loss: -1.2888 | nu_q: 411.4 | nu_delta: 408.5
+#&gt; Iter 12 | Loss: -1.2893 | nu_q: 411.6 | nu_delta: 408.2
+#&gt; Iter 13 | Loss: -1.2896 | nu_q: 411.8 | nu_delta: 408.1
+#&gt; Iter 14 | Loss: -1.2896 | nu_q: 411.8 | nu_delta: 408.1
+#&gt; Converged at iteration 14 
+#&gt; Iter 1 | Loss: 103.3442 | nu_q: 190.4 | nu_delta: 179.4
+#&gt; Iter 2 | Loss: 63.8436 | nu_q: 77.3 | nu_delta: 75.3
+#&gt; Iter 3 | Loss: 20.4762 | nu_q: 89.9 | nu_delta: 93.3
+#&gt; Iter 4 | Loss: 12.9998 | nu_q: 103.1 | nu_delta: 107.2
+#&gt; Iter 5 | Loss: 9.8266 | nu_q: 111.1 | nu_delta: 115.2
+#&gt; Iter 6 | Loss: 7.5029 | nu_q: 121.5 | nu_delta: 125.3
+#&gt; Iter 7 | Loss: 6.0031 | nu_q: 135.5 | nu_delta: 139.0
+#&gt; Iter 8 | Loss: 4.8069 | nu_q: 140.9 | nu_delta: 144.3
+#&gt; Iter 9 | Loss: 3.8796 | nu_q: 152.2 | nu_delta: 155.2
+#&gt; Iter 10 | Loss: 2.9597 | nu_q: 163.4 | nu_delta: 165.9
+#&gt; Iter 11 | Loss: 2.5021 | nu_q: 172.7 | nu_delta: 175.0
+#&gt; Iter 12 | Loss: 1.9181 | nu_q: 186.9 | nu_delta: 188.3
+#&gt; Iter 13 | Loss: 0.9337 | nu_q: 205.3 | nu_delta: 206.5
+#&gt; Iter 14 | Loss: 0.5478 | nu_q: 217.8 | nu_delta: 218.7
+#&gt; Iter 15 | Loss: -0.0921 | nu_q: 244.0 | nu_delta: 243.8
+#&gt; Iter 16 | Loss: -0.7285 | nu_q: 265.9 | nu_delta: 265.3
+#&gt; Iter 17 | Loss: -0.7605 | nu_q: 273.7 | nu_delta: 272.8
+#&gt; Iter 18 | Loss: -0.7705 | nu_q: 280.7 | nu_delta: 279.2
+#&gt; Iter 19 | Loss: -0.7750 | nu_q: 283.1 | nu_delta: 281.3
+#&gt; Iter 20 | Loss: -0.7781 | nu_q: 284.9 | nu_delta: 282.7
+#&gt; Iter 21 | Loss: -0.7803 | nu_q: 286.5 | nu_delta: 284.0
+#&gt; Iter 22 | Loss: -0.7821 | nu_q: 287.5 | nu_delta: 284.6
+#&gt; Iter 23 | Loss: -0.7831 | nu_q: 288.3 | nu_delta: 285.2
+#&gt; Iter 24 | Loss: -0.7837 | nu_q: 288.5 | nu_delta: 285.3
+#&gt; Iter 25 | Loss: -0.7838 | nu_q: 288.5 | nu_delta: 285.3
+#&gt; Converged at iteration 25 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005323234 
+#&gt; Iter 1 | Loss: -1.0887 | nu_q: 684.9 | nu_delta: 683.1
+#&gt; Iter 2 | Loss: -1.2528 | nu_q: 538.2 | nu_delta: 535.6
+#&gt; Iter 3 | Loss: -1.2922 | nu_q: 477.0 | nu_delta: 474.0
+#&gt; Iter 4 | Loss: -1.3039 | nu_q: 448.8 | nu_delta: 445.3
+#&gt; Iter 5 | Loss: -1.3072 | nu_q: 435.4 | nu_delta: 431.5
+#&gt; Iter 6 | Loss: -1.3082 | nu_q: 429.6 | nu_delta: 425.4
+#&gt; Iter 7 | Loss: -1.3084 | nu_q: 427.3 | nu_delta: 422.9
+#&gt; Iter 8 | Loss: -1.3084 | nu_q: 427.3 | nu_delta: 422.9
+#&gt; Converged at iteration 8 
+#&gt; [1] &quot;Seed 25&quot;
+#&gt; Iter 1 | Loss: -1.2276 | nu_q: 673.7 | nu_delta: 671.6
+#&gt; Iter 2 | Loss: -1.3618 | nu_q: 536.3 | nu_delta: 533.6
+#&gt; Iter 3 | Loss: -1.3932 | nu_q: 481.7 | nu_delta: 478.4
+#&gt; Iter 4 | Loss: -1.4011 | nu_q: 458.5 | nu_delta: 454.7
+#&gt; Iter 5 | Loss: -1.4035 | nu_q: 448.5 | nu_delta: 444.4
+#&gt; Iter 6 | Loss: -1.4039 | nu_q: 444.9 | nu_delta: 440.6
+#&gt; Iter 7 | Loss: -1.4041 | nu_q: 443.1 | nu_delta: 438.6
+#&gt; Iter 8 | Loss: -1.4041 | nu_q: 443.1 | nu_delta: 438.6
+#&gt; Converged at iteration 8 
+#&gt; Iter 1 | Loss: 46.5215 | nu_q: 130.0 | nu_delta: 125.8
+#&gt; Iter 2 | Loss: 16.2532 | nu_q: 113.1 | nu_delta: 113.6
+#&gt; Iter 3 | Loss: 10.7460 | nu_q: 118.0 | nu_delta: 119.3
+#&gt; Iter 4 | Loss: 8.1216 | nu_q: 129.6 | nu_delta: 130.8
+#&gt; Iter 5 | Loss: 6.3951 | nu_q: 140.8 | nu_delta: 142.1
+#&gt; Iter 6 | Loss: 4.6904 | nu_q: 154.9 | nu_delta: 155.9
+#&gt; Iter 7 | Loss: 3.3408 | nu_q: 170.4 | nu_delta: 171.4
+#&gt; Iter 8 | Loss: 2.5505 | nu_q: 182.0 | nu_delta: 182.7
+#&gt; Iter 9 | Loss: 1.8025 | nu_q: 202.6 | nu_delta: 202.3
+#&gt; Iter 10 | Loss: 1.1618 | nu_q: 215.7 | nu_delta: 215.2
+#&gt; Iter 11 | Loss: 0.7962 | nu_q: 240.5 | nu_delta: 239.6
+#&gt; Iter 12 | Loss: -0.1956 | nu_q: 270.9 | nu_delta: 269.4
+#&gt; Iter 13 | Loss: -0.7442 | nu_q: 298.6 | nu_delta: 296.9
+#&gt; Iter 14 | Loss: -0.7758 | nu_q: 316.1 | nu_delta: 313.9
+#&gt; Iter 15 | Loss: -0.7861 | nu_q: 323.3 | nu_delta: 320.7
+#&gt; Iter 16 | Loss: -0.7910 | nu_q: 326.7 | nu_delta: 323.9
+#&gt; Iter 17 | Loss: -0.7935 | nu_q: 328.1 | nu_delta: 325.0
+#&gt; Iter 18 | Loss: -0.7952 | nu_q: 329.8 | nu_delta: 326.5
+#&gt; Iter 19 | Loss: -0.7963 | nu_q: 330.5 | nu_delta: 327.0
+#&gt; Iter 20 | Loss: -0.7975 | nu_q: 331.7 | nu_delta: 327.9
+#&gt; Iter 21 | Loss: -0.7979 | nu_q: 331.8 | nu_delta: 327.9
+#&gt; Iter 22 | Loss: -0.7979 | nu_q: 331.8 | nu_delta: 327.9
+#&gt; Converged at iteration 22 
+#&gt; Ledoit-Wolf Linear Alpha estimated from R_0: 0.005296487 
+#&gt; Iter 1 | Loss: -1.2604 | nu_q: 678.2 | nu_delta: 676.3
+#&gt; Iter 2 | Loss: -1.3829 | nu_q: 545.8 | nu_delta: 543.1
+#&gt; Iter 3 | Loss: -1.4142 | nu_q: 488.1 | nu_delta: 484.9
+#&gt; Iter 4 | Loss: -1.4215 | nu_q: 464.7 | nu_delta: 461.0
+#&gt; Iter 5 | Loss: -1.4237 | nu_q: 455.9 | nu_delta: 451.8
+#&gt; Iter 6 | Loss: -1.4240 | nu_q: 452.3 | nu_delta: 448.0
+#&gt; Iter 7 | Loss: -1.4240 | nu_q: 452.3 | nu_delta: 448.0
+#&gt; Converged at iteration 7</code></pre>
+</div>
+<div id="visualization-results" class="section level1">
+<h1>2. Visualization results</h1>
+<div id="estimated-nu_0" class="section level2">
+<h2>2.1. Estimated nu_0</h2>
+<pre class="r"><code>library(ggplot2)
+df &lt;- data.frame(
+  x = c(1:seed) * 10,
+  y = est_nu_0[, 1]
+)
+
+ggplot(df, aes(x = x, y = y)) +
+  geom_point() +                          
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) + 
+  labs(
+    x     = &quot;Divergence time&quot;,
+    y     = &quot;Estimated nu_0&quot;,
+    title = &quot;naive shrinkage prior mean&quot;
+  )
+#&gt; `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="figure/divergence_increase-nu_decrease.Rmd/results%201-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df &lt;- data.frame(
+  x = c(1:seed) * 10,
+  y = est_nu_0[, 2]
+)
+
+ggplot(df, aes(x = x, y = y)) +
+  geom_point() +                          
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) + 
+  labs(
+    x     = &quot;Divergence time&quot;,
+    y     = &quot;Estimated nu_0&quot;,
+    title = &quot;WS shrinkage prior mean&quot;
+  )
+#&gt; `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="figure/divergence_increase-nu_decrease.Rmd/results%202-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df &lt;- data.frame(
+  x = c(1:seed) * 10,
+  y = est_nu_0[, 3]
+)
+
+ggplot(df, aes(x = x, y = y)) +
+  geom_point() +                          
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) + 
+  labs(
+    x     = &quot;Divergence time&quot;,
+    y     = &quot;Estimated nu_0&quot;,
+    title = &quot;LW shrinkage prior mean&quot;
+  )
+#&gt; `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="figure/divergence_increase-nu_decrease.Rmd/results%203-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="number-of-css" class="section level2">
+<h2>2.2. Number of CSs</h2>
+<pre class="r"><code>
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+#&gt; 
+#&gt; Attaching package: &#39;dplyr&#39;
+#&gt; The following objects are masked from &#39;package:stats&#39;:
+#&gt; 
+#&gt;     filter, lag
+#&gt; The following objects are masked from &#39;package:base&#39;:
+#&gt; 
+#&gt;     intersect, setdiff, setequal, union
+
+colnames(coverages) &lt;- c(&quot;In-sample&quot;, &quot;Out-of-sample&quot;, &quot;Naive shrinkage&quot;, &quot;WS&quot;, &quot;LW&quot;)
+
+
+# Build a data frame and pivot to long format
+df &lt;- data.frame(
+  x = c(1:seed) * 10,
+  coverages
+) %&gt;%
+  pivot_longer(
+    cols = -x,            # everything except x
+    names_to  = &quot;group&quot;,  # column name becomes the grouping variable
+    values_to = &quot;y&quot;       # the cell values
+  )
+
+ggplot(df, aes(x = x, y = y, color = group)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x     = &quot;Divergence time&quot;,
+    y     = &quot;Coverage&quot;,
+    title = &quot;Coverage as divergence time varies&quot;,
+    color = &quot;Legend Title&quot;
+  )</code></pre>
+<p><img src="figure/divergence_increase-nu_decrease.Rmd/num_CS-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>Because I have not ran replications, it is a bit hard to see. But it
+looks like WS wins overall (by a small margin).</p>
+<pre class="r"><code>colSums(coverages) / 25
+#&gt;       In-sample   Out-of-sample Naive shrinkage              WS              LW 
+#&gt;       1.0000000       0.4566667       0.8966667       0.9600000       0.8933333</code></pre>
+<p>Finally we can visualize the distance from out-of-sample <span
+class="math inline">\(R_0\)</span> and other estimated <span
+class="math inline">\(R_q\)</span> to the in-sample <span
+class="math inline">\(R\)</span>. <span
+class="math inline">\(R_q\)</span> estimated from all methods are better
+than <span class="math inline">\(R_0\)</span>.</p>
+<pre class="r"><code>colnames(dist_R) &lt;- c(&quot;Out-of-sample&quot;, &quot;Naive shrinkage&quot;, &quot;WS&quot;, &quot;LW&quot;)
+
+
+# Build a data frame and pivot to long format
+df &lt;- data.frame(
+  x = c(1:seed) * 10,
+  dist_R
+) %&gt;%
+  pivot_longer(
+    cols = -x,            # everything except x
+    names_to  = &quot;group&quot;,  # column name becomes the grouping variable
+    values_to = &quot;y&quot;       # the cell values
+  )
+
+ggplot(df, aes(x = x, y = y, color = group)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x     = &quot;Divergence time&quot;,
+    y     = &quot;Distance from estimated R to in-sample R&quot;,
+    title = &quot;Estimation error of R as divergence time varies&quot;,
+    color = &quot;Legend Title&quot;
+  )</code></pre>
+<p><img src="figure/divergence_increase-nu_decrease.Rmd/dist-R-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>3. Conclusion</h2>
+<p>We learned that as the divergence between in-sample <span
+class="math inline">\(R\)</span> and out-of-sample <span
+class="math inline">\(R_0\)</span> increases, the estimated <span
+class="math inline">\(\nu_0\)</span> decreases, and the estimated <span
+class="math inline">\(R_q\)</span> is often a little closer to the
+in-sample <span class="math inline">\(R\)</span> (compared to the
+distance between <span class="math inline">\(R_0\)</span> and <span
+class="math inline">\(R\)</span>). (Note that the rows corresponds to
+true causal signals often have biggest improvements, as observed from
+experiments that Peter and I conducted earlier.)</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()
+#&gt; R version 4.5.2 (2025-10-31)
+#&gt; Platform: aarch64-apple-darwin20
+#&gt; Running under: macOS Tahoe 26.5
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; time zone: America/New_York
+#&gt; tzcode source: internal
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] dplyr_1.2.0     tidyr_1.3.2     ggplot2_4.0.2   susieR_0.14.2  
+#&gt; [5] susielove_0.1.0 workflowr_1.7.2
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] sass_0.4.10        generics_0.1.4     stringi_1.8.7      lattice_0.22-7    
+#&gt;  [5] digest_0.6.39      magrittr_2.0.4     evaluate_1.0.5     grid_4.5.2        
+#&gt;  [9] RColorBrewer_1.1-3 fastmap_1.2.0      plyr_1.8.9         rprojroot_2.1.1   
+#&gt; [13] jsonlite_2.0.0     Matrix_1.7-4       processx_3.8.6     whisker_0.4.1     
+#&gt; [17] reshape_0.8.10     mixsqp_0.3-54      ps_1.9.1           promises_1.5.0    
+#&gt; [21] mgcv_1.9-3         httr_1.4.8         purrr_1.2.1        scales_1.4.0      
+#&gt; [25] jquerylib_0.1.4    cli_3.6.6          rlang_1.2.0        crayon_1.5.3      
+#&gt; [29] splines_4.5.2      withr_3.0.2        cachem_1.1.0       yaml_2.3.12       
+#&gt; [33] otel_0.2.0         tools_4.5.2        httpuv_1.6.17      reticulate_1.46.0 
+#&gt; [37] png_0.1-9          vctrs_0.7.1        R6_2.6.1           matrixStats_1.5.0 
+#&gt; [41] lifecycle_1.0.5    git2r_0.36.2       stringr_1.6.0      fs_2.1.0          
+#&gt; [45] irlba_2.3.7        pkgconfig_2.0.3    callr_3.7.6        pillar_1.11.1     
+#&gt; [49] bslib_0.10.0       later_1.4.8        gtable_0.3.6       glue_1.8.0        
+#&gt; [53] Rcpp_1.1.1         xfun_0.56          tibble_3.3.1       tidyselect_1.2.1  
+#&gt; [57] rstudioapi_0.18.0  knitr_1.51         farver_2.1.2       nlme_3.1-168      
+#&gt; [61] htmltools_0.5.9    labeling_0.4.3     rmarkdown_2.30     compiler_4.5.2    
+#&gt; [65] getPass_0.2-4      S7_0.2.1</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
