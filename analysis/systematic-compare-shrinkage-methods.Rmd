@@ -269,22 +269,32 @@ library(ggplot2)
 list_mat = list(coverages, powers, no_CSs, no_SNPs_CS)
 list_name = c("Coverages", "Power", "Number of CSs", "Number of SNPs per CS")
 plots = list()
+B <- 2000
 for (i in 1:4){
   m = list_mat[[i]]
   colnames(m) <- c('In-', 'Out-', 'naive', 'WS', 'LW')
   means <- colMeans(m)
-  sds   <- apply(m, 2, sd)
+
+  ci_lower <- numeric(ncol(m))
+  ci_upper <- numeric(ncol(m))
+  for (j in 1:ncol(m)) {
+    boot_means <- replicate(B, mean(sample(m[, j], replace = TRUE)))
+    ci_lower[j] <- quantile(boot_means, 0.05)
+    ci_upper[j] <- quantile(boot_means, 0.95)
+  }
+
   df <- data.frame(
     variable = factor(colnames(m), levels = colnames(m)),
     mean = means,
-    sd = sds
+    lower = ci_lower,
+    upper = ci_upper
   )
-  
+
   plots[[i]] = ggplot(df, aes(x = variable, y = mean)) +
     geom_point(size = 3, color = "blue") +
-    geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+    geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) +
     labs(title = list_name[i],
-         x = "Methods", y = "Mean ± SD")
+         x = "Methods", y = "Mean (90% bootstrap CI)")
 }
 
 library(patchwork)
