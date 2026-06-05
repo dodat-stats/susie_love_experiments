@@ -391,7 +391,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-06-01
+<strong>Last updated:</strong> 2026-06-05
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -522,15 +522,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreeb894cfc40e95ade37c5e8210d19c9f327ccd50b5targetblankb894cfca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreea85302a5bb933b60a88ee98b32acd554a2542f48targetblanka85302aa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/b894cfc40e95ade37c5e8210d19c9f327ccd50b5" target="_blank">b894cfc</a>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/a85302a5bb933b60a88ee98b32acd554a2542f48" target="_blank">a85302a</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreeb894cfc40e95ade37c5e8210d19c9f327ccd50b5targetblankb894cfca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreea85302a5bb933b60a88ee98b32acd554a2542f48targetblanka85302aa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -540,7 +540,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/b894cfc40e95ade37c5e8210d19c9f327ccd50b5" target="_blank">b894cfc</a>.
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/a85302a5bb933b60a88ee98b32acd554a2542f48" target="_blank">a85302a</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -560,7 +560,11 @@ Ignored files:
     Ignored:    .Rproj.user/
 
 Untracked files:
+    Untracked:  analysis/high-mismatch-tiny-nu0.Rmd
     Untracked:  analysis/test.Rmd
+
+Unstaged changes:
+    Modified:   analysis/divergence_increase-nu_decrease.Rmd
 
 </code></pre>
 <p>
@@ -610,6 +614,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/a85302a5bb933b60a88ee98b32acd554a2542f48/analysis/various-shrinkage.Rmd" target="_blank">a85302a</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-05
+</td>
+<td>
+update latex
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/dodat-stats/susie_love_experiments/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/various-shrinkage.html" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/dodat-stats/susie_love_experiments/blob/b894cfc40e95ade37c5e8210d19c9f327ccd50b5/analysis/various-shrinkage.Rmd" target="_blank">b894cfc</a>
 </td>
 <td>
@@ -646,17 +684,21 @@ out-of-sample covariance matrix. For the uniform presentation, we
 consider CORRELATION MATRIX instead of covariance here (so that the
 diagonal is constrained to be 1). Consider the following strategies:</p>
 <ol style="list-style-type: decimal">
-<li><p>Naive shrinkage: <span class="math inline">\(\Psi_{naive} =
-\left(1-\dfrac{1}{N_0}) R_0 + \dfrac{1}{N_0} I\)</span></p></li>
+<li><p>Naive shrinkage: <span class="math display">\[\Psi_{naive} =
+\left(1-\dfrac{1}{N_0}) R_0\right) + \dfrac{1}{N_0} I\]</span></p></li>
 <li><p>Wen and Stephens (2010) shrinkage: <span
-class="math inline">\(\Psi_{WS} = \left(1- \lambda)^2 R_0 + (1 -
-(1-\lambda)^2) I\)</span>, where <span class="math inline">\(\lambda =
+class="math display">\[\Psi_{WS} = \left(1- \lambda\right)^2 R_0 + (1 -
+(1-\lambda)^2) I,\]</span> where <span class="math inline">\(\lambda =
 \dfrac{\theta}{\theta + 2 N_0}\)</span> and <span
 class="math inline">\(\theta\)</span> is the Watterson’s estimator $=
 (_{i=1}^{2N_0 - 1} )^{-1} ((2N_0) + 0.57)^{-1} $.</p></li>
 <li><p>Ledoit and Wolf (2004) linear shrinkage: <span
-class="math inline">\(\Psi_{linear-LW} = \left(1- \lambda) R_0 + \lambda
-I\)</span>, where <span class="math inline">\(\lambda \asymp
+class="math display">\[\Psi_{linear-LW} = \left(1- \lambda\right) R_0 +
+\lambda I,\]</span> where <span class="math inline">\(\lambda\)</span>
+is estimated by minimizing the MSE between <span
+class="math inline">\(\Psi\)</span> and the true unknown <span
+class="math inline">\(\Psi\)</span> (similar approach to James-Stein
+shrinkage). The result <span class="math inline">\(\lambda \asymp
 \dfrac{1}{N_0}\)</span>.</p></li>
 <li><p>Ledoit and Wolf (2020) non-linear shrinkage: <span
 class="math inline">\(\Psi_{nonlinear-LW}\)</span> is obtained from
@@ -805,6 +847,43 @@ R0 = cov2cor(R0)
 plot(v, pch = 16)
 points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = &quot;red&quot;)</code></pre>
 <p><img src="figure/various-shrinkage.Rmd/unnamed-chunk-2-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-2-1">
+Past versions of unnamed-chunk-2-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/unnamed-chunk-2-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="fit-susie-with-in-sample-ld-matrix-oracle-baseline"
 class="section level2">
@@ -821,6 +900,43 @@ fit &lt;- susie_suff_stat(
 )
 susie_plot(fit, y = &quot;PIP&quot;, b = beta_true, main = &quot;In-sample LD&quot;)</code></pre>
 <p><img src="figure/various-shrinkage.Rmd/susie-insample-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-insample-1">
+Past versions of susie-insample-1.png
+</button>
+</p>
+<div id="fig-susie-insample-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/susie-insample-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="fit-susie-with-out-of-sample-ld" class="section level2">
 <h2>1.3. Fit SuSiE with out-of-sample LD</h2>
@@ -835,6 +951,43 @@ signals:</p>
 )
 susie_plot(fit_R0, y = &quot;PIP&quot;, b = beta_true, main = &quot;Out-of-sample LD mat&quot;)</code></pre>
 <p><img src="figure/various-shrinkage.Rmd/susie-outsample-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-outsample-1">
+Past versions of susie-outsample-1.png
+</button>
+</p>
+<div id="fig-susie-outsample-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/susie-outsample-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="fit-susie-love" class="section level1">
@@ -880,8 +1033,45 @@ susie_plot_alpha(
   b = beta_true,
   main = paste0(&quot;SuSiE-LovE with lambda = &quot;, lambda)
 )</code></pre>
-<p><img src="figure/various-shrinkage.Rmd/susie-love-naive-shrink-1.png" alt="" width="768" style="display: block; margin: auto;" />
-The result looks good. The spurious CS is gone.</p>
+<p><img src="figure/various-shrinkage.Rmd/susie-love-naive-shrink-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-love-naive-shrink-1">
+Past versions of susie-love-naive-shrink-1.png
+</button>
+</p>
+<div id="fig-susie-love-naive-shrink-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/susie-love-naive-shrink-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The result looks good. The spurious CS is gone.</p>
 </div>
 <div id="wen-and-stephens-ws-shrinkage" class="section level2">
 <h2>2.2. Wen and Stephens (WS) shrinkage</h2>
@@ -928,6 +1118,43 @@ susie_plot_alpha(
   main = paste0(&quot;SuSiE-LovE with WS shrinakge&quot;)
 )</code></pre>
 <p><img src="figure/various-shrinkage.Rmd/susie-love-WS-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-love-WS-1">
+Past versions of susie-love-WS-1.png
+</button>
+</p>
+<div id="fig-susie-love-WS-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/susie-love-WS-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="lw-linear-shrinkage" class="section level2">
 <h2>2.3. LW linear shrinkage</h2>
@@ -966,6 +1193,43 @@ susie_plot_alpha(
   main = paste0(&quot;SuSiE-LovE with linear LW shinkage&quot;)
 )</code></pre>
 <p><img src="figure/various-shrinkage.Rmd/susie-love-linear-LW-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-love-linear-LW-1">
+Past versions of susie-love-linear-LW-1.png
+</button>
+</p>
+<div id="fig-susie-love-linear-LW-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/susie-love-linear-LW-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="lw-non-linear-shrinkage" class="section level2">
 <h2>2.4. LW non-linear shrinkage</h2>
@@ -1025,6 +1289,43 @@ susie_plot_alpha(
   main = paste0(&quot;SuSiE-LovE with non-linear LW shrinakge&quot;)
 )</code></pre>
 <p><img src="figure/various-shrinkage.Rmd/susie-love-nonlinear-LW-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-love-nonlinear-LW-1">
+Past versions of susie-love-nonlinear-LW-1.png
+</button>
+</p>
+<div id="fig-susie-love-nonlinear-LW-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/susie-love-nonlinear-LW-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>It is a bit problematic for this shrinkage since many eigenvalues are
 still close to 0. Our theory for conservative behavior requires the
 eigenvalues of <span class="math inline">\(\Psi\)</span> to be bounded
@@ -1278,6 +1579,43 @@ susie_plot_alpha(
   main = paste0(&quot;SuSiE-LovE with non-linear LW shrinakge&quot;)
 )</code></pre>
 <p><img src="figure/various-shrinkage.Rmd/susie-love-nonlinear-LW-modify-little-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-love-nonlinear-LW-modify-little-1">
+Past versions of susie-love-nonlinear-LW-modify-little-1.png
+</button>
+</p>
+<div id="fig-susie-love-nonlinear-LW-modify-little-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/4deaf8e6d2da88a45caacef24296afdded89b5fd/docs/figure/various-shrinkage.Rmd/susie-love-nonlinear-LW-modify-little-1.png" target="_blank">4deaf8e</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="conclusion" class="section level1">
