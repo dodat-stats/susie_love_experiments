@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="dodat-stats" />
+
+<meta name="date" content="2026-06-04" />
+
+<title>Silly R0 leads to very small nu0 and conservative estimate?</title>
+
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">susie_love_experiments</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dodat-stats/susie_love_experiments">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Silly R0 leads to very small nu0 and
+conservative estimate?</h1>
+<h4 class="author">dodat-stats</h4>
+<h4 class="date">2026-06-04</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-06-05
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>susie_love_experiments/</code>
+<span class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.2). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260419code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260419)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260419code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260419)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree2449e633974cbf2dcf4a93f756adafa130596ef4targetblank2449e63a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/2449e633974cbf2dcf4a93f756adafa130596ef4" target="_blank">2449e63</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree2449e633974cbf2dcf4a93f756adafa130596ef4targetblank2449e63a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/2449e633974cbf2dcf4a93f756adafa130596ef4" target="_blank">2449e63</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  analysis/test.Rmd
+
+Unstaged changes:
+    Modified:   analysis/divergence_increase-nu_decrease.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/high-mismatch-tiny-nu0.Rmd</code>) and HTML
+(<code>docs/high-mismatch-tiny-nu0.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/2449e633974cbf2dcf4a93f756adafa130596ef4/analysis/high-mismatch-tiny-nu0.Rmd" target="_blank">2449e63</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-05
+</td>
+<td>
+Add new analyses
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="aim" class="section level1">
+<h1>1. Aim</h1>
+<p>We investigate to see if using a <strong>very mismatched</strong> R0
+leads to small <span class="math inline">\(\nu_0\)</span>.</p>
+<p>SPOIL: It actually does not lead to a small <span
+class="math inline">\(\nu_0\)</span>. Ironically, the regularization
+strength <span class="math inline">\(\lambda\)</span> matters so much
+more than the discrepancy between <span class="math inline">\(v\)</span>
+and out-of-sample <span class="math inline">\(R\)</span> in deciding the
+optimal <span class="math inline">\(\nu_0\)</span>… We have had
+automatic way to decide <span class="math inline">\(\lambda\)</span>,
+but it only depends on <span class="math inline">\(N_0\)</span>.
+Therefore in this case, where <span class="math inline">\(R0\)</span> is
+way different than <span class="math inline">\(R\)</span>, but because
+<span class="math inline">\(N_0\)</span> is the same, <span
+class="math inline">\(\lambda\)</span> is the same and leads to quite
+large <span class="math inline">\(\nu_0\)</span>, which leads to more
+borrowing of information than we like, and leads to more false
+positive.</p>
+<p>From a bright side, the current implementation is good when <span
+class="math inline">\(R_0\)</span> is not too mismatched though
+(mismatch but not super far away from <span
+class="math inline">\(R\)</span> (like divergence from a few hundred
+years apart), like in the previous workflow file).</p>
+<p>Anyway, let’s see it in action. We generate R from Asian population
+and R0 from European population.</p>
+</div>
+<div id="an-example" class="section level1">
+<h1>2. An example</h1>
+<div id="generate-silly-r0" class="section level2">
+<h2>2.1. Generate silly R0</h2>
+<pre class="r"><code>sim_asn_eur &lt;- function(chrom, start, end, n_gwas, n_ref, J, h2, seed) {
+
+  stdpopsim &lt;- reticulate::import(&quot;stdpopsim&quot;)
+  msprime   &lt;- reticulate::import(&quot;msprime&quot;)
+
+  set.seed(seed)
+
+  # 1. Get Realistic Genetic Map from stdpopsim
+  species &lt;- stdpopsim$get_species(&quot;HomSap&quot;)
+  contig  &lt;- species$get_contig(chrom, left = as.integer(start), right = as.integer(end))
+
+  # 2. Get OutOfAfrica_3G09 Demography (YRI, CEU, CHB)
+  demo_model &lt;- species$get_demographic_model(&quot;OutOfAfrica_3G09&quot;)
+  demography &lt;- demo_model$model
+
+  # 3. Run Simulation
+  ts &lt;- msprime$sim_ancestry(
+    samples = reticulate::dict(CHB = as.integer(n_gwas), CEU = as.integer(n_ref)),
+    demography = demography,
+    recombination_rate = contig$recombination_map,
+    random_seed = as.integer(seed)
+  )
+
+  ts &lt;- msprime$sim_mutations(ts, rate = 1.29e-8, random_seed = as.integer(seed))
+
+  # 4. Extract Genotypes
+  chb_id &lt;- NULL
+  ceu_id &lt;- NULL
+  for (p in reticulate::iterate(ts$populations())) {
+    if (!is.null(p$metadata) &amp;&amp; p$metadata$name == &quot;CHB&quot;) chb_id &lt;- p$id
+    if (!is.null(p$metadata) &amp;&amp; p$metadata$name == &quot;CEU&quot;) ceu_id &lt;- p$id
+  }
+
+  samples_gwas &lt;- ts$samples(population = as.integer(chb_id))
+  samples_ref  &lt;- ts$samples(population = as.integer(ceu_id))
+
+  G_all &lt;- ts$genotype_matrix()
+
+  to_diploid &lt;- function(hap_idx) {
+    idx &lt;- as.integer(hap_idx) + 1
+    g_hap &lt;- G_all[, idx, drop = FALSE]
+    g_dip &lt;- g_hap[, seq(1, ncol(g_hap), by = 2)] + g_hap[, seq(2, ncol(g_hap), by = 2)]
+    return(t(g_dip))
+  }
+
+  G_gwas &lt;- to_diploid(samples_gwas)
+  G_ref  &lt;- to_diploid(samples_ref)
+
+  # 5. Filter for Common Variants (MAF &gt; 5%)
+  maf_gwas &lt;- colMeans(G_gwas) / 2
+  maf_ref  &lt;- colMeans(G_ref) / 2
+
+  common_mask &lt;- (maf_gwas &gt; 0.05) &amp; (maf_gwas &lt; 0.95) &amp; (maf_ref &gt; 0.05) &amp; (maf_ref &lt; 0.95)
+  n_common &lt;- sum(common_mask)
+  if (n_common &lt; J) stop(paste0(&quot;Only &quot;, n_common, &quot; common variants found but J = &quot;, J, &quot;. Try a larger region.&quot;))
+  G_gwas &lt;- G_gwas[, common_mask, drop = FALSE]
+  G_ref  &lt;- G_ref[, common_mask, drop = FALSE]
+
+  J_all &lt;- min(ncol(G_gwas), J)
+  max_start &lt;- J_all - J
+  start_idx &lt;- if (max_start &gt; 0) sample(0:max_start, 1) else 0
+  cols_to_keep &lt;- (start_idx + 1):(start_idx + J)
+  G  &lt;- G_gwas[, cols_to_keep, drop = FALSE]
+  G0 &lt;- G_ref[, cols_to_keep, drop = FALSE]
+
+  # 6. Generate summary stats
+  X &lt;- sweep(G, 2, colMeans(G), &quot;-&quot;)
+  N &lt;- nrow(X)
+
+  G0_centered &lt;- sweep(G0, 2, colMeans(G0), &quot;-&quot;)
+
+  R0 &lt;- stats::cov(G0_centered)
+  R0[is.na(R0)] &lt;- 0
+
+  R &lt;- stats::cov(X)
+  R[is.na(R)] &lt;- 0
+
+  num_causal &lt;- 2
+  first_causal_SNP &lt;- sample(1:J, 1)
+  second_causal_SNP &lt;- which.min(R[first_causal_SNP, ]^2)
+  causal_SNPs_loc &lt;- c(first_causal_SNP, second_causal_SNP)
+
+  beta_true &lt;- rep(0, J)
+  beta_true[causal_SNPs_loc] &lt;- stats::runif(num_causal) + 0.01
+
+  var_expl &lt;- sum((X %*% beta_true)^2 / N)
+  scale &lt;- h2 / var_expl
+  beta_true &lt;- beta_true * sqrt(scale)
+
+  y &lt;- (X %*% beta_true) + sqrt(1 - h2) * stats::rnorm(N)
+  y_std &lt;- sqrt(sum((y - mean(y))^2) / N)
+  y &lt;- (y - mean(y)) / y_std
+
+  v &lt;- (t(X) %*% y) / N
+
+  return(list(
+    v = as.vector(v),
+    R = R,
+    R0 = R0,
+    beta_true = beta_true,
+    causal_SNPs_loc = causal_SNPs_loc
+  ))
+}
+</code></pre>
+<pre class="r"><code>seed = 2
+chrom &lt;- &quot;chr22&quot;
+start &lt;- 20e6
+end   &lt;- 21e6
+N     &lt;- 25000L
+N0 = 500L
+J     &lt;- 500L
+h2    &lt;- 0.01
+
+res &lt;- sim_asn_eur(chrom, start, end,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               &lt;- res$v
+R               &lt;- res$R
+R0              &lt;- res$R0
+beta_true       &lt;- res$beta_true
+causal_SNPs_loc &lt;- res$causal_SNPs_loc
+
+## standardized
+d = 1 / sqrt(diag(R))
+v = d * v
+R = cov2cor(R)
+R0 = cov2cor(R0)
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = &quot;red&quot;)</code></pre>
+<p><img src="figure/high-mismatch-tiny-nu0.Rmd/unnamed-chunk-3-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="visualize-two-correlation-matrices" class="section level2">
+<h2>2.2 Visualize two correlation matrices</h2>
+<p>Sorry the color scheme is a bit hard to see but if we squeeze our
+eyes a bit then we can see that the two matrices are totally
+different.</p>
+<pre class="r"><code>par(mfrow = c(1, 2))
+
+image(R0[1:100, 1:100], main = &quot;Out-of-sample (EUR)&quot;, col = heat.colors(15))
+image(R[1:100, 1:100], main = &quot;In-sample corr (CHB)&quot;, col = heat.colors(15))</code></pre>
+<p><img src="figure/high-mismatch-tiny-nu0.Rmd/unnamed-chunk-4-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>par(mfrow = c(1, 1))
+</code></pre>
+</div>
+<div id="fit-susie-with-in-sample-r" class="section level2">
+<h2>2.3 Fit susie with in-sample R</h2>
+<pre class="r"><code>fit_R &lt;- susie_suff_stat(
+  XtX = N * R,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5
+)
+susie_plot(fit_R, y = &quot;PIP&quot;, b = beta_true, main = &quot;In-sample cov mat&quot;)</code></pre>
+<p><img src="figure/high-mismatch-tiny-nu0.Rmd/unnamed-chunk-5-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fit-susie-with-silly-r" class="section level2">
+<h2>2.4 Fit susie with silly R</h2>
+<pre class="r"><code>fit_R_silly &lt;- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5,
+  residual_variance = 1
+)
+susie_plot(fit_R_silly, y = &quot;PIP&quot;, b = beta_true, main = &quot;Silly corr mat&quot;)</code></pre>
+<p><img src="figure/high-mismatch-tiny-nu0.Rmd/unnamed-chunk-6-1.png" alt="" width="768" style="display: block; margin: auto;" />
+Slightly regularized</p>
+<pre class="r"><code>R_tilde = (1 - 1 / N0) * R0 + 1 / N0 * diag(J)
+fit_R0 &lt;- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5
+)
+susie_plot(fit_R_silly, y = &quot;PIP&quot;, b = beta_true, main = &quot;Silly corr mat&quot;)</code></pre>
+<p><img src="figure/high-mismatch-tiny-nu0.Rmd/unnamed-chunk-7-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>
+print(summary(fit_R0)$cs)
+#&gt;   cs cs_log10bf cs_avg_r2 cs_min_r2    variable
+#&gt; 1  1  158.53519 1.0000000 1.0000000         341
+#&gt; 2  3   58.96533 1.0000000 1.0000000         406
+#&gt; 3  4 2874.95762 1.0000000 1.0000000         352
+#&gt; 4  5 2953.34492 1.0000000 1.0000000         358
+#&gt; 5  2   79.08453 0.9949025 0.9923586 372,373,374</code></pre>
+</div>
+<div id="fit-susielove-with-silly-r" class="section level2">
+<h2>2.5 Fit susielove with silly R</h2>
+<pre class="r"><code>R_out  &lt;- compute_wen_stephens(R_0 = R_tilde, N_ref = N0)
+# R_out = diag(J)
+# R_out = R_tilde
+k      &lt;- min(N0, J)
+diag_R = diag(R)
+
+love_res_WS &lt;- susie_love_lambda(v, R_out, diag_R,
+                              lambda = 0,
+                              N, L = 5,
+                              k,
+                              nu_delta_init = 500,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+#&gt; Iter 1 | Loss: -0.6490 | nu_q: 574.6 | nu_delta: 571.0
+#&gt; Iter 2 | Loss: -0.8621 | nu_q: 554.8 | nu_delta: 549.5
+#&gt; Iter 3 | Loss: -0.9281 | nu_q: 518.3 | nu_delta: 512.3
+#&gt; Iter 4 | Loss: -0.9647 | nu_q: 495.3 | nu_delta: 488.9
+#&gt; Iter 5 | Loss: -0.9836 | nu_q: 479.3 | nu_delta: 472.5
+#&gt; Iter 6 | Loss: -0.9942 | nu_q: 470.0 | nu_delta: 462.9
+#&gt; Iter 7 | Loss: -1.0014 | nu_q: 460.5 | nu_delta: 453.2
+#&gt; Iter 8 | Loss: -1.0060 | nu_q: 455.7 | nu_delta: 448.1
+#&gt; Iter 9 | Loss: -1.0089 | nu_q: 451.4 | nu_delta: 443.7
+#&gt; Iter 10 | Loss: -1.0111 | nu_q: 448.5 | nu_delta: 440.5
+#&gt; Iter 11 | Loss: -1.0126 | nu_q: 446.5 | nu_delta: 438.4
+#&gt; Iter 12 | Loss: -1.0138 | nu_q: 444.7 | nu_delta: 436.5
+#&gt; Iter 13 | Loss: -1.0147 | nu_q: 443.6 | nu_delta: 435.1
+#&gt; Iter 14 | Loss: -1.0154 | nu_q: 442.6 | nu_delta: 434.1
+#&gt; Iter 15 | Loss: -1.0160 | nu_q: 441.7 | nu_delta: 433.1
+#&gt; Iter 16 | Loss: -1.0165 | nu_q: 441.4 | nu_delta: 432.7
+#&gt; Iter 17 | Loss: -1.0168 | nu_q: 441.0 | nu_delta: 432.3
+#&gt; Iter 18 | Loss: -1.0171 | nu_q: 440.5 | nu_delta: 431.6
+#&gt; Iter 19 | Loss: -1.0173 | nu_q: 440.0 | nu_delta: 431.1
+#&gt; Iter 20 | Loss: -1.0173 | nu_q: 440.0 | nu_delta: 431.1
+#&gt; Converged at iteration 20
+
+b_res &lt;- love_res_WS$b_res
+R_q   &lt;- love_res_WS$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0(&quot;SuSiE-LovE with WS shrinkage&quot;)
+)</code></pre>
+<p><img src="figure/high-mismatch-tiny-nu0.Rmd/unnamed-chunk-8-1.png" alt="" width="672" style="display: block; margin: auto;" />
+Let’s try again with fixed and small <span
+class="math inline">\(\nu_0\)</span>: It indeed leads to conservative
+behavior. But how to produce this small <span
+class="math inline">\(\nu_0\)</span>???</p>
+<pre class="r"><code>nu_q = 10
+nu_0 = 1
+lambda = 1 / N0
+susie_love_small_nu &lt;- susie_love_fix_2params(v, R_out, diag_R,
+                                   lambda, nu_q, nu_0,
+                                   N, L = 5,
+                                   k,
+                                   z_init = NULL,
+                                   step_susie = 20,
+                                   step_R = 30,
+                                   step_nu = 30,
+                                   max_iter = 100,
+                                   max_iter_init = 100,
+                                   tol = 1e-4)
+#&gt; Iter 1 | Loss: 87.8778 | nu_q: 11.9 | nu_0: 1.0
+#&gt; Iter 2 | Loss: 60.7674 | nu_q: 12.1 | nu_0: 1.0
+#&gt; Iter 3 | Loss: 53.5698 | nu_q: 11.8 | nu_0: 1.0
+#&gt; Iter 4 | Loss: 47.5547 | nu_q: 11.4 | nu_0: 1.0
+#&gt; Iter 5 | Loss: 44.3025 | nu_q: 11.3 | nu_0: 1.0
+#&gt; Iter 6 | Loss: 42.2585 | nu_q: 11.0 | nu_0: 1.0
+#&gt; Iter 7 | Loss: 40.5368 | nu_q: 10.9 | nu_0: 1.0
+#&gt; Iter 8 | Loss: 39.4614 | nu_q: 10.6 | nu_0: 1.0
+#&gt; Iter 9 | Loss: 38.4577 | nu_q: 10.6 | nu_0: 1.0
+#&gt; Iter 10 | Loss: 37.7062 | nu_q: 10.3 | nu_0: 1.0
+#&gt; Iter 11 | Loss: 37.1495 | nu_q: 10.3 | nu_0: 1.0
+#&gt; Iter 12 | Loss: 36.6510 | nu_q: 10.1 | nu_0: 1.0
+#&gt; Iter 13 | Loss: 36.1987 | nu_q: 10.0 | nu_0: 1.0
+#&gt; Iter 14 | Loss: 35.7317 | nu_q: 9.8 | nu_0: 1.0
+#&gt; Iter 15 | Loss: 35.2837 | nu_q: 9.7 | nu_0: 1.0
+#&gt; Iter 16 | Loss: 34.9332 | nu_q: 9.6 | nu_0: 1.0
+#&gt; Iter 17 | Loss: 34.6317 | nu_q: 9.5 | nu_0: 1.0
+#&gt; Iter 18 | Loss: 34.3636 | nu_q: 9.3 | nu_0: 1.0
+#&gt; Iter 19 | Loss: 34.1391 | nu_q: 9.3 | nu_0: 1.0
+#&gt; Iter 20 | Loss: 33.9409 | nu_q: 9.1 | nu_0: 1.0
+#&gt; Iter 21 | Loss: 33.7723 | nu_q: 9.1 | nu_0: 1.0
+#&gt; Iter 22 | Loss: 33.6015 | nu_q: 9.0 | nu_0: 1.0
+#&gt; Iter 23 | Loss: 33.4025 | nu_q: 8.9 | nu_0: 1.0
+#&gt; Iter 24 | Loss: 33.2365 | nu_q: 8.8 | nu_0: 1.0
+#&gt; Iter 25 | Loss: 33.0901 | nu_q: 8.8 | nu_0: 1.0
+#&gt; Iter 26 | Loss: 32.9636 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 27 | Loss: 32.8316 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 28 | Loss: 32.7102 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 29 | Loss: 32.5853 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 30 | Loss: 32.4693 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 31 | Loss: 32.3580 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 32 | Loss: 32.2321 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 33 | Loss: 32.1206 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 34 | Loss: 32.0027 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 35 | Loss: 31.9107 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 36 | Loss: 31.8219 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 37 | Loss: 31.7295 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 38 | Loss: 31.6428 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 39 | Loss: 31.5674 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 40 | Loss: 31.4836 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 41 | Loss: 31.3954 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 42 | Loss: 31.2891 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 43 | Loss: 31.1921 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 44 | Loss: 31.1056 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 45 | Loss: 31.0004 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 46 | Loss: 30.9300 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 47 | Loss: 30.8610 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 48 | Loss: 30.7903 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 49 | Loss: 30.7188 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 50 | Loss: 30.6472 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 51 | Loss: 30.5683 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 52 | Loss: 30.4726 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 53 | Loss: 30.3752 | nu_q: 8.3 | nu_0: 1.0
+#&gt; Iter 54 | Loss: 30.2609 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 55 | Loss: 30.1616 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 56 | Loss: 30.1040 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 57 | Loss: 30.0361 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 58 | Loss: 29.9387 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 59 | Loss: 29.8549 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 60 | Loss: 29.8071 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 61 | Loss: 29.7475 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 62 | Loss: 29.6881 | nu_q: 8.4 | nu_0: 1.0
+#&gt; Iter 63 | Loss: 29.6324 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 64 | Loss: 29.5757 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 65 | Loss: 29.5077 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 66 | Loss: 29.4286 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 67 | Loss: 29.3676 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 68 | Loss: 29.3062 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 69 | Loss: 29.2497 | nu_q: 8.5 | nu_0: 1.0
+#&gt; Iter 70 | Loss: 29.1780 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 71 | Loss: 29.1184 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 72 | Loss: 29.0731 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 73 | Loss: 29.0244 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 74 | Loss: 28.9785 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 75 | Loss: 28.9352 | nu_q: 8.6 | nu_0: 1.0
+#&gt; Iter 76 | Loss: 28.8511 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 77 | Loss: 28.7840 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 78 | Loss: 28.7319 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 79 | Loss: 28.6774 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 80 | Loss: 28.6296 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 81 | Loss: 28.5849 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 82 | Loss: 28.5439 | nu_q: 8.7 | nu_0: 1.0
+#&gt; Iter 83 | Loss: 28.5024 | nu_q: 8.8 | nu_0: 1.0
+#&gt; Iter 84 | Loss: 28.4616 | nu_q: 8.8 | nu_0: 1.0
+#&gt; Iter 85 | Loss: 28.4214 | nu_q: 8.8 | nu_0: 1.0
+#&gt; Iter 86 | Loss: 28.2900 | nu_q: 8.8 | nu_0: 1.0
+#&gt; Iter 87 | Loss: 28.1835 | nu_q: 8.8 | nu_0: 1.0
+#&gt; Iter 88 | Loss: 28.0983 | nu_q: 8.9 | nu_0: 1.0
+#&gt; Iter 89 | Loss: 28.0319 | nu_q: 8.9 | nu_0: 1.0
+#&gt; Iter 90 | Loss: 27.9752 | nu_q: 8.9 | nu_0: 1.0
+#&gt; Iter 91 | Loss: 27.9083 | nu_q: 8.9 | nu_0: 1.0
+#&gt; Iter 92 | Loss: 27.8608 | nu_q: 9.0 | nu_0: 1.0
+#&gt; Iter 93 | Loss: 27.7930 | nu_q: 9.0 | nu_0: 1.0
+#&gt; Iter 94 | Loss: 27.7367 | nu_q: 9.0 | nu_0: 1.0
+#&gt; Iter 95 | Loss: 27.6843 | nu_q: 9.1 | nu_0: 1.0
+#&gt; Iter 96 | Loss: 27.6350 | nu_q: 9.1 | nu_0: 1.0
+#&gt; Iter 97 | Loss: 27.5938 | nu_q: 9.1 | nu_0: 1.0
+#&gt; Iter 98 | Loss: 27.5373 | nu_q: 9.2 | nu_0: 1.0
+#&gt; Iter 99 | Loss: 27.4757 | nu_q: 9.2 | nu_0: 1.0
+#&gt; Iter 100 | Loss: 27.4226 | nu_q: 9.2 | nu_0: 1.0
+
+b_res &lt;- susie_love_small_nu$b_res
+R_q   &lt;- susie_love_small_nu$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0(&quot;SuSiE-LovE with small nu0 = &quot;, nu_0)
+)</code></pre>
+<p><img src="figure/high-mismatch-tiny-nu0.Rmd/unnamed-chunk-9-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()
+#&gt; R version 4.5.2 (2025-10-31)
+#&gt; Platform: aarch64-apple-darwin20
+#&gt; Running under: macOS Tahoe 26.5
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; time zone: America/New_York
+#&gt; tzcode source: internal
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] susieR_0.14.2   susielove_0.1.0 workflowr_1.7.2
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] sass_0.4.10        generics_0.1.4     stringi_1.8.7      lattice_0.22-7    
+#&gt;  [5] digest_0.6.39      magrittr_2.0.4     evaluate_1.0.5     grid_4.5.2        
+#&gt;  [9] RColorBrewer_1.1-3 fastmap_1.2.0      plyr_1.8.9         rprojroot_2.1.1   
+#&gt; [13] jsonlite_2.0.0     Matrix_1.7-4       processx_3.8.6     whisker_0.4.1     
+#&gt; [17] reshape_0.8.10     mixsqp_0.3-54      ps_1.9.1           promises_1.5.0    
+#&gt; [21] httr_1.4.8         scales_1.4.0       jquerylib_0.1.4    cli_3.6.6         
+#&gt; [25] rlang_1.2.0        crayon_1.5.3       withr_3.0.2        cachem_1.1.0      
+#&gt; [29] yaml_2.3.12        otel_0.2.0         tools_4.5.2        dplyr_1.2.0       
+#&gt; [33] ggplot2_4.0.2      httpuv_1.6.17      reticulate_1.46.0  png_0.1-9         
+#&gt; [37] vctrs_0.7.1        R6_2.6.1           matrixStats_1.5.0  lifecycle_1.0.5   
+#&gt; [41] git2r_0.36.2       stringr_1.6.0      fs_2.1.0           irlba_2.3.7       
+#&gt; [45] pkgconfig_2.0.3    callr_3.7.6        pillar_1.11.1      bslib_0.10.0      
+#&gt; [49] later_1.4.8        gtable_0.3.6       glue_1.8.0         Rcpp_1.1.1        
+#&gt; [53] xfun_0.56          tibble_3.3.1       tidyselect_1.2.1   rstudioapi_0.18.0 
+#&gt; [57] knitr_1.51         farver_2.1.2       htmltools_0.5.9    rmarkdown_2.30    
+#&gt; [61] compiler_4.5.2     getPass_0.2-4      S7_0.2.1</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
