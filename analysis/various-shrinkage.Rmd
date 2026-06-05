@@ -22,11 +22,15 @@ Let's suppose that we want to go with the `susie_love_lambda` implementation of 
 $$R | \nu_{\delta} \sim \mathcal{IW}(\nu_{\delta} \Psi_0, \nu_{\delta} + J + 1), $$
 where $\Psi_0$ is somewhat shrinkage estimate obtained from the out-of-sample $R_0$. We can think of $\Psi_0$ as an estimate for the population out-of-sample covariance matrix. For the uniform presentation, we consider CORRELATION MATRIX instead of covariance here (so that the diagonal is constrained to be 1). Consider the following strategies:
 
-1. Naive shrinkage: $\Psi_{naive} = \left(1-\dfrac{1}{N_0}) R_0 + \dfrac{1}{N_0} I$
+1. Naive shrinkage: $$\Psi_{naive} = \left(1-\dfrac{1}{N_0}) R_0\right) + \dfrac{1}{N_0} I$$
 
-2. Wen and Stephens (2010) shrinkage: $\Psi_{WS} = \left(1- \lambda)^2 R_0 + (1 - (1-\lambda)^2) I$, where $\lambda = \dfrac{\theta}{\theta + 2 N_0}$ and $\theta$ is the Watterson's estimator $\theta = \left(\sum_{i=1}^{2N_0 - 1} \dfrac{1}{i}\right)^{-1} \approx (\log(2N_0) + 0.57)^{-1} $.
+2. Wen and Stephens (2010) shrinkage: 
+$$\Psi_{WS} = \left(1- \lambda\right)^2 R_0 + (1 - (1-\lambda)^2) I,$$ 
+where $\lambda = \dfrac{\theta}{\theta + 2 N_0}$ and $\theta$ is the Watterson's estimator $\theta = \left(\sum_{i=1}^{2N_0 - 1} \dfrac{1}{i}\right)^{-1} \approx (\log(2N_0) + 0.57)^{-1} $.
 
-3. Ledoit and Wolf (2004) linear shrinkage: $\Psi_{linear-LW} = \left(1- \lambda) R_0 + \lambda I$, where $\lambda \asymp \dfrac{1}{N_0}$. 
+3. Ledoit and Wolf (2004) linear shrinkage: 
+$$\Psi_{linear-LW} = \left(1- \lambda\right) R_0 + \lambda I,$$ 
+where $\lambda$ is estimated by minimizing the MSE between $\Psi$ and the true unknown $\Psi$ (similar approach to James-Stein shrinkage). The result $\lambda \asymp \dfrac{1}{N_0}$.
 
 4. Ledoit and Wolf (2020) non-linear shrinkage: $\Psi_{nonlinear-LW}$ is obtained from non-linear shrinkage of the sample eigenvalues. See their AoS 2020 paper, which use the random matrix theory to derive the shrinakge rule. This is considered state-of-the-art method for shrinkage in their review paper later.
 
