@@ -276,7 +276,7 @@ for (seed in c(1:num_reps)){
 ```{r results 1, fig.width=8, fig.height=6}
 library(ggplot2)
 df <- data.frame(
-  x = c(1:seed) * 10,
+  x = c(1:seed) * 25,
   y = est_nu_0[, 1]
 )
 
@@ -293,7 +293,7 @@ ggplot(df, aes(x = x, y = y)) +
 
 ```{r results 2, fig.width=8, fig.height=6}
 df <- data.frame(
-  x = c(1:seed) * 10,
+  x = c(1:seed) * 25,
   y = est_nu_0[, 2]
 )
 
@@ -309,7 +309,7 @@ ggplot(df, aes(x = x, y = y)) +
 
 ```{r results 3, fig.width=8, fig.height=6}
 df <- data.frame(
-  x = c(1:seed) * 10,
+  x = c(1:seed) * 25,
   y = est_nu_0[, 3]
 )
 
@@ -336,7 +336,7 @@ colnames(coverages) <- c("In-sample", "Out-of-sample", "Naive shrinkage", "WS", 
 
 # Build a data frame and pivot to long format
 df <- data.frame(
-  x = c(1:seed) * 10,
+  x = c(1:seed) * 25,
   coverages
 ) %>%
   pivot_longer(
@@ -359,7 +359,7 @@ ggplot(df, aes(x = x, y = y, color = group)) +
 Because I have not ran replications, it is a bit hard to see. But it looks like WS wins overall (by a small margin).
 
 ```{r compare mean coverage}
-colSums(coverages) / 25
+colSums(coverages) / num_reps
 ```
 
 Finally we can visualize the distance from out-of-sample $R_0$ and other estimated $R_q$ to the in-sample $R$. $R_q$ estimated from all methods are better than $R_0$.
@@ -370,7 +370,7 @@ colnames(dist_R) <- c("Out-of-sample", "Naive shrinkage", "WS", "LW")
 
 # Build a data frame and pivot to long format
 df <- data.frame(
-  x = c(1:seed) * 10,
+  x = c(1:seed) * 25,
   dist_R
 ) %>%
   pivot_longer(
