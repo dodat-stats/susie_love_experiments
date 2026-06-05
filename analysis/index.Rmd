@@ -24,4 +24,4 @@ editor_options:
 
 + [Increased mismatch leads to decreased nu_0](divergence_increase-nu_decrease.html)
 
-
++ [Too mismatch R0?](high-mismatch-tiny-nu0.html)

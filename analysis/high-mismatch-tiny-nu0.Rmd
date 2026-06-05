@@ -1,0 +1,350 @@
+---
+title: "Silly R0 leads to very small nu0 and conservative estimate?"
+author: "dodat-stats"
+date: "2026-06-04"
+output:
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# 1. Aim
+
+We investigate to see if using a **very mismatched** R0 leads to small $\nu_0$.
+
+SPOIL: It actually does not lead to a small $\nu_0$. Ironically, the regularization strength $\lambda$ matters so much more than the discrepancy between $v$ and out-of-sample $R$ in deciding the optimal $\nu_0$... We have had automatic way to decide $\lambda$, but it only depends on $N_0$. Therefore in this case, where $R0$ is way different than $R$, but because $N_0$ is the same, $\lambda$ is the same and leads to quite large $\nu_0$, which leads to more borrowing of information than we like, and leads to more false positive. 
+
+From a bright side, the current implementation is good when $R_0$ is not too mismatched though (mismatch but not super far away from $R$ (like divergence from a few hundred years apart), like in the previous workflow file). 
+
+Anyway, let's see it in action. We generate R from Asian population and R0 from European population.
+
+```{r, include=FALSE}
+library(susielove)
+library(susieR)
+
+compute_wen_stephens <- function(R_0, N_ref) {
+  # Number of haplotypes (diploid population)
+  d <- 2 * N_ref
+  
+  # Calculate Watterson's estimator constant (Harmonic sum)
+  harmonic_sum <- sum(1 / (1:(d - 1)))
+  theta        <- 1 / harmonic_sum
+  
+  # Calculate the exact mutation shrinkage parameter lambda
+  lambda <- theta / (theta + 2 * N_ref)
+  
+  # Apply local uniform shrinkage: Psi = (1-lambda)^2 * R_0 + (1 - (1-lambda)^2) * I
+  p <- ncol(R_0)
+  R_ws <- (1 - lambda)^2 * R_0 + (1 - (1 - lambda)^2) * diag(p)
+  
+  return(R_ws)
+}
+
+
+compute_lw_linear_from_R0 <- function(R_0, N_ref) {
+  p <- ncol(R_0)
+  
+  # 1. Sum of the squared off-diagonal elements of R_0
+  # (This is the Frobenius norm of the off-diagonals)
+  sum_sq_off_diag <- sum(R_0^2) - p
+  
+  # 2. Estimate the sampling variance (noise) parameter under normality
+  # In correlation space, the sum of variances of r_ij is approximated by:
+  beta_sq <- (1 / N_ref) * (p + sum_sq_off_diag)
+  
+  # 3. Calculate the distance to the identity target matrix
+  # Since diag(R_0) is all 1s and diag(I) is all 1s, the distance is just 
+  # the sum of the squared off-diagonal elements.
+  delta_sq <- sum_sq_off_diag
+  
+  # 4. Compute the optimal shrinkage intensity alpha
+  # Guard against division by zero if R_0 is already the identity matrix
+  if (delta_sq == 0) {
+    alpha <- 1
+  } else {
+    alpha <- min(1, beta_sq / delta_sq)
+  }
+  
+  # 5. Construct the shrunk matrix: alpha * I + (1 - alpha) * R_0
+  R_lw_linear <- (1 - alpha) * R_0 + alpha * diag(p)
+  
+  # Print the learned alpha for transparency
+  cat("Ledoit-Wolf Linear Alpha estimated from R_0:", alpha, "\n")
+  
+  return(R_lw_linear)
+}
+
+
+```
+
+
+# 2. An example
+
+## 2.1. Generate silly R0
+
+```{r}
+sim_asn_eur <- function(chrom, start, end, n_gwas, n_ref, J, h2, seed) {
+
+  stdpopsim <- reticulate::import("stdpopsim")
+  msprime   <- reticulate::import("msprime")
+
+  set.seed(seed)
+
+  # 1. Get Realistic Genetic Map from stdpopsim
+  species <- stdpopsim$get_species("HomSap")
+  contig  <- species$get_contig(chrom, left = as.integer(start), right = as.integer(end))
+
+  # 2. Get OutOfAfrica_3G09 Demography (YRI, CEU, CHB)
+  demo_model <- species$get_demographic_model("OutOfAfrica_3G09")
+  demography <- demo_model$model
+
+  # 3. Run Simulation
+  ts <- msprime$sim_ancestry(
+    samples = reticulate::dict(CHB = as.integer(n_gwas), CEU = as.integer(n_ref)),
+    demography = demography,
+    recombination_rate = contig$recombination_map,
+    random_seed = as.integer(seed)
+  )
+
+  ts <- msprime$sim_mutations(ts, rate = 1.29e-8, random_seed = as.integer(seed))
+
+  # 4. Extract Genotypes
+  chb_id <- NULL
+  ceu_id <- NULL
+  for (p in reticulate::iterate(ts$populations())) {
+    if (!is.null(p$metadata) && p$metadata$name == "CHB") chb_id <- p$id
+    if (!is.null(p$metadata) && p$metadata$name == "CEU") ceu_id <- p$id
+  }
+
+  samples_gwas <- ts$samples(population = as.integer(chb_id))
+  samples_ref  <- ts$samples(population = as.integer(ceu_id))
+
+  G_all <- ts$genotype_matrix()
+
+  to_diploid <- function(hap_idx) {
+    idx <- as.integer(hap_idx) + 1
+    g_hap <- G_all[, idx, drop = FALSE]
+    g_dip <- g_hap[, seq(1, ncol(g_hap), by = 2)] + g_hap[, seq(2, ncol(g_hap), by = 2)]
+    return(t(g_dip))
+  }
+
+  G_gwas <- to_diploid(samples_gwas)
+  G_ref  <- to_diploid(samples_ref)
+
+  # 5. Filter for Common Variants (MAF > 5%)
+  maf_gwas <- colMeans(G_gwas) / 2
+  maf_ref  <- colMeans(G_ref) / 2
+
+  common_mask <- (maf_gwas > 0.05) & (maf_gwas < 0.95) & (maf_ref > 0.05) & (maf_ref < 0.95)
+  n_common <- sum(common_mask)
+  if (n_common < J) stop(paste0("Only ", n_common, " common variants found but J = ", J, ". Try a larger region."))
+  G_gwas <- G_gwas[, common_mask, drop = FALSE]
+  G_ref  <- G_ref[, common_mask, drop = FALSE]
+
+  J_all <- min(ncol(G_gwas), J)
+  max_start <- J_all - J
+  start_idx <- if (max_start > 0) sample(0:max_start, 1) else 0
+  cols_to_keep <- (start_idx + 1):(start_idx + J)
+  G  <- G_gwas[, cols_to_keep, drop = FALSE]
+  G0 <- G_ref[, cols_to_keep, drop = FALSE]
+
+  # 6. Generate summary stats
+  X <- sweep(G, 2, colMeans(G), "-")
+  N <- nrow(X)
+
+  G0_centered <- sweep(G0, 2, colMeans(G0), "-")
+
+  R0 <- stats::cov(G0_centered)
+  R0[is.na(R0)] <- 0
+
+  R <- stats::cov(X)
+  R[is.na(R)] <- 0
+
+  num_causal <- 2
+  first_causal_SNP <- sample(1:J, 1)
+  second_causal_SNP <- which.min(R[first_causal_SNP, ]^2)
+  causal_SNPs_loc <- c(first_causal_SNP, second_causal_SNP)
+
+  beta_true <- rep(0, J)
+  beta_true[causal_SNPs_loc] <- stats::runif(num_causal) + 0.01
+
+  var_expl <- sum((X %*% beta_true)^2 / N)
+  scale <- h2 / var_expl
+  beta_true <- beta_true * sqrt(scale)
+
+  y <- (X %*% beta_true) + sqrt(1 - h2) * stats::rnorm(N)
+  y_std <- sqrt(sum((y - mean(y))^2) / N)
+  y <- (y - mean(y)) / y_std
+
+  v <- (t(X) %*% y) / N
+
+  return(list(
+    v = as.vector(v),
+    R = R,
+    R0 = R0,
+    beta_true = beta_true,
+    causal_SNPs_loc = causal_SNPs_loc
+  ))
+}
+
+```
+
+```{r}
+seed = 2
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0 = 500L
+J     <- 500L
+h2    <- 0.01
+
+res <- sim_asn_eur(chrom, start, end,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+
+## standardized
+d = 1 / sqrt(diag(R))
+v = d * v
+R = cov2cor(R)
+R0 = cov2cor(R0)
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+
+
+## 2.2 Visualize two correlation matrices
+
+Sorry the color scheme is a bit hard to see but if we squeeze our eyes a bit then we can see that the two matrices are totally different. 
+
+```{r, fig.width=8, fig.height=6}
+par(mfrow = c(1, 2))
+
+image(R0[1:100, 1:100], main = "Out-of-sample (EUR)", col = heat.colors(15))
+image(R[1:100, 1:100], main = "In-sample corr (CHB)", col = heat.colors(15))
+par(mfrow = c(1, 1))
+
+```
+
+## 2.3 Fit susie with in-sample R
+
+```{r, fig.width=8, fig.height=6}
+fit_R <- susie_suff_stat(
+  XtX = N * R,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5
+)
+susie_plot(fit_R, y = "PIP", b = beta_true, main = "In-sample cov mat")
+```
+
+## 2.4 Fit susie with silly R
+
+```{r, fig.width=8, fig.height=6}
+fit_R_silly <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5,
+  residual_variance = 1
+)
+susie_plot(fit_R_silly, y = "PIP", b = beta_true, main = "Silly corr mat")
+```
+Slightly regularized
+
+```{r, fig.width=8, fig.height=6}
+R_tilde = (1 - 1 / N0) * R0 + 1 / N0 * diag(J)
+fit_R0 <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5
+)
+susie_plot(fit_R_silly, y = "PIP", b = beta_true, main = "Silly corr mat")
+
+print(summary(fit_R0)$cs)
+```
+
+## 2.5 Fit susielove with silly R
+
+```{r}
+R_out  <- compute_wen_stephens(R_0 = R_tilde, N_ref = N0)
+# R_out = diag(J)
+# R_out = R_tilde
+k      <- min(N0, J)
+diag_R = diag(R)
+
+love_res_WS <- susie_love_lambda(v, R_out, diag_R,
+                              lambda = 0,
+                              N, L = 5,
+                              k,
+                              nu_delta_init = 500,
+                              step_susie = 20,
+                              step_R = 30,
+                              step_nu = 10,
+                              max_iter = 30, 
+                              tol = 1e-4)
+
+b_res <- love_res_WS$b_res
+R_q   <- love_res_WS$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with WS shrinkage")
+)
+
+```
+Let's try again with fixed and small $\nu_0$: It indeed leads to conservative behavior. But how to produce this small $\nu_0$???
+
+```{r}
+nu_q = 10
+nu_0 = 1
+lambda = 1 / N0
+susie_love_small_nu <- susie_love_fix_2params(v, R_out, diag_R,
+                                   lambda, nu_q, nu_0,
+                                   N, L = 5,
+                                   k,
+                                   z_init = NULL,
+                                   step_susie = 20,
+                                   step_R = 30,
+                                   step_nu = 30,
+                                   max_iter = 100,
+                                   max_iter_init = 100,
+                                   tol = 1e-4)
+
+b_res <- susie_love_small_nu$b_res
+R_q   <- susie_love_small_nu$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE with small nu0 = ", nu_0)
+)
+```
+
+
