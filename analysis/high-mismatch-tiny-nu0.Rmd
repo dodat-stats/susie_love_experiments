@@ -347,4 +347,412 @@ susie_plot_alpha(
 )
 ```
 
+## 3. Trying to achieve conservative behavior when the mismatch is large
+
+As discussed, the current way to choose $\lambda$ only depends on $N_0$, but not on how "mismatched" $R_0$ and $v$ is. 
+
+Going back to our desire to learn $\lambda$ as a device to measure the mismatch between $v$ and $R_0$. We have learned the following:
+
+(A) Learning $\lambda$ under the null model is good.
+
+(B) But under the VI of susie-love, the ELBO prefers large $\lambda$ (and also large $\nu_0$), leading to FDR.
+
+(C) But intuitively, large $\lambda$ means large mismatch, which should lead to small $\nu_0$ instead.
+
+(D) One way to rescue this is to fix $\delta$: Indeed, in this case, $\lambda = \dfrac{\delta}{\delta + \nu_0}$, which is inversely proportional to $\nu_0$ and it makes more sense.
+
+Therefore, we can consider the following procedure of estimating $\delta$ and $\nu_0$ from data:
+
+1) First fit the susieR with the out-of-sample LD $R_0$ and chosen $L$ (say $L = 5$) to get the posterior mean $\bar{b}$, then get the "estimated null" $v_0 = \sqrt{N}(v - R_0 \bar{b})$
+
+2) Estimate $\lambda$ from the MLE of the null model $\sqrt{N} v_0 \sim (0, (1 - \lambda) R_0 + \lambda I)$ (or the moment method; see the file `learn-nu0-lambda.tex` on Overleaf).
+
+3) Set $\nu_0 = \dfrac{\delta (1 - \lambda)}{\lambda}$.
+
+This is still estimating the prior from data (so it still has "empirical Bayes" spirit). Let's see how it works
+
+### 3.1. Trying with severely mismatched data
+
+```{r}
+moment_estimate_lambda <- function(v0, R0, N){
+  eig = eigen(R0)
+  U = eig$vectors
+  s = eig$values
+  w = sqrt(N) * t(U) %*% v0
+  lin_mod = lm(w^2 ~ s)
+  slope = lin_mod$coefficients[[2]]  # tau^2 * (1 - lambda)
+  intercept = lin_mod$coefficients[[1]]  # tau^2 * lambda
+  odds = intercept / slope
+  lambda_est = odds / (1 + odds)
+  
+  lambda_est
+}
+```
+
+
+```{r}
+maximize_log_pdf <- function(R0, v, N) {
+  J <- length(v)
+  
+  R0 <- (R0 + t(R0)) / 2
+  eig <- eigen(R0, symmetric = TRUE)
+  
+  # Clamp any floating-point negative eigenvalues to exactly 0
+  d <- pmax(eig$values, 0) 
+  v_tilde <- as.numeric(crossprod(eig$vectors, v))
+  
+  # Optimize over log_nu0 to keep parameter scales identical
+  neg_log_pdf <- function(params) {
+    lambda <- params[1]
+    nu0 <- exp(params[2]) # Decode log(nu0)
+    
+    d_lambda <- (1 - lambda) * d + lambda
+    
+    log_det <- sum(log(d_lambda))
+    qf <- N * sum((v_tilde^2) / d_lambda)
+    
+    inner_log <- 1 + (1 / nu0) * qf
+    
+    term1 <- lgamma((nu0 + J + 2) / 2)
+    term2 <- lgamma((nu0 + 2) / 2)
+    term3 <- (J / 2) * log(nu0 * pi)
+    term4 <- 0.5 * log_det
+    term5 <- ((nu0 + J + 2) / 2) * log(inner_log)
+    
+    log_lik <- term1 - term2 - term3 - term4 - term5
+    
+    # Scale objective by J to prevent gradient collapse in finite-differencing
+    return(-log_lik / J)
+  }
+  
+  init_lambda <- 0.5
+  init_log_nu0 <- log(5.0) 
+  
+  epsilon <- 1e-5 
+  
+  # nlminb is significantly more robust for this topology
+  opt_res <- nlminb(
+    start = c(init_lambda, init_log_nu0),
+    objective = neg_log_pdf,
+    lower = c(epsilon, log(epsilon)),
+    upper = c(1 - epsilon, log(1e5))
+  )
+  
+  return(list(
+    lambda = opt_res$par[1],
+    nu_0 = exp(opt_res$par[2]),
+    # Scale the objective back up by J to get true log likelihood
+    max_log_pdf = -opt_res$objective * J,
+    convergence = opt_res$convergence, # 0 means successful
+    message = opt_res$message
+  ))
+}
+```
+
+### 3.1.1. Moment estimate
+
+```{r}
+library(susieR)
+fit_R_silly <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5,
+  residual_variance = 1
+)
+
+b_bar = colSums(fit_R_silly$alpha * fit_R_silly$mu)
+
+
+v0 = v - R0 %*% b_bar
+
+lambda_est = moment_estimate_lambda(v0, R0, N)
+lambda_est
+```
+
+
+
+```{r}
+delta = 1
+nu0 = delta * (1 - lambda_est) / lambda_est
+
+nu0
+```
+
+```{r}
+lambda <- lambda_est
+diag_R <- diag(R)
+k      <- min(N0, J)
+nu_q = nu0 + 1
+
+susie_love_pre_est_lambda <- susie_love_fix_2params(v, R0, diag_R,
+                                   lambda, nu_q, nu_0 = nu0 + delta,
+                                   N, L = 5,
+                                   k,
+                                   z_init = NULL,
+                                   step_susie = 20,
+                                   step_R = 30,
+                                   step_nu = 50,
+                                   max_iter = 500,
+                                   max_iter_init = 100,
+                                   tol = 1e-4)
+
+```
+
+```{r}
+b_res <- susie_love_pre_est_lambda$b_res
+R_q   <- susie_love_pre_est_lambda$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE pre-estimated lambda and nu0")
+)
+```
+
+Hence, we achieve conservative behavior in this case using the moment estimate.
+I actually find the moment estimate now too reliable because it is learn from `lm(w^2 ~ s)` and they look like this:
+
+```{r}
+eig = eigen(R0)
+U = eig$vectors
+s = eig$values
+w = sqrt(N) * t(U) %*% v0
+plot(s, w^2)
+abline(lm(w^2 ~ s))
+```
+
+
+### 3.1.2. MLE of lambda
+
+Let us try to use the MLE estimate of $\lambda$ to see if there is any difference.
+
+```{r}
+result <- maximize_log_pdf(R0, v0, N)
+print(result)
+
+lambda_est = result$lambda
+lambda_est
+```
+
+It is interesting that the MLE of $\lambda$ is much lower than the moment estimate. Let's try susielove with this $\lambda$ and corresponding $\nu_0$.
+
+```{r}
+delta = 1
+nu0 = delta * (1 - lambda_est) / lambda_est
+
+nu0
+```
+
+```{r}
+lambda <- lambda_est
+diag_R <- diag(R)
+k      <- min(N0, J)
+nu_q = nu0 + 1
+
+susie_love_pre_est_lambda <- susie_love_fix_2params(v, R0, diag_R,
+                                   lambda, nu_q, nu_0 = nu0 + delta,
+                                   N, L = 5,
+                                   k,
+                                   z_init = NULL,
+                                   step_susie = 20,
+                                   step_R = 30,
+                                   step_nu = 50,
+                                   max_iter = 500,
+                                   max_iter_init = 100,
+                                   tol = 1e-4)
+
+b_res <- susie_love_pre_est_lambda$b_res
+R_q   <- susie_love_pre_est_lambda$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE pre-estimated lambda and nu0 (MLE)")
+)
+
+```
+
+I'd say that it is almost conservative for the MLE. Let me try a smarter $\nu_0$ set by the Wen and Stephens (2010):
+
+$$\lambda \approx \dfrac{2\theta}{\theta + 2 \nu_0} \approx \dfrac{\theta}{\nu_0} \approx \dfrac{1}{\nu_0 (\log(2\nu_0) + 0.57)},$$
+where $\theta \approx (\log(2 \nu_0) + 0.57)^{-1}$
+
+```{r}
+find_nu0_WS <- function(lambda) {
+  f <- function(nu0) {
+    1 / (nu0 * (log(2 * nu0) + 0.57)) - lambda
+  }
+  uniroot(f, interval = c(1, 1e6))$root
+}
+
+nu0_WS =  find_nu0_WS(lambda_est)
+nu0_WS
+```
+
+Ok with this small nu0 we can expect conservative behavior.
+
+```{r}
+lambda <- lambda_est
+diag_R <- diag(R)
+k      <- min(N0, J)
+nu_q = nu0_WS + 1
+
+susie_love_pre_est_lambda <- susie_love_fix_2params(v, R0, diag_R,
+                                   lambda, nu_q, nu_0 = nu0_WS,
+                                   N, L = 5,
+                                   k,
+                                   z_init = NULL,
+                                   step_susie = 20,
+                                   step_R = 30,
+                                   step_nu = 50,
+                                   max_iter = 500,
+                                   max_iter_init = 100,
+                                   tol = 1e-4)
+
+b_res <- susie_love_pre_est_lambda$b_res
+R_q   <- susie_love_pre_est_lambda$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE pre-estimated lambda and nu0 (MLE + WS)")
+)
+```
+
+
+
+### 3.2. But is it too conservative in other cases???
+
+Now consider another case where the mismatch is low and the true $L = 2$. Let's see if it can recover both signals (and set $\nu_0$ to be large, $\lambda$ to be small) or it is still conservative. 
+
+```{r}
+seed  <- 1
+T_split <- 1  ## divergence time very small so the mismatch is small
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0    <- 1000L
+J     <- 500L
+h2    <- 0.01
+
+res <- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+
+## standardized
+d = 1 / sqrt(diag(R))
+v = d * v
+R = cov2cor(R)
+R0 = cov2cor(R0)
+  
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+Here is susie fitted with the out-of-sample LD:
+
+```{r}
+fit_R_init <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N,
+  L = 5,
+  residual_variance = 1
+)
+
+susie_plot(fit_R_init, y = "PIP", b = beta_true,
+           main = "Out-of-sample corr")
+```
+
+Even the out-of-sample LD works well. We know that the mismatch is small.
+
+```{r}
+b_bar = colSums(fit_R_init$alpha * fit_R_init$mu)
+
+
+v0 = v - R0 %*% b_bar
+
+lambda_est = moment_estimate_lambda(v0, R0, N)
+lambda_est
+```
+
+I do not understand why estimated $\lambda$ is large. I decided to print the $w^2_j$ and $s_j$ inside the moment estimating formula to see what the linear model is fitting to.
+
+```{r}
+eig = eigen(R0)
+U = eig$vectors
+s = eig$values
+w = sqrt(N) * t(U) %*% v0
+plot(s, w^2)
+abline(lm(w^2 ~ s))
+```
+
+Ok no wonder why it is bad. Let's try MLE next.
+
+### 3.2.2. MLE
+
+```{r}
+result <- maximize_log_pdf(R0, v0, N)
+print(result)
+
+lambda_est = result$lambda
+lambda_est
+```
+
+Learning $\lambda$ using MLE is surprisingly different. $\lambda$ here is very small, which is expected for small mismatch.
+
+```{r}
+nu0_WS =  find_nu0_WS(lambda_est)
+nu0_WS
+```
+
+susie-love result:
+
+```{r}
+lambda <- lambda_est
+diag_R <- diag(R)
+k      <- min(N0, J)
+nu_q = nu0_WS + 1
+
+susie_love_pre_est_lambda <- susie_love_fix_2params(v, R0, diag_R,
+                                   lambda, nu_q, nu_0 = nu0_WS,
+                                   N, L = 5,
+                                   k,
+                                   z_init = NULL,
+                                   step_susie = 20,
+                                   step_R = 30,
+                                   step_nu = 50,
+                                   max_iter = 500,
+                                   max_iter_init = 100,
+                                   tol = 1e-4)
+
+b_res <- susie_love_pre_est_lambda$b_res
+R_q   <- susie_love_pre_est_lambda$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R = cov2cor(R_q),
+  b = beta_true,
+  main = paste0("SuSiE-LovE pre-estimated lambda and nu0 (MLE + WS)")
+)
+```
+
+OKKKKKKK!!!!!!!!
 
