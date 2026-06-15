@@ -1,0 +1,298 @@
+---
+title: "Test new grid-based optimization for nu_0"
+author: "Dat Do"
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+date: "2026-06-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## 0. Aim
+Here we aim to still learn $\nu_0$ using VEB while fixing $\delta$ (i.e., $ = 1$). This is arguably the most principal approach, although the convergence of $\nu_0$ is poorly (it rarely moves away from the intitial point). Therefore, in this workflowr, we seek alternative optimization approach. 
+
+Since optimizing $\nu_0$ is only a 1D optimization problem, I plan to find it using a grid of $\nu_0$. But a grid of 10 values of $\nu_0$ would lead to an optimization problem that is 10 times slower than `susie-love-lambda`. After working with Claude, we decided the best solution is:
+
+1) For each $\nu_0$ in the grid, fix $\nu_0$ (turn `estimate_nu_0` to `FALSE`) and run the optimization of other parameters in 10 iterations. 
+
+2) Choose the best $\nu_0$ and call it the warm start for learning the optimal $\nu_0$
+
+3) Start optimizing everything from this $\nu_0$ (turn `estimate_nu_0` to `TRUE`).
+
+So the total cost is only 10 (grid points) x 10 (iterations) + number of iterations in step 3. Not too bad. Let's see how it work in the low mismatch scenario. 
+
+One more update is we changed the optimization of nu_0 and nu_q to log-scale. It works slightly better. 
+
+
+## 1. Simulate data from a coalescent model
+
+```{r simulate, fig.width=8, fig.height=6}
+library(susielove)
+
+seed  <- 1
+T_split <- 25
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0    <- 200L
+J     <- 1000L
+h2    <- 0.01
+
+res <- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+## 2. Prepare inputs
+
+Diagonal correction to align out-of-sample diagonals with in-sample, then set
+up shared inputs for `susie_XL`.
+
+```{r prep-inputs}
+d0_inv_sqrt <- 1 / sqrt(diag(R0))
+LD0 <- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
+d_sqrt <- sqrt(diag(R))
+R_tilde <- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- min(N0, J)
+delta  <- 1e-1
+```
+
+
+
+## 3. Fit susie_XL with new log-space optimization (nu_0_init = 1000)
+
+```{r susie-XL-1000, fig.width=8, fig.height=6}
+nu_0_init <- 1000
+max_iter  <- 20
+
+XL_res_1000 <- susie_XL(v, R_out, diag_R,
+                         delta,
+                         N, L = 5,
+                         k,
+                         nu_0_init     = nu_0_init,
+                         max_iter_init = 100,
+                         step_susie    = 20,
+                         step_R        = 100,
+                         estimate_nu_0 = TRUE,
+                         estimate_delta = FALSE,
+                         max_iter      = max_iter,
+                         tol           = 1e-5)
+
+b_res <- XL_res_1000$b_res
+R_q   <- XL_res_1000$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R     = cov2cor(R_q),
+  b     = beta_true,
+  main  = paste0("SuSiE-XL (nu_0_init=1000) | nu_0=",
+                 round(XL_res_1000$nu_0, 1),
+                 " | nu_q=", round(XL_res_1000$nu_q, 1))
+)
+```
+
+## 4. Fit susie_XL with new log-space optimization (nu_0_init = 100)
+
+```{r susie-XL-100, fig.width=8, fig.height=6}
+nu_0_init <- 100
+max_iter  <- 20
+
+XL_res_100 <- susie_XL(v, R_out, diag_R,
+                        delta,
+                        N, L = 5,
+                        k,
+                        nu_0_init     = nu_0_init,
+                        max_iter_init = 500,
+                        step_susie    = 20,
+                        step_R        = 100,
+                        estimate_nu_0 = TRUE,
+                        estimate_delta = FALSE,
+                        max_iter      = max_iter,
+                        tol           = 1e-5)
+
+b_res <- XL_res_100$b_res
+R_q   <- XL_res_100$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R     = cov2cor(R_q),
+  b     = beta_true,
+  main  = paste0("SuSiE-XL (nu_0_init=100) | nu_0=",
+                 round(XL_res_100$nu_0, 1),
+                 " | nu_q=", round(XL_res_100$nu_q, 1))
+)
+```
+
+## 5. Compare convergence
+
+Check whether the two initializations now converge to the same nu_0 and nu_q.
+
+```{r compare}
+cat("nu_0_init = 1000 -> nu_0:", round(XL_res_1000$nu_0, 2),
+    " | nu_q:", round(XL_res_1000$nu_q, 2),
+    " | iters:", length(XL_res_1000$loss_history), "\n")
+cat("nu_0_init = 100  -> nu_0:", round(XL_res_100$nu_0, 2),
+    " | nu_q:", round(XL_res_100$nu_q, 2),
+    " | iters:", length(XL_res_100$loss_history), "\n")
+
+plot(XL_res_1000$loss_history, type = "l", col = "blue",
+     xlab = "Outer iteration", ylab = "Loss", main = "Convergence (loss)")
+lines(XL_res_100$loss_history, col = "red")
+legend("topright", legend = c("nu_0_init=1000", "nu_0_init=100"),
+       col = c("blue", "red"), lty = 1)
+```
+
+**Conclusion:** Optimal $\nu_0$ highly depends on the initialization.
+
+## 6. Profile empirical Bayes over nu_0
+
+The log-space `optimize()` finds the right nu_0 for a fixed R_q, but R_q itself was
+optimized for the current nu_0 — so the two steps keep each other near the
+initialization (a CAVI fixed-point coupling issue). The fix is a two-phase
+profile search: short runs across a log-spaced grid to rank candidates cheaply,
+then one full run warm-started from the best.
+
+### Phase 1: coarse scan (10 iterations each)
+
+```{r profile-coarse}
+nu_0_grid <- exp(seq(log(10), log(5*N0), length.out = 10))
+
+coarse_results <- lapply(nu_0_grid, function(nu_0_fixed) {
+  susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+            nu_0_init     = nu_0_fixed,
+            estimate_nu_0 = FALSE,
+            max_iter_init = 100,
+            step_susie    = 10,
+            step_R        = 20,
+            max_iter      = 10,
+            tol           = -Inf)
+})
+
+coarse_loss <- sapply(coarse_results, function(r) tail(r$loss_history, 1))
+best_idx    <- which.min(coarse_loss)
+
+plot(nu_0_grid, coarse_loss, log = "x", type = "b", pch = 16,
+     xlab = "nu_0 (log scale)", ylab = "Loss after 10 iters",
+     main = "Profile loss — coarse scan")
+abline(v = nu_0_grid[best_idx], col = "red", lty = 2)
+cat("Best nu_0 on grid:", round(nu_0_grid[best_idx], 2),
+    "| coarse loss:", round(coarse_loss[best_idx], 4), "\n")
+```
+
+### Phase 2: full convergence from the best warm start
+
+```{r profile-full, fig.width=8, fig.height=6}
+best_res <- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                      nu_0_init     = nu_0_grid[best_idx],
+                      z_init        = coarse_results[[best_idx]]$Z_final,
+                      estimate_nu_0 = TRUE,
+                      max_iter_init = 100,
+                      step_susie    = 10,
+                      n_inner = 5,
+                      step_R        = 50,
+                      max_iter      = 100,
+                      tol           = 1e-4)
+
+cat("Converged loss:", round(tail(best_res$loss_history, 1), 4),
+    "| nu_0:", round(best_res$nu_0, 2),
+    "| nu_q:", round(best_res$nu_q, 2),
+    "| iters:", length(best_res$loss_history), "\n")
+
+susie_plot_alpha(
+  alpha = best_res$b_res$alpha,
+  R     = cov2cor(best_res$R_q),
+  b     = beta_true,
+  main  = paste0("SuSiE-XL profile EB | nu_0=", round(best_res$nu_0, 1),
+                 " | nu_q=", round(best_res$nu_q, 1))
+)
+```
+
+## 7. Profile EB with warm-starts across grid points (slightly smarter solution)
+
+In section 6 the 10-iteration budget is spent mostly on the initial transient
+because each grid point starts cold. Here we chain the grid runs: each point
+is warm-started with `Z_final` from its left neighbour, so the transient is
+already past and the 10 iterations reflect the actual profile loss.
+
+### Phase 1: warm-started coarse scan
+
+```{r profile-warm-coarse}
+nu_0_grid_w <- exp(seq(log(10), log(5*N0), length.out = 10))
+
+coarse_results_w <- vector("list", length(nu_0_grid_w))
+z_prev <- NULL
+
+for (i in seq_along(nu_0_grid_w)) {
+  coarse_results_w[[i]] <- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                                     nu_0_init     = nu_0_grid_w[i],
+                                     z_init        = z_prev,
+                                     estimate_nu_0 = FALSE,
+                                     max_iter_init = 100,
+                                     step_susie    = 10,
+                                     step_R        = 20,
+                                     max_iter      = 10,
+                                     tol           = -Inf)
+  z_prev <- coarse_results_w[[i]]$Z_final
+}
+
+coarse_loss_w <- sapply(coarse_results_w, function(r) tail(r$loss_history, 1))
+best_idx_w    <- which.min(coarse_loss_w)
+
+plot(nu_0_grid_w, coarse_loss_w, log = "x", type = "b", pch = 16,
+     xlab = "nu_0 (log scale)", ylab = "Loss after 10 iters",
+     main = "Profile loss — warm-started coarse scan")
+abline(v = nu_0_grid_w[best_idx_w], col = "red", lty = 2)
+cat("Best nu_0 on grid:", round(nu_0_grid_w[best_idx_w], 2),
+    "| coarse loss:", round(coarse_loss_w[best_idx_w], 4), "\n")
+```
+
+### Phase 2: full convergence from the best warm start
+
+```{r profile-warm-full, fig.width=8, fig.height=6}
+best_res_w <- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                        nu_0_init     = nu_0_grid_w[best_idx_w],
+                        z_init        = coarse_results_w[[best_idx_w]]$Z_final,
+                        estimate_nu_0 = TRUE,
+                        max_iter_init = 100,
+                        step_susie    = 20,
+                        step_R        = 50,
+                        max_iter      = 100,
+                        tol           = 1e-4)
+
+cat("Converged loss:", round(tail(best_res_w$loss_history, 1), 4),
+    "| nu_0:", round(best_res_w$nu_0, 2),
+    "| nu_q:", round(best_res_w$nu_q, 2),
+    "| iters:", length(best_res_w$loss_history), "\n")
+
+susie_plot_alpha(
+  alpha = best_res_w$b_res$alpha,
+  R     = cov2cor(best_res_w$R_q),
+  b     = beta_true,
+  main  = paste0("SuSiE-XL warm profile EB | nu_0=", round(best_res_w$nu_0, 1),
+                 " | nu_q=", round(best_res_w$nu_q, 1))
+)
+```

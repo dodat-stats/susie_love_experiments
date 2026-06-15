@@ -27,3 +27,7 @@ editor_options:
 + [Increased mismatch leads to decreased nu_0 (Large N0)](divergence_increase-nu_decrease-large-N0.html)
 
 + [Too mismatch R0?](high-mismatch-tiny-nu0.html)
+
++ [Try grid search of nu0 in susie-XL implementation (Fix delta)](test-new-optimization-delta-ver.html)
+
+
