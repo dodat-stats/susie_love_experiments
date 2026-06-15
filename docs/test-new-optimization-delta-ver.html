@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Dat Do" />
+
+<meta name="date" content="2026-06-15" />
+
+<title>Test new grid-based optimization for nu_0</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">susie_love_experiments</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dodat-stats/susie_love_experiments">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Test new grid-based optimization for
+nu_0</h1>
+<h4 class="author">Dat Do</h4>
+<h4 class="date">2026-06-15</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-06-15
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>susie_love_experiments/</code>
+<span class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260419code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260419)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260419code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260419)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree163ad86141ce687252e984e78fbe0f63038870a2targetblank163ad86a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/163ad86141ce687252e984e78fbe0f63038870a2" target="_blank">163ad86</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree163ad86141ce687252e984e78fbe0f63038870a2targetblank163ad86a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/163ad86141ce687252e984e78fbe0f63038870a2" target="_blank">163ad86</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/mismatch_fix_delta_approach.Rmd
+
+Unstaged changes:
+    Modified:   analysis/algorithmic-approach.Rmd
+    Modified:   analysis/small_nu.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/test-new-optimization-delta-ver.Rmd</code>) and HTML
+(<code>docs/test-new-optimization-delta-ver.html</code>) files. If
+you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/163ad86141ce687252e984e78fbe0f63038870a2/analysis/test-new-optimization-delta-ver.Rmd" target="_blank">163ad86</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-15
+</td>
+<td>
+added new file: optimizing nu0 using grid search
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="aim" class="section level2">
+<h2>0. Aim</h2>
+<p>Here we aim to still learn <span class="math inline">\(\nu_0\)</span>
+using VEB while fixing <span class="math inline">\(\delta\)</span>
+(i.e., $ = 1$). This is arguably the most principal approach, although
+the convergence of <span class="math inline">\(\nu_0\)</span> is poorly
+(it rarely moves away from the intitial point). Therefore, in this
+workflowr, we seek alternative optimization approach.</p>
+<p>Since optimizing <span class="math inline">\(\nu_0\)</span> is only a
+1D optimization problem, I plan to find it using a grid of <span
+class="math inline">\(\nu_0\)</span>. But a grid of 10 values of <span
+class="math inline">\(\nu_0\)</span> would lead to an optimization
+problem that is 10 times slower than <code>susie-love-lambda</code>.
+After working with Claude, we decided the best solution is:</p>
+<ol style="list-style-type: decimal">
+<li><p>For each <span class="math inline">\(\nu_0\)</span> in the grid,
+fix <span class="math inline">\(\nu_0\)</span> (turn
+<code>estimate_nu_0</code> to <code>FALSE</code>) and run the
+optimization of other parameters in 10 iterations.</p></li>
+<li><p>Choose the best <span class="math inline">\(\nu_0\)</span> and
+call it the warm start for learning the optimal <span
+class="math inline">\(\nu_0\)</span></p></li>
+<li><p>Start optimizing everything from this <span
+class="math inline">\(\nu_0\)</span> (turn <code>estimate_nu_0</code> to
+<code>TRUE</code>).</p></li>
+</ol>
+<p>So the total cost is only 10 (grid points) x 10 (iterations) + number
+of iterations in step 3. Not too bad. Let’s see how it work in the low
+mismatch scenario.</p>
+<p>One more update is we changed the optimization of nu_0 and nu_q to
+log-scale. It works slightly better.</p>
+</div>
+<div id="simulate-data-from-a-coalescent-model" class="section level2">
+<h2>1. Simulate data from a coalescent model</h2>
+<pre class="r"><code>library(susielove)
+
+seed  &lt;- 1
+T_split &lt;- 25
+chrom &lt;- &quot;chr22&quot;
+start &lt;- 20e6
+end   &lt;- 21e6
+N     &lt;- 25000L
+N0    &lt;- 200L
+J     &lt;- 1000L
+h2    &lt;- 0.01
+
+res &lt;- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               &lt;- res$v
+R               &lt;- res$R
+R0              &lt;- res$R0
+beta_true       &lt;- res$beta_true
+causal_SNPs_loc &lt;- res$causal_SNPs_loc
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = &quot;red&quot;)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/simulate-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="prepare-inputs" class="section level2">
+<h2>2. Prepare inputs</h2>
+<p>Diagonal correction to align out-of-sample diagonals with in-sample,
+then set up shared inputs for <code>susie_XL</code>.</p>
+<pre class="r"><code>d0_inv_sqrt &lt;- 1 / sqrt(diag(R0))
+LD0 &lt;- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
+d_sqrt &lt;- sqrt(diag(R))
+R_tilde &lt;- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+diag_R &lt;- diag(R)
+R_out  &lt;- R_tilde
+k      &lt;- min(N0, J)
+delta  &lt;- 1e-1</code></pre>
+</div>
+<div id="fit-susie_xl-with-new-log-space-optimization-nu_0_init-1000"
+class="section level2">
+<h2>3. Fit susie_XL with new log-space optimization (nu_0_init =
+1000)</h2>
+<pre class="r"><code>nu_0_init &lt;- 1000
+max_iter  &lt;- 20
+
+XL_res_1000 &lt;- susie_XL(v, R_out, diag_R,
+                         delta,
+                         N, L = 5,
+                         k,
+                         nu_0_init     = nu_0_init,
+                         max_iter_init = 100,
+                         step_susie    = 20,
+                         step_R        = 100,
+                         estimate_nu_0 = TRUE,
+                         estimate_delta = FALSE,
+                         max_iter      = max_iter,
+                         tol           = 1e-5)
+#&gt; Iter 1 | Loss: 17.0331 | nu_q: 1000.8 | nu_0: 976.8 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 8.5234 | nu_q: 993.0 | nu_0: 969.5 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 6.0227 | nu_q: 981.4 | nu_0: 956.0 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 1.7603 | nu_q: 959.7 | nu_0: 943.3 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -0.7281 | nu_q: 958.9 | nu_0: 942.9 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -0.7751 | nu_q: 956.1 | nu_0: 939.8 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -0.7898 | nu_q: 952.3 | nu_0: 936.1 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -0.7899 | nu_q: 952.9 | nu_0: 936.0 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -0.7995 | nu_q: 949.6 | nu_0: 933.0 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -0.7996 | nu_q: 950.0 | nu_0: 932.9 | delta: 1.0000e-01
+#&gt; Iter 11 | Loss: -0.8062 | nu_q: 947.6 | nu_0: 930.9 | delta: 1.0000e-01
+#&gt; Iter 12 | Loss: -0.8062 | nu_q: 947.9 | nu_0: 930.9 | delta: 1.0000e-01
+#&gt; Iter 13 | Loss: -0.8062 | nu_q: 947.9 | nu_0: 930.9 | delta: 1.0000e-01
+#&gt; Converged at iteration 13
+
+b_res &lt;- XL_res_1000$b_res
+R_q   &lt;- XL_res_1000$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R     = cov2cor(R_q),
+  b     = beta_true,
+  main  = paste0(&quot;SuSiE-XL (nu_0_init=1000) | nu_0=&quot;,
+                 round(XL_res_1000$nu_0, 1),
+                 &quot; | nu_q=&quot;, round(XL_res_1000$nu_q, 1))
+)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/susie-XL-1000-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fit-susie_xl-with-new-log-space-optimization-nu_0_init-100"
+class="section level2">
+<h2>4. Fit susie_XL with new log-space optimization (nu_0_init =
+100)</h2>
+<pre class="r"><code>nu_0_init &lt;- 100
+max_iter  &lt;- 20
+
+XL_res_100 &lt;- susie_XL(v, R_out, diag_R,
+                        delta,
+                        N, L = 5,
+                        k,
+                        nu_0_init     = nu_0_init,
+                        max_iter_init = 500,
+                        step_susie    = 20,
+                        step_R        = 100,
+                        estimate_nu_0 = TRUE,
+                        estimate_delta = FALSE,
+                        max_iter      = max_iter,
+                        tol           = 1e-5)
+#&gt; Iter 1 | Loss: -1.5378 | nu_q: 100.5 | nu_0: 99.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -1.7168 | nu_q: 100.8 | nu_0: 99.2 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -1.7353 | nu_q: 101.1 | nu_0: 99.2 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.7395 | nu_q: 101.4 | nu_0: 99.1 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -1.7433 | nu_q: 101.7 | nu_0: 99.3 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -1.7460 | nu_q: 101.9 | nu_0: 99.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -1.7461 | nu_q: 101.9 | nu_0: 99.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -1.7461 | nu_q: 101.9 | nu_0: 99.4 | delta: 1.0000e-01
+#&gt; Converged at iteration 8
+
+b_res &lt;- XL_res_100$b_res
+R_q   &lt;- XL_res_100$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R     = cov2cor(R_q),
+  b     = beta_true,
+  main  = paste0(&quot;SuSiE-XL (nu_0_init=100) | nu_0=&quot;,
+                 round(XL_res_100$nu_0, 1),
+                 &quot; | nu_q=&quot;, round(XL_res_100$nu_q, 1))
+)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/susie-XL-100-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="compare-convergence" class="section level2">
+<h2>5. Compare convergence</h2>
+<p>Check whether the two initializations now converge to the same nu_0
+and nu_q.</p>
+<pre class="r"><code>cat(&quot;nu_0_init = 1000 -&gt; nu_0:&quot;, round(XL_res_1000$nu_0, 2),
+    &quot; | nu_q:&quot;, round(XL_res_1000$nu_q, 2),
+    &quot; | iters:&quot;, length(XL_res_1000$loss_history), &quot;\n&quot;)
+#&gt; nu_0_init = 1000 -&gt; nu_0: 930.85  | nu_q: 947.93  | iters: 13
+cat(&quot;nu_0_init = 100  -&gt; nu_0:&quot;, round(XL_res_100$nu_0, 2),
+    &quot; | nu_q:&quot;, round(XL_res_100$nu_q, 2),
+    &quot; | iters:&quot;, length(XL_res_100$loss_history), &quot;\n&quot;)
+#&gt; nu_0_init = 100  -&gt; nu_0: 99.41  | nu_q: 101.93  | iters: 8
+
+plot(XL_res_1000$loss_history, type = &quot;l&quot;, col = &quot;blue&quot;,
+     xlab = &quot;Outer iteration&quot;, ylab = &quot;Loss&quot;, main = &quot;Convergence (loss)&quot;)
+lines(XL_res_100$loss_history, col = &quot;red&quot;)
+legend(&quot;topright&quot;, legend = c(&quot;nu_0_init=1000&quot;, &quot;nu_0_init=100&quot;),
+       col = c(&quot;blue&quot;, &quot;red&quot;), lty = 1)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/compare-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><strong>Conclusion:</strong> Optimal <span
+class="math inline">\(\nu_0\)</span> highly depends on the
+initialization.</p>
+</div>
+<div id="profile-empirical-bayes-over-nu_0" class="section level2">
+<h2>6. Profile empirical Bayes over nu_0</h2>
+<p>The log-space <code>optimize()</code> finds the right nu_0 for a
+fixed R_q, but R_q itself was optimized for the current nu_0 — so the
+two steps keep each other near the initialization (a CAVI fixed-point
+coupling issue). The fix is a two-phase profile search: short runs
+across a log-spaced grid to rank candidates cheaply, then one full run
+warm-started from the best.</p>
+<div id="phase-1-coarse-scan-10-iterations-each" class="section level3">
+<h3>Phase 1: coarse scan (10 iterations each)</h3>
+<pre class="r"><code>nu_0_grid &lt;- exp(seq(log(10), log(5*N0), length.out = 10))
+
+coarse_results &lt;- lapply(nu_0_grid, function(nu_0_fixed) {
+  susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+            nu_0_init     = nu_0_fixed,
+            estimate_nu_0 = FALSE,
+            max_iter_init = 100,
+            step_susie    = 10,
+            step_R        = 20,
+            max_iter      = 10,
+            tol           = -Inf)
+})
+#&gt; Iter 1 | Loss: 11.7142 | nu_q: 10.4 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 8.2761 | nu_q: 10.5 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 7.4564 | nu_q: 10.6 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 7.1409 | nu_q: 10.6 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 6.9487 | nu_q: 10.8 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 6.8240 | nu_q: 10.8 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 6.7112 | nu_q: 10.9 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 6.6204 | nu_q: 11.0 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 6.5474 | nu_q: 11.1 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 6.4743 | nu_q: 11.2 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 7.1903 | nu_q: 17.1 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 4.4100 | nu_q: 17.2 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 3.7728 | nu_q: 17.3 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 3.4673 | nu_q: 17.4 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 3.2939 | nu_q: 17.5 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 3.1897 | nu_q: 17.6 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 3.1269 | nu_q: 17.7 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 3.0747 | nu_q: 17.8 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 3.0362 | nu_q: 17.8 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 3.0039 | nu_q: 17.9 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 4.5053 | nu_q: 28.3 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 2.0694 | nu_q: 28.4 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 1.4987 | nu_q: 28.5 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 1.1677 | nu_q: 28.7 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 0.9862 | nu_q: 28.7 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 0.8955 | nu_q: 28.9 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 0.8491 | nu_q: 29.0 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 0.8163 | nu_q: 29.1 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 0.7924 | nu_q: 29.2 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 0.7674 | nu_q: 29.3 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 1.7689 | nu_q: 47.0 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 0.4063 | nu_q: 47.1 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -0.0236 | nu_q: 47.2 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -0.2280 | nu_q: 47.3 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -0.3691 | nu_q: 47.4 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -0.4406 | nu_q: 47.5 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -0.4997 | nu_q: 47.6 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -0.5389 | nu_q: 47.7 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -0.5692 | nu_q: 47.9 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -0.5886 | nu_q: 47.9 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 1.0866 | nu_q: 78.2 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -0.5617 | nu_q: 78.2 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -0.9452 | nu_q: 78.3 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.1355 | nu_q: 78.4 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -1.2318 | nu_q: 78.5 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -1.2904 | nu_q: 78.7 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -1.3330 | nu_q: 78.8 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -1.3606 | nu_q: 78.9 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -1.3825 | nu_q: 79.0 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -1.3998 | nu_q: 79.1 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 0.0348 | nu_q: 130.2 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -1.1110 | nu_q: 130.2 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -1.5586 | nu_q: 130.3 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.6895 | nu_q: 130.4 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -1.7639 | nu_q: 130.5 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -1.8174 | nu_q: 130.6 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -1.8511 | nu_q: 130.8 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -1.8707 | nu_q: 130.9 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -1.8879 | nu_q: 131.1 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -1.9012 | nu_q: 131.2 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 2.4854 | nu_q: 215.1 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 1.9022 | nu_q: 215.0 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 1.6168 | nu_q: 215.0 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 1.3230 | nu_q: 214.9 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 1.0382 | nu_q: 214.9 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 0.6824 | nu_q: 215.0 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 0.2346 | nu_q: 215.1 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -0.3293 | nu_q: 215.1 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -1.2133 | nu_q: 215.4 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -1.8927 | nu_q: 215.6 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 8.7990 | nu_q: 361.4 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 7.5182 | nu_q: 361.7 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 6.0152 | nu_q: 361.7 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 5.0514 | nu_q: 361.4 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 4.6125 | nu_q: 361.5 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 3.9409 | nu_q: 361.1 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 2.9134 | nu_q: 361.2 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 2.7546 | nu_q: 361.5 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 2.6316 | nu_q: 361.1 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 2.4829 | nu_q: 361.3 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 19.3964 | nu_q: 614.7 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 17.1647 | nu_q: 615.2 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 14.6744 | nu_q: 614.2 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 12.6207 | nu_q: 613.9 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 10.7680 | nu_q: 613.9 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 10.0718 | nu_q: 613.4 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 9.1469 | nu_q: 612.9 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 8.3162 | nu_q: 612.2 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 7.6206 | nu_q: 611.9 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 6.7013 | nu_q: 611.0 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 34.4851 | nu_q: 1019.4 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 32.3739 | nu_q: 1021.3 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 30.8694 | nu_q: 1019.1 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 29.5665 | nu_q: 1019.0 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 27.4421 | nu_q: 1017.4 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 24.9870 | nu_q: 1015.8 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 22.0980 | nu_q: 1016.5 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 19.2120 | nu_q: 1015.4 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 17.8105 | nu_q: 1015.1 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 16.0138 | nu_q: 1015.9 | nu_0: 1000.0 | delta: 1.0000e-01
+
+coarse_loss &lt;- sapply(coarse_results, function(r) tail(r$loss_history, 1))
+best_idx    &lt;- which.min(coarse_loss)
+
+plot(nu_0_grid, coarse_loss, log = &quot;x&quot;, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;nu_0 (log scale)&quot;, ylab = &quot;Loss after 10 iters&quot;,
+     main = &quot;Profile loss — coarse scan&quot;)
+abline(v = nu_0_grid[best_idx], col = &quot;red&quot;, lty = 2)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/profile-coarse-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>cat(&quot;Best nu_0 on grid:&quot;, round(nu_0_grid[best_idx], 2),
+    &quot;| coarse loss:&quot;, round(coarse_loss[best_idx], 4), &quot;\n&quot;)
+#&gt; Best nu_0 on grid: 129.15 | coarse loss: -1.9012</code></pre>
+</div>
+<div id="phase-2-full-convergence-from-the-best-warm-start"
+class="section level3">
+<h3>Phase 2: full convergence from the best warm start</h3>
+<pre class="r"><code>best_res &lt;- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                      nu_0_init     = nu_0_grid[best_idx],
+                      z_init        = coarse_results[[best_idx]]$Z_final,
+                      estimate_nu_0 = TRUE,
+                      max_iter_init = 100,
+                      step_susie    = 10,
+                      n_inner = 5,
+                      step_R        = 50,
+                      max_iter      = 100,
+                      tol           = 1e-4)
+#&gt; Iter 1 | Loss: -1.9410 | nu_q: 130.7 | nu_0: 127.7 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -1.9459 | nu_q: 131.2 | nu_0: 128.0 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -1.9460 | nu_q: 131.2 | nu_0: 128.0 | delta: 1.0000e-01
+#&gt; Converged at iteration 3
+
+cat(&quot;Converged loss:&quot;, round(tail(best_res$loss_history, 1), 4),
+    &quot;| nu_0:&quot;, round(best_res$nu_0, 2),
+    &quot;| nu_q:&quot;, round(best_res$nu_q, 2),
+    &quot;| iters:&quot;, length(best_res$loss_history), &quot;\n&quot;)
+#&gt; Converged loss: -1.946 | nu_0: 127.99 | nu_q: 131.19 | iters: 3
+
+susie_plot_alpha(
+  alpha = best_res$b_res$alpha,
+  R     = cov2cor(best_res$R_q),
+  b     = beta_true,
+  main  = paste0(&quot;SuSiE-XL profile EB | nu_0=&quot;, round(best_res$nu_0, 1),
+                 &quot; | nu_q=&quot;, round(best_res$nu_q, 1))
+)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/profile-full-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div
+id="profile-eb-with-warm-starts-across-grid-points-slightly-smarter-solution"
+class="section level2">
+<h2>7. Profile EB with warm-starts across grid points (slightly smarter
+solution)</h2>
+<p>In section 6 the 10-iteration budget is spent mostly on the initial
+transient because each grid point starts cold. Here we chain the grid
+runs: each point is warm-started with <code>Z_final</code> from its left
+neighbour, so the transient is already past and the 10 iterations
+reflect the actual profile loss.</p>
+<div id="phase-1-warm-started-coarse-scan" class="section level3">
+<h3>Phase 1: warm-started coarse scan</h3>
+<pre class="r"><code>nu_0_grid_w &lt;- exp(seq(log(10), log(5*N0), length.out = 10))
+
+coarse_results_w &lt;- vector(&quot;list&quot;, length(nu_0_grid_w))
+z_prev &lt;- NULL
+
+for (i in seq_along(nu_0_grid_w)) {
+  coarse_results_w[[i]] &lt;- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                                     nu_0_init     = nu_0_grid_w[i],
+                                     z_init        = z_prev,
+                                     estimate_nu_0 = FALSE,
+                                     max_iter_init = 100,
+                                     step_susie    = 10,
+                                     step_R        = 20,
+                                     max_iter      = 10,
+                                     tol           = -Inf)
+  z_prev &lt;- coarse_results_w[[i]]$Z_final
+}
+#&gt; Iter 1 | Loss: 11.7142 | nu_q: 10.4 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 8.2761 | nu_q: 10.5 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 7.4564 | nu_q: 10.6 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 7.1409 | nu_q: 10.6 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 6.9487 | nu_q: 10.8 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 6.8240 | nu_q: 10.8 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 6.7112 | nu_q: 10.9 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 6.6204 | nu_q: 11.0 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 6.5474 | nu_q: 11.1 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 6.4743 | nu_q: 11.2 | nu_0: 10.0 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 4.7428 | nu_q: 16.7 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 3.5051 | nu_q: 16.9 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 3.3442 | nu_q: 17.0 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 3.2618 | nu_q: 17.2 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 3.2074 | nu_q: 17.3 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 3.1527 | nu_q: 17.4 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 3.1141 | nu_q: 17.5 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 3.0698 | nu_q: 17.6 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 3.0332 | nu_q: 17.7 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 2.9933 | nu_q: 17.9 | nu_0: 16.7 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 1.8896 | nu_q: 27.4 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 1.1498 | nu_q: 27.6 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 1.0158 | nu_q: 27.8 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 0.9563 | nu_q: 27.9 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 0.9211 | nu_q: 28.1 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 0.8909 | nu_q: 28.2 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 0.8630 | nu_q: 28.4 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 0.8398 | nu_q: 28.5 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 0.8209 | nu_q: 28.6 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 0.8048 | nu_q: 28.7 | nu_0: 27.8 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 0.3749 | nu_q: 46.5 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -0.3984 | nu_q: 46.7 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -0.5169 | nu_q: 46.9 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -0.5515 | nu_q: 47.0 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -0.5758 | nu_q: 47.2 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -0.5902 | nu_q: 47.2 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -0.6034 | nu_q: 47.4 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -0.6112 | nu_q: 47.5 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -0.6235 | nu_q: 47.7 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -0.6287 | nu_q: 47.8 | nu_0: 46.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: -0.6966 | nu_q: 76.6 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -1.2110 | nu_q: 76.9 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -1.3152 | nu_q: 77.1 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.3660 | nu_q: 77.2 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -1.3934 | nu_q: 77.4 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -1.4102 | nu_q: 77.5 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -1.4247 | nu_q: 77.8 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -1.4327 | nu_q: 77.9 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -1.4396 | nu_q: 78.1 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -1.4444 | nu_q: 78.2 | nu_0: 77.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: -1.2729 | nu_q: 128.7 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -1.6788 | nu_q: 128.9 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -1.7992 | nu_q: 129.1 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.8514 | nu_q: 129.2 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -1.8804 | nu_q: 129.4 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -1.9000 | nu_q: 129.5 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -1.9106 | nu_q: 129.7 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -1.9166 | nu_q: 129.8 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -1.9212 | nu_q: 130.0 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -1.9246 | nu_q: 130.1 | nu_0: 129.2 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: -0.8049 | nu_q: 212.9 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -1.7709 | nu_q: 213.1 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -1.9057 | nu_q: 213.4 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.9855 | nu_q: 213.5 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -2.0338 | nu_q: 213.7 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -2.0724 | nu_q: 214.2 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -2.0934 | nu_q: 214.3 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -2.1065 | nu_q: 214.8 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -2.1123 | nu_q: 214.9 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -2.1172 | nu_q: 215.2 | nu_0: 215.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 0.0680 | nu_q: 359.7 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -1.4341 | nu_q: 358.3 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -1.7472 | nu_q: 358.8 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.8511 | nu_q: 358.8 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -1.9074 | nu_q: 358.9 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -1.9461 | nu_q: 359.0 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -1.9778 | nu_q: 359.2 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -1.9979 | nu_q: 359.3 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -2.0123 | nu_q: 359.5 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -2.0219 | nu_q: 359.6 | nu_0: 359.4 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 2.1059 | nu_q: 600.1 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -0.1974 | nu_q: 596.0 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -0.9378 | nu_q: 596.6 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -1.2374 | nu_q: 596.4 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -1.3436 | nu_q: 596.9 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: -1.4010 | nu_q: 596.7 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: -1.4377 | nu_q: 597.1 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: -1.4675 | nu_q: 597.0 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: -1.4909 | nu_q: 597.3 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: -1.5164 | nu_q: 597.4 | nu_0: 599.5 | delta: 1.0000e-01
+#&gt; Iter 1 | Loss: 13.8447 | nu_q: 868.6 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: 4.6377 | nu_q: 851.9 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: 3.0818 | nu_q: 854.0 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: 2.4939 | nu_q: 856.0 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: 2.1675 | nu_q: 860.2 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 6 | Loss: 1.9006 | nu_q: 865.5 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 7 | Loss: 1.6997 | nu_q: 868.4 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 8 | Loss: 1.4849 | nu_q: 875.3 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 9 | Loss: 1.2918 | nu_q: 877.9 | nu_0: 1000.0 | delta: 1.0000e-01
+#&gt; Iter 10 | Loss: 0.9888 | nu_q: 891.5 | nu_0: 1000.0 | delta: 1.0000e-01
+
+coarse_loss_w &lt;- sapply(coarse_results_w, function(r) tail(r$loss_history, 1))
+best_idx_w    &lt;- which.min(coarse_loss_w)
+
+plot(nu_0_grid_w, coarse_loss_w, log = &quot;x&quot;, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;nu_0 (log scale)&quot;, ylab = &quot;Loss after 10 iters&quot;,
+     main = &quot;Profile loss — warm-started coarse scan&quot;)
+abline(v = nu_0_grid_w[best_idx_w], col = &quot;red&quot;, lty = 2)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/profile-warm-coarse-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>cat(&quot;Best nu_0 on grid:&quot;, round(nu_0_grid_w[best_idx_w], 2),
+    &quot;| coarse loss:&quot;, round(coarse_loss_w[best_idx_w], 4), &quot;\n&quot;)
+#&gt; Best nu_0 on grid: 215.44 | coarse loss: -2.1172</code></pre>
+</div>
+<div id="phase-2-full-convergence-from-the-best-warm-start-1"
+class="section level3">
+<h3>Phase 2: full convergence from the best warm start</h3>
+<pre class="r"><code>best_res_w &lt;- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                        nu_0_init     = nu_0_grid_w[best_idx_w],
+                        z_init        = coarse_results_w[[best_idx_w]]$Z_final,
+                        estimate_nu_0 = TRUE,
+                        max_iter_init = 100,
+                        step_susie    = 20,
+                        step_R        = 50,
+                        max_iter      = 100,
+                        tol           = 1e-4)
+#&gt; Iter 1 | Loss: -2.1364 | nu_q: 216.5 | nu_0: 213.9 | delta: 1.0000e-01
+#&gt; Iter 2 | Loss: -2.1423 | nu_q: 216.8 | nu_0: 213.0 | delta: 1.0000e-01
+#&gt; Iter 3 | Loss: -2.1456 | nu_q: 217.1 | nu_0: 212.8 | delta: 1.0000e-01
+#&gt; Iter 4 | Loss: -2.1466 | nu_q: 217.2 | nu_0: 212.7 | delta: 1.0000e-01
+#&gt; Iter 5 | Loss: -2.1466 | nu_q: 217.2 | nu_0: 212.7 | delta: 1.0000e-01
+#&gt; Converged at iteration 5
+
+cat(&quot;Converged loss:&quot;, round(tail(best_res_w$loss_history, 1), 4),
+    &quot;| nu_0:&quot;, round(best_res_w$nu_0, 2),
+    &quot;| nu_q:&quot;, round(best_res_w$nu_q, 2),
+    &quot;| iters:&quot;, length(best_res_w$loss_history), &quot;\n&quot;)
+#&gt; Converged loss: -2.1466 | nu_0: 212.66 | nu_q: 217.22 | iters: 5
+
+susie_plot_alpha(
+  alpha = best_res_w$b_res$alpha,
+  R     = cov2cor(best_res_w$R_q),
+  b     = beta_true,
+  main  = paste0(&quot;SuSiE-XL warm profile EB | nu_0=&quot;, round(best_res_w$nu_0, 1),
+                 &quot; | nu_q=&quot;, round(best_res_w$nu_q, 1))
+)</code></pre>
+<p><img src="figure/test-new-optimization-delta-ver.Rmd/profile-warm-full-1.png" width="768" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()
+#&gt; R version 4.3.2 (2023-10-31)
+#&gt; Platform: aarch64-apple-darwin20 (64-bit)
+#&gt; Running under: macOS 26.2
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; time zone: America/New_York
+#&gt; tzcode source: internal
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] susielove_0.1.0 workflowr_1.7.1
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Matrix_1.6-1.1    jsonlite_2.0.0    compiler_4.3.2    promises_1.5.0   
+#&gt;  [5] Rcpp_1.1.0        stringr_1.6.0     git2r_0.36.2      callr_3.7.6      
+#&gt;  [9] later_1.4.2       jquerylib_0.1.4   png_0.1-8         yaml_2.3.10      
+#&gt; [13] fastmap_1.2.0     lattice_0.22-7    reticulate_1.42.0 R6_2.6.1         
+#&gt; [17] knitr_1.50        tibble_3.3.0      rprojroot_2.1.1   bslib_0.9.0      
+#&gt; [21] pillar_1.11.1     rlang_1.1.6       cachem_1.1.0      stringi_1.8.7    
+#&gt; [25] httpuv_1.6.16     xfun_0.52         getPass_0.2-4     fs_1.6.6         
+#&gt; [29] sass_0.4.10       otel_0.2.0        cli_3.6.5         withr_3.0.2      
+#&gt; [33] magrittr_2.0.3    ps_1.9.1          grid_4.3.2        digest_0.6.39    
+#&gt; [37] processx_3.8.6    rstudioapi_0.17.1 lifecycle_1.0.4   vctrs_0.6.5      
+#&gt; [41] evaluate_1.0.5    glue_1.8.0        whisker_0.4.1     rmarkdown_2.29   
+#&gt; [45] httr_1.4.7        tools_4.3.2       pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
