@@ -1,0 +1,38 @@
+---
+title: "Untitled"
+output: html_document
+date: "2026-05-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+\begin{align*}
+\mathcal{E}(q(b), R_q, \nu_q, \nu_0) & = \log \Gamma_{\! J}\left(\dfrac{\nu_q +J + 1}{2}\right) - \log \Gamma_{\! J}\left(\dfrac{\nu_{\delta} + J + 1}{2}\right) - \dfrac{\nu_q - \nu_{\delta} - 1}{2} \psi_{\! J}\left(\dfrac{\nu_q + J + 1}{2}\right) \nonumber\\
+& - \dfrac{(\nu_{\delta} + J + 1)J}{2} \log |\nu_q|  + \dfrac{(\nu_q + J + 1)J}{2} + \dfrac{\nu_{\delta} + J + 1}{2} \log |\nu_0 R_0 + \delta D_0| \nonumber\\
+& - \dfrac{\nu_{\delta} + J + 2}{2} \log |R_q| - \dfrac{N}{2} \trace(R_q \boldsymbol{B}) - \dfrac{1}{2}\trace(R_q^{-1} \boldsymbol{V})\\
+& + N v^\top \overline{b} - \mathrm{KL}(q(b) \| p(b)),
+\end{align*}
+(up to a constant only depends on $J$ and $N$), where $\nu_{\delta} = \nu_0 + \delta$, 
+\begin{equation}
+    \boldsymbol{V} = \dfrac{\nu_q + J + 1}{\nu_q} \left(\nu_0 R_0 + \delta D_0 + N vv^\top\right),
+\end{equation}
+and 
+$$\boldsymbol{B} = \mathbb{E}_{q(b)} [bb^\top].$$
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

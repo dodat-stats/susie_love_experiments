@@ -632,22 +632,58 @@ for (row in set_rows){
 
 
 ```{r}
-sum((R_q[set_rows[1], ] - R_bar[set_rows[1], ])^2)
-sum((R_q[set_rows[2], ] - R_bar[set_rows[2], ])^2)
-sum((R_q[set_rows[3], ] - R_bar[set_rows[3], ])^2)
-sum((R_q[set_rows[4], ] - R_bar[set_rows[4], ])^2)
-sum((R_q[set_rows[5], ] - R_bar[set_rows[5], ])^2)
+for (row in set_rows){
+   signal_res = optimize_nu0_single_effect(R[row, ], row, R0, init_nu0 = 50, lambda = lambda_est)
+   print(signal_res)
+}
 
 ```
+
 
 ```{r}
 for (row in set_rows){
    signal_res = optimize_params_single_effect(R_q[row, ], row, R0, init_nu0 = 100, lambda_est)
    print(signal_res)
 }
+```
+
+```{r}
+for (row in set_rows){
+   grid_res = grid_search_single_effect(R_q[row, ], row, R0, n_grid = 10)
+   print(row)  
+   print(grid_res$lambda_opt)
+   print(grid_res$nu_0_opt)
+}
+
+
 
 ```
 
+```{r}
+prior_mean = N0 / (N0 + 1) * R0 + 1 / (N0 + 1) * diag_R
+all_dists = colSums((R_q - prior_mean)^2)
+
+plot(c(1:J), all_dists)  
+all_cs = susielove:::get_cs(b_res$alpha, R_q)$cs
+for (i in c(1:5)){
+  points(all_cs[[i]], all_dists[all_cs[[i]]], col=i+1, pch = 19)
+}
+
+
+```
+
+```{r}
+prior_mean = N0 / (N0 + 1) * R0 + 1 / (N0 + 1) * diag_R
+all_dists = colSums((R - prior_mean)^2)
+
+plot(c(1:J), all_dists)  
+all_cs = susielove:::get_cs(b_res$alpha, R_q)$cs
+for (i in c(1:5)){
+  points(all_cs[[i]], all_dists[all_cs[[i]]], col=i+1, pch = 19)
+}
+
+
+```
 
 # 4. But is it too conservative in other cases???
 
@@ -761,3 +797,12 @@ for (row in set_rows){
    print(signal_res)
 }
 ```
+
+
+# 5. Conclusion now.
+
+1) estimating nu_0 from R_q is not working. (Compared to R)
+
+2) For selling, perhaps I should just set $\delta = .1$ and then tune $\nu_0$ in `susie-XL`. That seems most principle.
+
+
