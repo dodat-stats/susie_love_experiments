@@ -30,4 +30,4 @@ editor_options:
 
 + [Try grid search of nu0 in susie-XL implementation (Fix delta)](test-new-optimization-delta-ver.html)
 
-
++ [Does grid search of nu0 in susie-XL implementation save the too mismatch case? (spoiler: yes)](mismatch_fix_delta_approach.html)

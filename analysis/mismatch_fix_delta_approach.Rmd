@@ -1,0 +1,531 @@
+---
+title: "Fix delta, tune nu0 in a grid"
+author: "dodat-stats"
+date: "2026-06-04"
+output:
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# 1. Aim
+
+We investigate to see if using a **very mismatched** R0 leads to small $\nu_0$.
+
+## 1.1. Generate silly R0
+
+```{r}
+sim_asn_eur <- function(chrom, start, end, n_gwas, n_ref, J, h2, seed) {
+
+  stdpopsim <- reticulate::import("stdpopsim")
+  msprime   <- reticulate::import("msprime")
+
+  set.seed(seed)
+
+  # 1. Get Realistic Genetic Map from stdpopsim
+  species <- stdpopsim$get_species("HomSap")
+  contig  <- species$get_contig(chrom, left = as.integer(start), right = as.integer(end))
+
+  # 2. Get OutOfAfrica_3G09 Demography (YRI, CEU, CHB)
+  demo_model <- species$get_demographic_model("OutOfAfrica_3G09")
+  demography <- demo_model$model
+
+  # 3. Run Simulation
+  ts <- msprime$sim_ancestry(
+    samples = reticulate::dict(CHB = as.integer(n_gwas), CEU = as.integer(n_ref)),
+    demography = demography,
+    recombination_rate = contig$recombination_map,
+    random_seed = as.integer(seed)
+  )
+
+  ts <- msprime$sim_mutations(ts, rate = 1.29e-8, random_seed = as.integer(seed))
+
+  # 4. Extract Genotypes
+  chb_id <- NULL
+  ceu_id <- NULL
+  for (p in reticulate::iterate(ts$populations())) {
+    if (!is.null(p$metadata) && p$metadata$name == "CHB") chb_id <- p$id
+    if (!is.null(p$metadata) && p$metadata$name == "CEU") ceu_id <- p$id
+  }
+
+  samples_gwas <- ts$samples(population = as.integer(chb_id))
+  samples_ref  <- ts$samples(population = as.integer(ceu_id))
+
+  G_all <- ts$genotype_matrix()
+
+  to_diploid <- function(hap_idx) {
+    idx <- as.integer(hap_idx) + 1
+    g_hap <- G_all[, idx, drop = FALSE]
+    g_dip <- g_hap[, seq(1, ncol(g_hap), by = 2)] + g_hap[, seq(2, ncol(g_hap), by = 2)]
+    return(t(g_dip))
+  }
+
+  G_gwas <- to_diploid(samples_gwas)
+  G_ref  <- to_diploid(samples_ref)
+
+  # 5. Filter for Common Variants (MAF > 5%)
+  maf_gwas <- colMeans(G_gwas) / 2
+  maf_ref  <- colMeans(G_ref) / 2
+
+  common_mask <- (maf_gwas > 0.05) & (maf_gwas < 0.95) & (maf_ref > 0.05) & (maf_ref < 0.95)
+  n_common <- sum(common_mask)
+  if (n_common < J) stop(paste0("Only ", n_common, " common variants found but J = ", J, ". Try a larger region."))
+  G_gwas <- G_gwas[, common_mask, drop = FALSE]
+  G_ref  <- G_ref[, common_mask, drop = FALSE]
+
+  J_all <- min(ncol(G_gwas), J)
+  max_start <- J_all - J
+  start_idx <- if (max_start > 0) sample(0:max_start, 1) else 0
+  cols_to_keep <- (start_idx + 1):(start_idx + J)
+  G  <- G_gwas[, cols_to_keep, drop = FALSE]
+  G0 <- G_ref[, cols_to_keep, drop = FALSE]
+
+  # 6. Generate summary stats
+  X <- sweep(G, 2, colMeans(G), "-")
+  N <- nrow(X)
+
+  G0_centered <- sweep(G0, 2, colMeans(G0), "-")
+
+  R0 <- stats::cov(G0_centered)
+  R0[is.na(R0)] <- 0
+
+  R <- stats::cov(X)
+  R[is.na(R)] <- 0
+
+  num_causal <- 2
+  first_causal_SNP <- sample(1:J, 1)
+  second_causal_SNP <- which.min(R[first_causal_SNP, ]^2)
+  causal_SNPs_loc <- c(first_causal_SNP, second_causal_SNP)
+
+  beta_true <- rep(0, J)
+  beta_true[causal_SNPs_loc] <- stats::runif(num_causal) + 0.01
+
+  var_expl <- sum((X %*% beta_true)^2 / N)
+  scale <- h2 / var_expl
+  beta_true <- beta_true * sqrt(scale)
+
+  y <- (X %*% beta_true) + sqrt(1 - h2) * stats::rnorm(N)
+  y_std <- sqrt(sum((y - mean(y))^2) / N)
+  y <- (y - mean(y)) / y_std
+
+  v <- (t(X) %*% y) / N
+
+  return(list(
+    v = as.vector(v),
+    R = R,
+    R0 = R0,
+    beta_true = beta_true,
+    causal_SNPs_loc = causal_SNPs_loc
+  ))
+}
+
+```
+
+```{r}
+seed = 2
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0 = 500L
+J     <- 500L
+h2    <- 0.01
+
+res <- sim_asn_eur(chrom, start, end,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+
+## standardized
+d = 1 / sqrt(diag(R))
+v = d * v
+R = cov2cor(R)
+R0 = cov2cor(R0)
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+
+
+## 1.2 Visualize two correlation matrices
+
+Sorry the color scheme is a bit hard to see but if we squeeze our eyes a bit then we can see that the two matrices are different. 
+
+```{r, fig.width=8, fig.height=6}
+par(mfrow = c(1, 2))
+
+image(R0[1:100, 1:100], main = "Out-of-sample (EUR)", col = heat.colors(15))
+image(R[1:100, 1:100], main = "In-sample corr (CHB)", col = heat.colors(15))
+par(mfrow = c(1, 1))
+```
+
+## 1.3. Fit susieR
+
+```{r susie-insample, fig.width=8, fig.height=6}
+library(susieR)
+
+fit <- susie_suff_stat(
+  XtX = N * R,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit, y = "PIP", b = beta_true, main = "In-sample cov mat")
+```
+
+```{r susie-outsample, fig.width=8, fig.height=6}
+library(susieR)
+
+fit_R0 <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit_R0, y = "PIP", b = beta_true, main = "Out-of-sample cov mat")
+```
+
+# 2. Fit the susie model with fixed delta and nu_0 warm start from a grid
+
+## 2.1 Prepare inputs for susie-love
+
+```{r prep-inputs}
+library(susielove)
+
+diag_R <- rep(1, J)
+R_out  <- R0
+k      <- min(min(N0, J), 200)
+delta  <- 1
+```
+
+## 2.2 Phase 1: warm-started coarse scan (10 iterations each)
+
+Each grid point is warm-started with `Z_final` from its left neighbour so the
+10-iteration budget reflects the actual profile loss rather than the cold-start
+transient.
+
+```{r profile-warm-coarse}
+nu_0_grid <- exp(seq(log(10), log(5 * N0), length.out = 10))
+
+coarse_results <- vector("list", length(nu_0_grid))
+z_prev <- NULL
+
+for (i in seq_along(nu_0_grid)) {
+  coarse_results[[i]] <- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                                   nu_0_init     = nu_0_grid[i],
+                                   z_init        = z_prev,
+                                   estimate_nu_0 = FALSE,
+                                   max_iter_init = 100,
+                                   step_susie    = 1,
+                                   step_R        = 100,
+                                   max_iter      = 10,
+                                   tol           = -Inf)
+  z_prev <- coarse_results[[i]]$Z_final
+}
+
+coarse_loss <- sapply(coarse_results, function(r) tail(r$loss_history, 1))
+best_idx    <- which.min(coarse_loss)
+
+plot(nu_0_grid, coarse_loss, log = "x", type = "b", pch = 16,
+     xlab = "nu_0 (log scale)", ylab = "Loss after 10 iters",
+     main = "Profile loss — warm-started coarse scan")
+abline(v = nu_0_grid[best_idx], col = "red", lty = 2)
+cat("Best nu_0 on grid:", round(nu_0_grid[best_idx], 2),
+    "| coarse loss:", round(coarse_loss[best_idx], 4), "\n")
+```
+
+## 2.3 Phase 2: full convergence from the best warm start
+
+```{r profile-warm-full, fig.width=8, fig.height=6}
+best_res <- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                      nu_0_init     = nu_0_grid[best_idx],
+                      z_init        = coarse_results[[best_idx]]$Z_final,
+                      estimate_nu_0 = TRUE,
+                      max_iter_init = 100,
+                      step_susie    = 1,
+                      n_inner = 5,
+                      step_R        = 100,
+                      max_iter      = 100,
+                      tol           = 1e-5)
+
+cat("Converged loss:", round(tail(best_res$loss_history, 1), 4),
+    "| nu_0:", round(best_res$nu_0, 2),
+    "| nu_q:", round(best_res$nu_q, 2),
+    "| iters:", length(best_res$loss_history), "\n")
+
+susie_plot_alpha(
+  alpha = best_res$b_res$alpha,
+  R     = cov2cor(best_res$R_q),
+  b     = beta_true,
+  main  = paste0("SuSiE-XL (CHB/EUR mismatch) | nu_0=", round(best_res$nu_0, 1),
+                 " | nu_q=", round(best_res$nu_q, 1))
+)
+```
+
+**Conclusion:** Hence, the susie-love implementation that fixes $\delta = 1$ and only learn $\nu_0$ remains conservative when the mismatch is large. Our updated learning strategy using a grid of $\nu_0$ as a warm-start to choose the good initialization for $\nu_0$ seems to work pretty well, and it is not too slow, total run time on a Mac M1 is around 1 minute. I will make a computational benchmark later.
+
+# 3. A catch
+
+There is a catch in the analysis above, which is the way that we constrain the rank k in the low-rank part of the low-rank-plus-diagonal representation of $R_q$. 
+
+Recall that $R_q$ is parametrized by a unconstrained $k \times J$ matrix. With $J = 1000$, this yields $1000k$ parameters to optimize. Hence, we naturally want $k$ not to be large. Of course $k \leq \text{rank}(R_0) \leq \min\{N_0, J\}$.
+
+In the analysis above, $N_0 = 500, J = 500$ and I further restrict $k = \min\{N_0, J, 200\}$. Therefore the low-rank part of the $R_q$ has rank 200. 
+
+To my surprise, the result changes when we increase $k$: The ELBO becomes larger (the loss is smaller), the optimal $\nu_0$ is larger and leads to more false positive.
+
+Let's try $k = 400$ to see this.
+
+## 3.1 Prepare inputs for susie-love
+
+```{r prep-inputs-k-400}
+library(susielove)
+
+diag_R <- rep(1, J)
+R_out  <- R0
+k      <- min(min(N0, J), 400)  ## 400
+delta  <- 1
+```
+
+## 3.2 Phase 1: warm-started coarse scan (10 iterations each)
+
+```{r profile-warm-coarse-400}
+nu_0_grid <- exp(seq(log(10), log(5 * N0), length.out = 10))
+
+coarse_results <- vector("list", length(nu_0_grid))
+z_prev <- NULL
+
+for (i in seq_along(nu_0_grid)) {
+  coarse_results[[i]] <- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                                   nu_0_init     = nu_0_grid[i],
+                                   z_init        = z_prev,
+                                   estimate_nu_0 = FALSE,
+                                   max_iter_init = 100,
+                                   step_susie    = 1,
+                                   step_R        = 100,
+                                   max_iter      = 10,
+                                   tol           = -Inf)
+  z_prev <- coarse_results[[i]]$Z_final
+}
+
+coarse_loss <- sapply(coarse_results, function(r) tail(r$loss_history, 1))
+best_idx    <- which.min(coarse_loss)
+
+plot(nu_0_grid, coarse_loss, log = "x", type = "b", pch = 16,
+     xlab = "nu_0 (log scale)", ylab = "Loss after 10 iters",
+     main = "Profile loss — warm-started coarse scan")
+abline(v = nu_0_grid[best_idx], col = "red", lty = 2)
+cat("Best nu_0 on grid:", round(nu_0_grid[best_idx], 2),
+    "| coarse loss:", round(coarse_loss[best_idx], 4), "\n")
+```
+
+## 3.3 Phase 2: full convergence from the best warm start
+
+```{r profile-warm-full-400, fig.width=8, fig.height=6}
+best_res <- susie_XL(v, R_out, diag_R, delta, N, L = 5, k,
+                      nu_0_init     = nu_0_grid[best_idx],
+                      z_init        = coarse_results[[best_idx]]$Z_final,
+                      estimate_nu_0 = TRUE,
+                      max_iter_init = 100,
+                      step_susie    = 1,
+                      n_inner = 5,
+                      step_R        = 100,
+                      max_iter      = 100,
+                      tol           = 1e-5)
+
+cat("Converged loss:", round(tail(best_res$loss_history, 1), 4),
+    "| nu_0:", round(best_res$nu_0, 2),
+    "| nu_q:", round(best_res$nu_q, 2),
+    "| iters:", length(best_res$loss_history), "\n")
+
+susie_plot_alpha(
+  alpha = best_res$b_res$alpha,
+  R     = cov2cor(best_res$R_q),
+  b     = beta_true,
+  main  = paste0("SuSiE-XL (CHB/EUR mismatch) | nu_0=", round(best_res$nu_0, 1),
+                 " | nu_q=", round(best_res$nu_q, 1))
+)
+```
+
+## 3.4. Investigate rank of $R_0$
+
+$k$ should be tuned to depend on the rank of $R_0$. Let's investigate the eigenvalues of $R_0$:
+
+```{r eigen-val-R0}
+eig_vals_R0 = eigen(R0)$values
+plot(c(1:J), eig_vals_R0, pch = 16, cex = .5)
+```
+
+From the plot, it should be reasonable to say that $k = 100$ (or at most 200) suffices for the low-rank part in the low-rank-plus-diag of $R_0$ (and $R_q$). We now verify this by comparing how well the rank-$k$ variational family can approximate the prior at $\nu_0 = \nu_q = 500$.
+
+## 3.5. KL between the variational R_q and the prior at k = 200 vs k = 400
+
+We set the prior mean $\bar{R} = (1 - 1/N_0) R_0 + (1/N_0) I_J$ (i.e. $\lambda = 1/N_0$) and fix $\nu_0 = \nu_q = 500$. For each $k$ we find the best $R_q$ in the rank-$k$-plus-diagonal family using `initialize_Z_from_prior_R`, then compute
+
+$$\mathrm{KL}\!\left(\mathrm{IW}(\nu_q R_q,\; \nu_q + J + 1) \;\|\; \mathrm{IW}(\nu_0 \bar{R},\; \nu_0 + J + 1)\right).$$
+
+Because $\nu_q = \nu_0$ the multivariate-gamma and digamma terms cancel and the formula reduces to
+
+$$\mathrm{KL} = \frac{\nu_0 + J + 1}{2}\!\left[\log\frac{|R_q|}{|\bar{R}|} + \mathrm{tr}(\bar{R}\, R_q^{-1}) - J\right].$$
+
+```{r kl-setup}
+nu  <- 500L
+R_bar <- (1 - 1 / N0) * R0 + (1 / N0) * diag(J)
+
+# KL(IW(nu*R_q, nu+J+1) || IW(nu*R_bar, nu+J+1)) when nu_q = nu_0 = nu
+compute_KL_IW <- function(Z, k, nu, R_bar, diag_R) {
+  J <- nrow(R_bar)
+
+  s          <- 1 + rowSums(Z^2)
+  alpha_diag <- sqrt(diag_R / s)
+  F_mat      <- Z * alpha_diag
+  D_diag     <- alpha_diag^2
+  D_inv_diag <- 1 / D_diag
+
+  # log|R_q| via matrix determinant lemma
+  M      <- diag(k) + t(F_mat) %*% (F_mat * D_inv_diag)
+  chol_M <- chol(M)
+  log_det_Rq <- sum(log(D_diag)) + 2 * sum(log(diag(chol_M)))
+
+  # log|R_bar|
+  log_det_Rbar <- 2 * sum(log(diag(chol(R_bar))))
+
+  # tr(R_bar * R_q^{-1}) via Woodbury
+  M_inv   <- chol2inv(chol_M)
+  D_inv_F <- F_mat * D_inv_diag                          # J x k
+  term1   <- sum(diag(R_bar) * D_inv_diag)              # tr(R_bar D^{-1})
+  A       <- crossprod(D_inv_F, R_bar %*% D_inv_F)      # k x k
+  tr_Rbar_Rqinv <- term1 - sum(A * M_inv)
+
+  (nu + J + 1) / 2 * (log_det_Rq - log_det_Rbar + tr_Rbar_Rqinv - J)
+}
+```
+
+```{r kl-k200}
+k_200 <- 200L
+z_200 <- susielove:::initialize_Z_from_prior_R(R_bar, nu, nu, diag_R, k_200, max_iter_init = 500)
+Z_200 <- matrix(z_200, nrow = J, ncol = k_200)
+
+s_200     <- 1 + rowSums(Z_200^2)
+alpha_200 <- sqrt(diag_R / s_200)
+R_q_200   <- (Z_200 * alpha_200) %*% t(Z_200 * alpha_200) + diag(alpha_200^2)
+
+KL_200 <- compute_KL_IW(Z_200, k_200, nu, R_bar, diag_R)
+cat("k = 200 | KL:", round(KL_200, 4), "\n")
+```
+
+```{r kl-k400}
+k_400 <- 400L
+z_400 <- susielove:::initialize_Z_from_prior_R(R_bar, nu, nu, diag_R, k_400, max_iter_init = 500)
+Z_400 <- matrix(z_400, nrow = J, ncol = k_400)
+
+s_400     <- 1 + rowSums(Z_400^2)
+alpha_400 <- sqrt(diag_R / s_400)
+R_q_400   <- (Z_400 * alpha_400) %*% t(Z_400 * alpha_400) + diag(alpha_400^2)
+
+KL_400 <- compute_KL_IW(Z_400, k_400, nu, R_bar, diag_R)
+cat("k = 400 | KL:", round(KL_400, 4), "\n")
+```
+
+```{r kl-compare, fig.width=12, fig.height=4}
+cat("KL reduction from k=200 to k=400:",
+    round((KL_200 - KL_400) / KL_200 * 100, 1), "%\n")
+
+par(mfrow = c(1, 3))
+image(R_bar[1:50, 1:50],   main = "R_bar (prior mean)", col = heat.colors(15))
+image(R_q_200[1:50, 1:50], main = "R_q  (k = 200)",    col = heat.colors(15))
+image(R_q_400[1:50, 1:50], main = "R_q  (k = 400)",    col = heat.colors(15))
+par(mfrow = c(1, 1))
+```
+
+```{r kl-diff, fig.width=14, fig.height=4}
+diff_200_bar <- (R_q_200 - R_bar)[1:50, 1:50]
+diff_400_bar <- (R_q_400 - R_bar)[1:50, 1:50]
+diff_400_200 <- (R_q_400 - R_q_200)[1:50, 1:50]
+
+zlim    <- range(c(diff_200_bar, diff_400_bar, diff_400_200))
+col_div <- colorRampPalette(c("blue", "white", "red"))(50)
+
+layout(matrix(1:4, 1, 4), widths = c(4, 4, 4, 0.6))
+
+par(mar = c(4, 4, 3, 1))
+image(diff_200_bar, main = "R_q(k=200) - R_bar",       col = col_div, zlim = zlim)
+image(diff_400_bar, main = "R_q(k=400) - R_bar",       col = col_div, zlim = zlim)
+image(diff_400_200, main = "R_q(k=400) - R_q(k=200)",  col = col_div, zlim = zlim)
+
+# colour bar
+par(mar = c(4, 0.5, 3, 3))
+color_vals <- seq(zlim[1], zlim[2], length.out = 50)
+image(x = 1, y = color_vals, z = matrix(color_vals, nrow = 1),
+      col = col_div, xaxt = "n", xlab = "", ylab = "", main = "")
+axis(4, las = 1)
+
+layout(1)
+par(mar = c(5, 4, 4, 2) + 0.1)
+
+cat("Max |R_q(k=200) - R_bar|     :", round(max(abs(R_q_200 - R_bar)), 5), "\n")
+cat("Max |R_q(k=400) - R_bar|     :", round(max(abs(R_q_400 - R_bar)), 5), "\n")
+cat("Max |R_q(k=400) - R_q(k=200)|:", round(max(abs(R_q_400 - R_q_200)), 5), "\n")
+```
+
+**Conclusion:** It can be observed that the case $k = 400$ provides a better approximation to the prior mean $\overline{R}$. However $R_q$ with $ k = 200$ is not bad, the maximal difference between elements to $\overline{R}$ is only 0.02 and it happens only at a very few elements. But it seems to affect the KL divergence a lot. This KL divergence enters the loss of susie-love through the term `cov` (divided by $J = 500$).
+
+```{r}
+cat("k = 400 | KL:", round(KL_400, 4), "\n")
+cat("k = 200 | KL:", round(KL_200, 4), "\n")
+```
+
+However, term `fit` is not affected much by the rank. 
+
+```{r}
+fit_200 <- susie_suff_stat(
+  XtX = N * R_q_200,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit_200, y = "PIP", b = beta_true, main = "Out-of-sample R_q_200")
+
+b_bar = colSums(fit_200$alpha, fit_200$mu)
+
+epsilon = v - R_q_200 %*% b_bar
+fit_term_200 = N * t(epsilon) %*% solve(R_q_200, epsilon) / J
+fit_term_200
+```
+
+```{r}
+fit_400 <- susie_suff_stat(
+  XtX = N * R_q_200,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit_400, y = "PIP", b = beta_true, main = "Out-of-sample R_q_400")
+
+b_bar = colSums(fit_400$alpha, fit_400$mu)
+
+epsilon = v - R_q_400 %*% b_bar
+fit_term_400 = N * t(epsilon) %*% solve(R_q_400, epsilon) / J
+fit_term_400
+```
+
+In the next workflowr, we will use the fit error to propose an automatic choice for $k$. My takeaway now is it actually quite delicate to work with the KL divergence between IW of $J \times J$ covariance matrices. But we are getting there!!!
+
+
