@@ -13,7 +13,7 @@
 
 <title>Setting small nu leads to conservative behaviour</title>
 
-<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -366,7 +366,7 @@ behaviour</h1>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-ok text-success"
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -377,8 +377,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-</a>
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -387,13 +387,13 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-05-07
+<strong>Last updated:</strong> 2026-05-12
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 0
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>susie_love_experiments/</code>
@@ -405,7 +405,7 @@ title="This is the local directory in which the code in this file was executed."
 This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
 analysis was created with <a
   href="https://github.com/workflowr/workflowr">workflowr</a> (version
-1.7.2). The <em>Checks</em> tab describes the reproducibility checks
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
 that were applied when the results were created. The <em>Past
 versions</em> tab lists the development history.
 </p>
@@ -416,18 +416,21 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
-<span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
-</a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate"
+<div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git
-repository, you know the exact version of the code that produced these
-results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
 </div>
 </div>
 </div>
@@ -518,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreeb9f6b5c5ac9537746b60fcaa91560ff48d59c331targetblankb9f6b5ca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree1d8434114aa8e4d6ff08dc3cd2b4551b22710150targetblank1d84341a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/b9f6b5c5ac9537746b60fcaa91560ff48d59c331" target="_blank">b9f6b5c</a>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/1d8434114aa8e4d6ff08dc3cd2b4551b22710150" target="_blank">1d84341</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreeb9f6b5c5ac9537746b60fcaa91560ff48d59c331targetblankb9f6b5ca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree1d8434114aa8e4d6ff08dc3cd2b4551b22710150targetblank1d84341a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -536,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/dodat-stats/susie_love_experiments/tree/b9f6b5c5ac9537746b60fcaa91560ff48d59c331" target="_blank">b9f6b5c</a>.
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/1d8434114aa8e4d6ff08dc3cd2b4551b22710150" target="_blank">1d84341</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -552,9 +555,10 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
-    Ignored:    .Rhistory
-    Ignored:    .Rproj.user/
     Ignored:    analysis/figure/
+
+Unstaged changes:
+    Modified:   analysis/small_nu.Rmd
 
 </code></pre>
 <p>
@@ -569,6 +573,7 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
 These are the previous versions of the repository in which changes were
 made to the R Markdown (<code>analysis/small_nu.Rmd</code>) and HTML
@@ -599,6 +604,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/dodat-stats/susie_love_experiments/1d8434114aa8e4d6ff08dc3cd2b4551b22710150/docs/small_nu.html" target="_blank">1d84341</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-05-07
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -661,7 +683,7 @@ wflow_publish(c("analysis/index.Rmd", "analysis/small_nu.Rmd"))
 <h2>1. Simulate data from a coalescent model</h2>
 <pre class="r"><code>library(susielove)
 
-seed  &lt;- 1
+seed  &lt;- 2
 T_split &lt;- 25
 chrom &lt;- &quot;chr22&quot;
 start &lt;- 20e6
@@ -688,7 +710,7 @@ true_SNP = which(beta_true != 0)
 
 plot(v, pch = 16)
 points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = &quot;red&quot;)</code></pre>
-<p><img src="figure/small_nu.Rmd/simulate-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/simulate-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-simulate-1">
 Past versions of simulate-1.png
@@ -729,8 +751,9 @@ dodat-stats
 </div>
 <div id="susie-with-out-of-sample-ld" class="section level2">
 <h2>2. SuSiE with out-of-sample LD:</h2>
-<pre class="r"><code>library(susieR)
-d0_inv_sqrt &lt;- 1 / sqrt(diag(R0))
+<pre class="r"><code>library(susieR)</code></pre>
+<pre><code>Warning: package &#39;susieR&#39; was built under R version 4.3.3</code></pre>
+<pre class="r"><code>d0_inv_sqrt &lt;- 1 / sqrt(diag(R0))
 LD0 &lt;- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
 d_sqrt &lt;- sqrt(diag(R))
 R_tilde &lt;- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
@@ -743,7 +766,7 @@ fit_R_tilde &lt;- susie_suff_stat(
 )
 susie_plot(fit_R_tilde, y = &quot;PIP&quot;, b = beta_true,
            main = &quot;Out-of-sample cov mat (corrected diag)&quot;)</code></pre>
-<p><img src="figure/small_nu.Rmd/diag-correction-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/diag-correction-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-diag-correction-1">
 Past versions of diag-correction-1.png
@@ -799,15 +822,16 @@ love_res &lt;- susie_love_lambda(v, R_out, diag_R,
                               step_nu = 10,
                               max_iter = 30, 
                               tol = 1e-4)</code></pre>
-<pre><code>Iter 1 | Loss: -2.8906 | nu_q: 820.5 | nu_0: 818.9
-Iter 2 | Loss: -2.9245 | nu_q: 755.5 | nu_0: 752.5
-Iter 3 | Loss: -2.9339 | nu_q: 711.4 | nu_0: 707.6
-Iter 4 | Loss: -2.9378 | nu_q: 685.3 | nu_0: 680.8
-Iter 5 | Loss: -2.9392 | nu_q: 669.9 | nu_0: 665.0
-Iter 6 | Loss: -2.9396 | nu_q: 661.9 | nu_0: 656.9
-Iter 7 | Loss: -2.9398 | nu_q: 661.9 | nu_0: 656.9
-Iter 8 | Loss: -2.9399 | nu_q: 661.9 | nu_0: 656.9
-Converged at iteration 8 </code></pre>
+<pre><code>Iter 1 | Loss: -2.6384 | nu_q: 818.3 | nu_0: 816.4
+Iter 2 | Loss: -2.6962 | nu_q: 709.2 | nu_0: 705.6
+Iter 3 | Loss: -2.7117 | nu_q: 656.3 | nu_0: 651.9
+Iter 4 | Loss: -2.7167 | nu_q: 631.5 | nu_0: 626.6
+Iter 5 | Loss: -2.7176 | nu_q: 620.5 | nu_0: 615.5
+Iter 6 | Loss: -2.7178 | nu_q: 620.5 | nu_0: 615.5
+Iter 7 | Loss: -2.7184 | nu_q: 613.2 | nu_0: 607.7
+Iter 8 | Loss: -2.7185 | nu_q: 610.3 | nu_0: 604.9
+Iter 9 | Loss: -2.7186 | nu_q: 610.3 | nu_0: 604.9
+Converged at iteration 9 </code></pre>
 <pre class="r"><code>b_res &lt;- love_res$b_res
 R_q   &lt;- love_res$R_q
 
@@ -817,7 +841,7 @@ susie_plot_alpha(
   b = beta_true,
   main = paste0(&quot;SuSiE-LovE with lambda = &quot;, lambda)
 )</code></pre>
-<p><img src="figure/small_nu.Rmd/susie-love-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/susie-love-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-susie-love-1">
 Past versions of susie-love-1.png
@@ -879,334 +903,272 @@ susie_love_small_nu &lt;- susie_love_fix_2params(v, R_out, diag_R,
                                    max_iter = 500,
                                    max_iter_init = 100,
                                    tol = 1e-4)</code></pre>
-<pre><code>Iter 1 | Loss: 51.7092 | nu_q: 2.3 | nu_0: 1.1
-Iter 2 | Loss: 46.3937 | nu_q: 2.5 | nu_0: 1.1
-Iter 3 | Loss: 42.7383 | nu_q: 2.8 | nu_0: 1.1
-Iter 4 | Loss: 39.6519 | nu_q: 3.0 | nu_0: 1.1
-Iter 5 | Loss: 37.0251 | nu_q: 3.2 | nu_0: 1.1
-Iter 6 | Loss: 34.7855 | nu_q: 3.4 | nu_0: 1.1
-Iter 7 | Loss: 32.8272 | nu_q: 3.6 | nu_0: 1.1
-Iter 8 | Loss: 31.1138 | nu_q: 3.8 | nu_0: 1.1
-Iter 9 | Loss: 29.5874 | nu_q: 4.0 | nu_0: 1.1
-Iter 10 | Loss: 28.2273 | nu_q: 4.2 | nu_0: 1.1
-Iter 11 | Loss: 26.9680 | nu_q: 4.5 | nu_0: 1.1
-Iter 12 | Loss: 25.8787 | nu_q: 4.7 | nu_0: 1.1
-Iter 13 | Loss: 24.8999 | nu_q: 4.9 | nu_0: 1.1
-Iter 14 | Loss: 23.9988 | nu_q: 5.1 | nu_0: 1.1
-Iter 15 | Loss: 23.1842 | nu_q: 5.3 | nu_0: 1.1
-Iter 16 | Loss: 22.4457 | nu_q: 5.5 | nu_0: 1.1
-Iter 17 | Loss: 21.7630 | nu_q: 5.7 | nu_0: 1.1
-Iter 18 | Loss: 21.1384 | nu_q: 5.9 | nu_0: 1.1
-Iter 19 | Loss: 20.5620 | nu_q: 6.1 | nu_0: 1.1
-Iter 20 | Loss: 20.0098 | nu_q: 6.3 | nu_0: 1.1
-Iter 21 | Loss: 19.4875 | nu_q: 6.5 | nu_0: 1.1
-Iter 22 | Loss: 19.0035 | nu_q: 6.7 | nu_0: 1.1
-Iter 23 | Loss: 18.5552 | nu_q: 6.9 | nu_0: 1.1
-Iter 24 | Loss: 18.1152 | nu_q: 7.1 | nu_0: 1.1
-Iter 25 | Loss: 17.7254 | nu_q: 7.3 | nu_0: 1.1
-Iter 26 | Loss: 17.3650 | nu_q: 7.5 | nu_0: 1.1
-Iter 27 | Loss: 17.0064 | nu_q: 7.7 | nu_0: 1.1
-Iter 28 | Loss: 16.6858 | nu_q: 7.9 | nu_0: 1.1
-Iter 29 | Loss: 16.3800 | nu_q: 8.1 | nu_0: 1.1
-Iter 30 | Loss: 16.0876 | nu_q: 8.3 | nu_0: 1.1
-Iter 31 | Loss: 15.7989 | nu_q: 8.5 | nu_0: 1.1
-Iter 32 | Loss: 15.5456 | nu_q: 8.7 | nu_0: 1.1
-Iter 33 | Loss: 15.3040 | nu_q: 8.9 | nu_0: 1.1
-Iter 34 | Loss: 15.0756 | nu_q: 9.0 | nu_0: 1.1
-Iter 35 | Loss: 14.8503 | nu_q: 9.2 | nu_0: 1.1
-Iter 36 | Loss: 14.6022 | nu_q: 9.4 | nu_0: 1.1
-Iter 37 | Loss: 14.3912 | nu_q: 9.6 | nu_0: 1.1
-Iter 38 | Loss: 14.2112 | nu_q: 9.8 | nu_0: 1.1
-Iter 39 | Loss: 14.0232 | nu_q: 10.0 | nu_0: 1.1
-Iter 40 | Loss: 13.8590 | nu_q: 10.2 | nu_0: 1.1
-Iter 41 | Loss: 13.6799 | nu_q: 10.3 | nu_0: 1.1
-Iter 42 | Loss: 13.5220 | nu_q: 10.5 | nu_0: 1.1
-Iter 43 | Loss: 13.3691 | nu_q: 10.7 | nu_0: 1.1
-Iter 44 | Loss: 13.2065 | nu_q: 10.9 | nu_0: 1.1
-Iter 45 | Loss: 13.0542 | nu_q: 11.1 | nu_0: 1.1
-Iter 46 | Loss: 12.9106 | nu_q: 11.3 | nu_0: 1.1
-Iter 47 | Loss: 12.7644 | nu_q: 11.5 | nu_0: 1.1
-Iter 48 | Loss: 12.6197 | nu_q: 11.7 | nu_0: 1.1
-Iter 49 | Loss: 12.4915 | nu_q: 11.8 | nu_0: 1.1
-Iter 50 | Loss: 12.3545 | nu_q: 12.0 | nu_0: 1.1
-Iter 51 | Loss: 12.2264 | nu_q: 12.2 | nu_0: 1.1
-Iter 52 | Loss: 12.1101 | nu_q: 12.4 | nu_0: 1.1
-Iter 53 | Loss: 11.9950 | nu_q: 12.6 | nu_0: 1.1
-Iter 54 | Loss: 11.8803 | nu_q: 12.7 | nu_0: 1.1
-Iter 55 | Loss: 11.7795 | nu_q: 12.9 | nu_0: 1.1
-Iter 56 | Loss: 11.6761 | nu_q: 13.1 | nu_0: 1.1
-Iter 57 | Loss: 11.5673 | nu_q: 13.3 | nu_0: 1.1
-Iter 58 | Loss: 11.4719 | nu_q: 13.4 | nu_0: 1.1
-Iter 59 | Loss: 11.3801 | nu_q: 13.6 | nu_0: 1.1
-Iter 60 | Loss: 11.2785 | nu_q: 13.8 | nu_0: 1.1
-Iter 61 | Loss: 11.1805 | nu_q: 14.0 | nu_0: 1.1
-Iter 62 | Loss: 11.0989 | nu_q: 14.1 | nu_0: 1.1
-Iter 63 | Loss: 11.0134 | nu_q: 14.3 | nu_0: 1.1
-Iter 64 | Loss: 10.9309 | nu_q: 14.5 | nu_0: 1.1
-Iter 65 | Loss: 10.8594 | nu_q: 14.6 | nu_0: 1.1
-Iter 66 | Loss: 10.7630 | nu_q: 14.8 | nu_0: 1.1
-Iter 67 | Loss: 10.6620 | nu_q: 14.9 | nu_0: 1.1
-Iter 68 | Loss: 10.5836 | nu_q: 15.1 | nu_0: 1.1
-Iter 69 | Loss: 10.5041 | nu_q: 15.2 | nu_0: 1.1
-Iter 70 | Loss: 10.3967 | nu_q: 15.4 | nu_0: 1.1
-Iter 71 | Loss: 10.2823 | nu_q: 15.5 | nu_0: 1.1
-Iter 72 | Loss: 10.1696 | nu_q: 15.7 | nu_0: 1.1
-Iter 73 | Loss: 10.0752 | nu_q: 15.8 | nu_0: 1.1
-Iter 74 | Loss: 9.8826 | nu_q: 15.9 | nu_0: 1.1
-Iter 75 | Loss: 9.6623 | nu_q: 16.0 | nu_0: 1.1
-Iter 76 | Loss: 9.2064 | nu_q: 16.3 | nu_0: 1.1
-Iter 77 | Loss: 8.1166 | nu_q: 16.6 | nu_0: 1.1
-Iter 78 | Loss: 7.7041 | nu_q: 16.8 | nu_0: 1.1
-Iter 79 | Loss: 7.6477 | nu_q: 16.9 | nu_0: 1.1
-Iter 80 | Loss: 7.5903 | nu_q: 17.1 | nu_0: 1.1
-Iter 81 | Loss: 7.5332 | nu_q: 17.3 | nu_0: 1.1
-Iter 82 | Loss: 7.4787 | nu_q: 17.5 | nu_0: 1.1
-Iter 83 | Loss: 7.4278 | nu_q: 17.6 | nu_0: 1.1
-Iter 84 | Loss: 7.3771 | nu_q: 17.8 | nu_0: 1.1
-Iter 85 | Loss: 7.3269 | nu_q: 18.0 | nu_0: 1.1
-Iter 86 | Loss: 7.2796 | nu_q: 18.2 | nu_0: 1.1
-Iter 87 | Loss: 7.2318 | nu_q: 18.4 | nu_0: 1.1
-Iter 88 | Loss: 7.1879 | nu_q: 18.5 | nu_0: 1.1
-Iter 89 | Loss: 7.1447 | nu_q: 18.7 | nu_0: 1.1
-Iter 90 | Loss: 7.1013 | nu_q: 18.9 | nu_0: 1.1
-Iter 91 | Loss: 7.0601 | nu_q: 19.0 | nu_0: 1.1
-Iter 92 | Loss: 7.0185 | nu_q: 19.2 | nu_0: 1.1
-Iter 93 | Loss: 6.9781 | nu_q: 19.4 | nu_0: 1.1
-Iter 94 | Loss: 6.9405 | nu_q: 19.6 | nu_0: 1.1
-Iter 95 | Loss: 6.9042 | nu_q: 19.7 | nu_0: 1.1
-Iter 96 | Loss: 6.8684 | nu_q: 19.9 | nu_0: 1.1
-Iter 97 | Loss: 6.8311 | nu_q: 20.1 | nu_0: 1.1
-Iter 98 | Loss: 6.7949 | nu_q: 20.3 | nu_0: 1.1
-Iter 99 | Loss: 6.7587 | nu_q: 20.4 | nu_0: 1.1
-Iter 100 | Loss: 6.7242 | nu_q: 20.6 | nu_0: 1.1
-Iter 101 | Loss: 6.6924 | nu_q: 20.8 | nu_0: 1.1
-Iter 102 | Loss: 6.6595 | nu_q: 20.9 | nu_0: 1.1
-Iter 103 | Loss: 6.6297 | nu_q: 21.1 | nu_0: 1.1
-Iter 104 | Loss: 6.6004 | nu_q: 21.3 | nu_0: 1.1
-Iter 105 | Loss: 6.5722 | nu_q: 21.4 | nu_0: 1.1
-Iter 106 | Loss: 6.5444 | nu_q: 21.6 | nu_0: 1.1
-Iter 107 | Loss: 6.5173 | nu_q: 21.8 | nu_0: 1.1
-Iter 108 | Loss: 6.4892 | nu_q: 21.9 | nu_0: 1.1
-Iter 109 | Loss: 6.4624 | nu_q: 22.1 | nu_0: 1.1
-Iter 110 | Loss: 6.4357 | nu_q: 22.2 | nu_0: 1.1
-Iter 111 | Loss: 6.4108 | nu_q: 22.4 | nu_0: 1.1
-Iter 112 | Loss: 6.3862 | nu_q: 22.5 | nu_0: 1.1
-Iter 113 | Loss: 6.3625 | nu_q: 22.7 | nu_0: 1.1
-Iter 114 | Loss: 6.3393 | nu_q: 22.9 | nu_0: 1.1
-Iter 115 | Loss: 6.3161 | nu_q: 23.0 | nu_0: 1.1
-Iter 116 | Loss: 6.2938 | nu_q: 23.2 | nu_0: 1.1
-Iter 117 | Loss: 6.2703 | nu_q: 23.3 | nu_0: 1.1
-Iter 118 | Loss: 6.2489 | nu_q: 23.5 | nu_0: 1.1
-Iter 119 | Loss: 6.2283 | nu_q: 23.6 | nu_0: 1.1
-Iter 120 | Loss: 6.2081 | nu_q: 23.8 | nu_0: 1.1
-Iter 121 | Loss: 6.1883 | nu_q: 23.9 | nu_0: 1.1
-Iter 122 | Loss: 6.1692 | nu_q: 24.1 | nu_0: 1.1
-Iter 123 | Loss: 6.1502 | nu_q: 24.3 | nu_0: 1.1
-Iter 124 | Loss: 6.1319 | nu_q: 24.4 | nu_0: 1.1
-Iter 125 | Loss: 6.1139 | nu_q: 24.5 | nu_0: 1.1
-Iter 126 | Loss: 6.0964 | nu_q: 24.7 | nu_0: 1.1
-Iter 127 | Loss: 6.0793 | nu_q: 24.8 | nu_0: 1.1
-Iter 128 | Loss: 6.0631 | nu_q: 25.0 | nu_0: 1.1
-Iter 129 | Loss: 6.0457 | nu_q: 25.1 | nu_0: 1.1
-Iter 130 | Loss: 6.0294 | nu_q: 25.3 | nu_0: 1.1
-Iter 131 | Loss: 6.0135 | nu_q: 25.4 | nu_0: 1.1
-Iter 132 | Loss: 5.9980 | nu_q: 25.6 | nu_0: 1.1
-Iter 133 | Loss: 5.9830 | nu_q: 25.7 | nu_0: 1.1
-Iter 134 | Loss: 5.9683 | nu_q: 25.8 | nu_0: 1.1
-Iter 135 | Loss: 5.9538 | nu_q: 26.0 | nu_0: 1.1
-Iter 136 | Loss: 5.9396 | nu_q: 26.1 | nu_0: 1.1
-Iter 137 | Loss: 5.9260 | nu_q: 26.3 | nu_0: 1.1
-Iter 138 | Loss: 5.9123 | nu_q: 26.4 | nu_0: 1.1
-Iter 139 | Loss: 5.8991 | nu_q: 26.6 | nu_0: 1.1
-Iter 140 | Loss: 5.8848 | nu_q: 26.7 | nu_0: 1.1
-Iter 141 | Loss: 5.8713 | nu_q: 26.8 | nu_0: 1.1
-Iter 142 | Loss: 5.8584 | nu_q: 27.0 | nu_0: 1.1
-Iter 143 | Loss: 5.8463 | nu_q: 27.1 | nu_0: 1.1
-Iter 144 | Loss: 5.8346 | nu_q: 27.2 | nu_0: 1.1
-Iter 145 | Loss: 5.8229 | nu_q: 27.4 | nu_0: 1.1
-Iter 146 | Loss: 5.8110 | nu_q: 27.5 | nu_0: 1.1
-Iter 147 | Loss: 5.7998 | nu_q: 27.6 | nu_0: 1.1
-Iter 148 | Loss: 5.7885 | nu_q: 27.8 | nu_0: 1.1
-Iter 149 | Loss: 5.7772 | nu_q: 27.9 | nu_0: 1.1
-Iter 150 | Loss: 5.7661 | nu_q: 28.0 | nu_0: 1.1
-Iter 151 | Loss: 5.7552 | nu_q: 28.2 | nu_0: 1.1
-Iter 152 | Loss: 5.7453 | nu_q: 28.3 | nu_0: 1.1
-Iter 153 | Loss: 5.7356 | nu_q: 28.4 | nu_0: 1.1
-Iter 154 | Loss: 5.7261 | nu_q: 28.6 | nu_0: 1.1
-Iter 155 | Loss: 5.7169 | nu_q: 28.7 | nu_0: 1.1
-Iter 156 | Loss: 5.7079 | nu_q: 28.8 | nu_0: 1.1
-Iter 157 | Loss: 5.6989 | nu_q: 28.9 | nu_0: 1.1
-Iter 158 | Loss: 5.6900 | nu_q: 29.1 | nu_0: 1.1
-Iter 159 | Loss: 5.6816 | nu_q: 29.2 | nu_0: 1.1
-Iter 160 | Loss: 5.6731 | nu_q: 29.3 | nu_0: 1.1
-Iter 161 | Loss: 5.6649 | nu_q: 29.4 | nu_0: 1.1
-Iter 162 | Loss: 5.6570 | nu_q: 29.5 | nu_0: 1.1
-Iter 163 | Loss: 5.6493 | nu_q: 29.7 | nu_0: 1.1
-Iter 164 | Loss: 5.6412 | nu_q: 29.8 | nu_0: 1.1
-Iter 165 | Loss: 5.6337 | nu_q: 29.9 | nu_0: 1.1
-Iter 166 | Loss: 5.6263 | nu_q: 30.0 | nu_0: 1.1
-Iter 167 | Loss: 5.6191 | nu_q: 30.1 | nu_0: 1.1
-Iter 168 | Loss: 5.6122 | nu_q: 30.2 | nu_0: 1.1
-Iter 169 | Loss: 5.6050 | nu_q: 30.4 | nu_0: 1.1
-Iter 170 | Loss: 5.5979 | nu_q: 30.5 | nu_0: 1.1
-Iter 171 | Loss: 5.5912 | nu_q: 30.6 | nu_0: 1.1
-Iter 172 | Loss: 5.5849 | nu_q: 30.7 | nu_0: 1.1
-Iter 173 | Loss: 5.5788 | nu_q: 30.8 | nu_0: 1.1
-Iter 174 | Loss: 5.5729 | nu_q: 30.9 | nu_0: 1.1
-Iter 175 | Loss: 5.5668 | nu_q: 31.0 | nu_0: 1.1
-Iter 176 | Loss: 5.5603 | nu_q: 31.1 | nu_0: 1.1
-Iter 177 | Loss: 5.5536 | nu_q: 31.3 | nu_0: 1.1
-Iter 178 | Loss: 5.5474 | nu_q: 31.4 | nu_0: 1.1
-Iter 179 | Loss: 5.5414 | nu_q: 31.5 | nu_0: 1.1
-Iter 180 | Loss: 5.5359 | nu_q: 31.6 | nu_0: 1.1
-Iter 181 | Loss: 5.5307 | nu_q: 31.7 | nu_0: 1.1
-Iter 182 | Loss: 5.5255 | nu_q: 31.8 | nu_0: 1.1
-Iter 183 | Loss: 5.5204 | nu_q: 31.9 | nu_0: 1.1
-Iter 184 | Loss: 5.5155 | nu_q: 32.0 | nu_0: 1.1
-Iter 185 | Loss: 5.5104 | nu_q: 32.1 | nu_0: 1.1
-Iter 186 | Loss: 5.5051 | nu_q: 32.2 | nu_0: 1.1
-Iter 187 | Loss: 5.5002 | nu_q: 32.3 | nu_0: 1.1
-Iter 188 | Loss: 5.4957 | nu_q: 32.4 | nu_0: 1.1
-Iter 189 | Loss: 5.4913 | nu_q: 32.5 | nu_0: 1.1
-Iter 190 | Loss: 5.4870 | nu_q: 32.6 | nu_0: 1.1
-Iter 191 | Loss: 5.4827 | nu_q: 32.7 | nu_0: 1.1
-Iter 192 | Loss: 5.4785 | nu_q: 32.8 | nu_0: 1.1
-Iter 193 | Loss: 5.4744 | nu_q: 32.9 | nu_0: 1.1
-Iter 194 | Loss: 5.4705 | nu_q: 33.0 | nu_0: 1.1
-Iter 195 | Loss: 5.4667 | nu_q: 33.1 | nu_0: 1.1
-Iter 196 | Loss: 5.4628 | nu_q: 33.2 | nu_0: 1.1
-Iter 197 | Loss: 5.4589 | nu_q: 33.3 | nu_0: 1.1
-Iter 198 | Loss: 5.4549 | nu_q: 33.4 | nu_0: 1.1
-Iter 199 | Loss: 5.4509 | nu_q: 33.5 | nu_0: 1.1
-Iter 200 | Loss: 5.4471 | nu_q: 33.6 | nu_0: 1.1
-Iter 201 | Loss: 5.4436 | nu_q: 33.7 | nu_0: 1.1
-Iter 202 | Loss: 5.4400 | nu_q: 33.7 | nu_0: 1.1
-Iter 203 | Loss: 5.4367 | nu_q: 33.8 | nu_0: 1.1
-Iter 204 | Loss: 5.4334 | nu_q: 33.9 | nu_0: 1.1
-Iter 205 | Loss: 5.4304 | nu_q: 34.0 | nu_0: 1.1
-Iter 206 | Loss: 5.4274 | nu_q: 34.1 | nu_0: 1.1
-Iter 207 | Loss: 5.4245 | nu_q: 34.2 | nu_0: 1.1
-Iter 208 | Loss: 5.4217 | nu_q: 34.3 | nu_0: 1.1
-Iter 209 | Loss: 5.4187 | nu_q: 34.3 | nu_0: 1.1
-Iter 210 | Loss: 5.4159 | nu_q: 34.4 | nu_0: 1.1
-Iter 211 | Loss: 5.4132 | nu_q: 34.5 | nu_0: 1.1
-Iter 212 | Loss: 5.4105 | nu_q: 34.6 | nu_0: 1.1
-Iter 213 | Loss: 5.4079 | nu_q: 34.7 | nu_0: 1.1
-Iter 214 | Loss: 5.4053 | nu_q: 34.7 | nu_0: 1.1
-Iter 215 | Loss: 5.4029 | nu_q: 34.8 | nu_0: 1.1
-Iter 216 | Loss: 5.4004 | nu_q: 34.9 | nu_0: 1.1
-Iter 217 | Loss: 5.3979 | nu_q: 35.0 | nu_0: 1.1
-Iter 218 | Loss: 5.3956 | nu_q: 35.1 | nu_0: 1.1
-Iter 219 | Loss: 5.3933 | nu_q: 35.1 | nu_0: 1.1
-Iter 220 | Loss: 5.3911 | nu_q: 35.2 | nu_0: 1.1
-Iter 221 | Loss: 5.3889 | nu_q: 35.3 | nu_0: 1.1
-Iter 222 | Loss: 5.3868 | nu_q: 35.4 | nu_0: 1.1
-Iter 223 | Loss: 5.3847 | nu_q: 35.4 | nu_0: 1.1
-Iter 224 | Loss: 5.3827 | nu_q: 35.5 | nu_0: 1.1
-Iter 225 | Loss: 5.3808 | nu_q: 35.6 | nu_0: 1.1
-Iter 226 | Loss: 5.3788 | nu_q: 35.7 | nu_0: 1.1
-Iter 227 | Loss: 5.3769 | nu_q: 35.7 | nu_0: 1.1
-Iter 228 | Loss: 5.3750 | nu_q: 35.8 | nu_0: 1.1
-Iter 229 | Loss: 5.3732 | nu_q: 35.9 | nu_0: 1.1
-Iter 230 | Loss: 5.3714 | nu_q: 35.9 | nu_0: 1.1
-Iter 231 | Loss: 5.3696 | nu_q: 36.0 | nu_0: 1.1
-Iter 232 | Loss: 5.3679 | nu_q: 36.1 | nu_0: 1.1
-Iter 233 | Loss: 5.3662 | nu_q: 36.1 | nu_0: 1.1
-Iter 234 | Loss: 5.3646 | nu_q: 36.2 | nu_0: 1.1
-Iter 235 | Loss: 5.3630 | nu_q: 36.3 | nu_0: 1.1
-Iter 236 | Loss: 5.3614 | nu_q: 36.3 | nu_0: 1.1
-Iter 237 | Loss: 5.3598 | nu_q: 36.4 | nu_0: 1.1
-Iter 238 | Loss: 5.3583 | nu_q: 36.5 | nu_0: 1.1
-Iter 239 | Loss: 5.3568 | nu_q: 36.5 | nu_0: 1.1
-Iter 240 | Loss: 5.3554 | nu_q: 36.6 | nu_0: 1.1
-Iter 241 | Loss: 5.3540 | nu_q: 36.7 | nu_0: 1.1
-Iter 242 | Loss: 5.3526 | nu_q: 36.7 | nu_0: 1.1
-Iter 243 | Loss: 5.3512 | nu_q: 36.8 | nu_0: 1.1
-Iter 244 | Loss: 5.3499 | nu_q: 36.9 | nu_0: 1.1
-Iter 245 | Loss: 5.3485 | nu_q: 36.9 | nu_0: 1.1
-Iter 246 | Loss: 5.3472 | nu_q: 37.0 | nu_0: 1.1
-Iter 247 | Loss: 5.3459 | nu_q: 37.0 | nu_0: 1.1
-Iter 248 | Loss: 5.3446 | nu_q: 37.1 | nu_0: 1.1
-Iter 249 | Loss: 5.3433 | nu_q: 37.2 | nu_0: 1.1
-Iter 250 | Loss: 5.3422 | nu_q: 37.2 | nu_0: 1.1
-Iter 251 | Loss: 5.3411 | nu_q: 37.3 | nu_0: 1.1
-Iter 252 | Loss: 5.3400 | nu_q: 37.3 | nu_0: 1.1
-Iter 253 | Loss: 5.3389 | nu_q: 37.4 | nu_0: 1.1
-Iter 254 | Loss: 5.3378 | nu_q: 37.5 | nu_0: 1.1
-Iter 255 | Loss: 5.3368 | nu_q: 37.5 | nu_0: 1.1
-Iter 256 | Loss: 5.3359 | nu_q: 37.6 | nu_0: 1.1
-Iter 257 | Loss: 5.3349 | nu_q: 37.6 | nu_0: 1.1
-Iter 258 | Loss: 5.3340 | nu_q: 37.7 | nu_0: 1.1
-Iter 259 | Loss: 5.3331 | nu_q: 37.7 | nu_0: 1.1
-Iter 260 | Loss: 5.3321 | nu_q: 37.8 | nu_0: 1.1
-Iter 261 | Loss: 5.3313 | nu_q: 37.8 | nu_0: 1.1
-Iter 262 | Loss: 5.3304 | nu_q: 37.9 | nu_0: 1.1
-Iter 263 | Loss: 5.3295 | nu_q: 37.9 | nu_0: 1.1
-Iter 264 | Loss: 5.3286 | nu_q: 38.0 | nu_0: 1.1
-Iter 265 | Loss: 5.3278 | nu_q: 38.0 | nu_0: 1.1
-Iter 266 | Loss: 5.3270 | nu_q: 38.1 | nu_0: 1.1
-Iter 267 | Loss: 5.3262 | nu_q: 38.1 | nu_0: 1.1
-Iter 268 | Loss: 5.3254 | nu_q: 38.2 | nu_0: 1.1
-Iter 269 | Loss: 5.3246 | nu_q: 38.2 | nu_0: 1.1
-Iter 270 | Loss: 5.3239 | nu_q: 38.3 | nu_0: 1.1
-Iter 271 | Loss: 5.3231 | nu_q: 38.3 | nu_0: 1.1
-Iter 272 | Loss: 5.3224 | nu_q: 38.4 | nu_0: 1.1
-Iter 273 | Loss: 5.3217 | nu_q: 38.4 | nu_0: 1.1
-Iter 274 | Loss: 5.3210 | nu_q: 38.5 | nu_0: 1.1
-Iter 275 | Loss: 5.3203 | nu_q: 38.5 | nu_0: 1.1
-Iter 276 | Loss: 5.3197 | nu_q: 38.6 | nu_0: 1.1
-Iter 277 | Loss: 5.3191 | nu_q: 38.6 | nu_0: 1.1
-Iter 278 | Loss: 5.3185 | nu_q: 38.6 | nu_0: 1.1
-Iter 279 | Loss: 5.3179 | nu_q: 38.7 | nu_0: 1.1
-Iter 280 | Loss: 5.3173 | nu_q: 38.7 | nu_0: 1.1
-Iter 281 | Loss: 5.3167 | nu_q: 38.8 | nu_0: 1.1
-Iter 282 | Loss: 5.3162 | nu_q: 38.8 | nu_0: 1.1
-Iter 283 | Loss: 5.3156 | nu_q: 38.9 | nu_0: 1.1
-Iter 284 | Loss: 5.3151 | nu_q: 38.9 | nu_0: 1.1
-Iter 285 | Loss: 5.3146 | nu_q: 38.9 | nu_0: 1.1
-Iter 286 | Loss: 5.3141 | nu_q: 39.0 | nu_0: 1.1
-Iter 287 | Loss: 5.3136 | nu_q: 39.0 | nu_0: 1.1
-Iter 288 | Loss: 5.3132 | nu_q: 39.1 | nu_0: 1.1
-Iter 289 | Loss: 5.3127 | nu_q: 39.1 | nu_0: 1.1
-Iter 290 | Loss: 5.3123 | nu_q: 39.1 | nu_0: 1.1
-Iter 291 | Loss: 5.3119 | nu_q: 39.2 | nu_0: 1.1
-Iter 292 | Loss: 5.3114 | nu_q: 39.2 | nu_0: 1.1
-Iter 293 | Loss: 5.3110 | nu_q: 39.2 | nu_0: 1.1
-Iter 294 | Loss: 5.3106 | nu_q: 39.3 | nu_0: 1.1
-Iter 295 | Loss: 5.3102 | nu_q: 39.3 | nu_0: 1.1
-Iter 296 | Loss: 5.3098 | nu_q: 39.4 | nu_0: 1.1
-Iter 297 | Loss: 5.3094 | nu_q: 39.4 | nu_0: 1.1
-Iter 298 | Loss: 5.3090 | nu_q: 39.4 | nu_0: 1.1
-Iter 299 | Loss: 5.3087 | nu_q: 39.5 | nu_0: 1.1
-Iter 300 | Loss: 5.3083 | nu_q: 39.5 | nu_0: 1.1
-Iter 301 | Loss: 5.3080 | nu_q: 39.5 | nu_0: 1.1
-Iter 302 | Loss: 5.3077 | nu_q: 39.6 | nu_0: 1.1
-Iter 303 | Loss: 5.3073 | nu_q: 39.6 | nu_0: 1.1
-Iter 304 | Loss: 5.3070 | nu_q: 39.6 | nu_0: 1.1
-Iter 305 | Loss: 5.3067 | nu_q: 39.7 | nu_0: 1.1
-Iter 306 | Loss: 5.3064 | nu_q: 39.7 | nu_0: 1.1
-Iter 307 | Loss: 5.3061 | nu_q: 39.7 | nu_0: 1.1
-Iter 308 | Loss: 5.3058 | nu_q: 39.7 | nu_0: 1.1
-Iter 309 | Loss: 5.3056 | nu_q: 39.8 | nu_0: 1.1
-Iter 310 | Loss: 5.3053 | nu_q: 39.8 | nu_0: 1.1
-Iter 311 | Loss: 5.3050 | nu_q: 39.8 | nu_0: 1.1
-Iter 312 | Loss: 5.3047 | nu_q: 39.9 | nu_0: 1.1
-Iter 313 | Loss: 5.3045 | nu_q: 39.9 | nu_0: 1.1
-Iter 314 | Loss: 5.3042 | nu_q: 39.9 | nu_0: 1.1
-Iter 315 | Loss: 5.3040 | nu_q: 40.0 | nu_0: 1.1
-Iter 316 | Loss: 5.3037 | nu_q: 40.0 | nu_0: 1.1
-Iter 317 | Loss: 5.3035 | nu_q: 40.0 | nu_0: 1.1
-Iter 318 | Loss: 5.3032 | nu_q: 40.0 | nu_0: 1.1
-Iter 319 | Loss: 5.3030 | nu_q: 40.1 | nu_0: 1.1
-Iter 320 | Loss: 5.3028 | nu_q: 40.1 | nu_0: 1.1
-Iter 321 | Loss: 5.3026 | nu_q: 40.1 | nu_0: 1.1
-Iter 322 | Loss: 5.3023 | nu_q: 40.1 | nu_0: 1.1
-Iter 323 | Loss: 5.3022 | nu_q: 40.2 | nu_0: 1.1
-Iter 324 | Loss: 5.3019 | nu_q: 40.2 | nu_0: 1.1
-Iter 325 | Loss: 5.3017 | nu_q: 40.2 | nu_0: 1.1
-Iter 326 | Loss: 5.3015 | nu_q: 40.3 | nu_0: 1.1
-Iter 327 | Loss: 5.3015 | nu_q: 40.3 | nu_0: 1.1
-Converged at iteration 327 </code></pre>
+<pre><code>Iter 1 | Loss: 72.2111 | nu_q: 2.4 | nu_0: 1.1
+Iter 2 | Loss: 63.4391 | nu_q: 2.7 | nu_0: 1.1
+Iter 3 | Loss: 56.9731 | nu_q: 3.0 | nu_0: 1.1
+Iter 4 | Loss: 51.7780 | nu_q: 3.3 | nu_0: 1.1
+Iter 5 | Loss: 47.5367 | nu_q: 3.6 | nu_0: 1.1
+Iter 6 | Loss: 44.0427 | nu_q: 3.9 | nu_0: 1.1
+Iter 7 | Loss: 41.0766 | nu_q: 4.2 | nu_0: 1.1
+Iter 8 | Loss: 38.5400 | nu_q: 4.5 | nu_0: 1.1
+Iter 9 | Loss: 36.3524 | nu_q: 4.8 | nu_0: 1.1
+Iter 10 | Loss: 34.4399 | nu_q: 5.1 | nu_0: 1.1
+Iter 11 | Loss: 32.7121 | nu_q: 5.4 | nu_0: 1.1
+Iter 12 | Loss: 31.2048 | nu_q: 5.7 | nu_0: 1.1
+Iter 13 | Loss: 29.7824 | nu_q: 6.0 | nu_0: 1.1
+Iter 14 | Loss: 28.5214 | nu_q: 6.3 | nu_0: 1.1
+Iter 15 | Loss: 27.4100 | nu_q: 6.6 | nu_0: 1.1
+Iter 16 | Loss: 26.3717 | nu_q: 6.9 | nu_0: 1.1
+Iter 17 | Loss: 25.3439 | nu_q: 7.3 | nu_0: 1.1
+Iter 18 | Loss: 24.4922 | nu_q: 7.5 | nu_0: 1.1
+Iter 19 | Loss: 23.6740 | nu_q: 7.8 | nu_0: 1.1
+Iter 20 | Loss: 22.9566 | nu_q: 8.1 | nu_0: 1.1
+Iter 21 | Loss: 22.2869 | nu_q: 8.4 | nu_0: 1.1
+Iter 22 | Loss: 21.6697 | nu_q: 8.7 | nu_0: 1.1
+Iter 23 | Loss: 21.0729 | nu_q: 9.0 | nu_0: 1.1
+Iter 24 | Loss: 20.5524 | nu_q: 9.3 | nu_0: 1.1
+Iter 25 | Loss: 20.0233 | nu_q: 9.6 | nu_0: 1.1
+Iter 26 | Loss: 19.5670 | nu_q: 9.9 | nu_0: 1.1
+Iter 27 | Loss: 19.1214 | nu_q: 10.2 | nu_0: 1.1
+Iter 28 | Loss: 18.6683 | nu_q: 10.5 | nu_0: 1.1
+Iter 29 | Loss: 18.2511 | nu_q: 10.8 | nu_0: 1.1
+Iter 30 | Loss: 17.8422 | nu_q: 11.1 | nu_0: 1.1
+Iter 31 | Loss: 17.4447 | nu_q: 11.4 | nu_0: 1.1
+Iter 32 | Loss: 17.1177 | nu_q: 11.7 | nu_0: 1.1
+Iter 33 | Loss: 16.7960 | nu_q: 12.0 | nu_0: 1.1
+Iter 34 | Loss: 16.5195 | nu_q: 12.3 | nu_0: 1.1
+Iter 35 | Loss: 16.2474 | nu_q: 12.5 | nu_0: 1.1
+Iter 36 | Loss: 15.9565 | nu_q: 12.8 | nu_0: 1.1
+Iter 37 | Loss: 15.6675 | nu_q: 13.2 | nu_0: 1.1
+Iter 38 | Loss: 15.4009 | nu_q: 13.5 | nu_0: 1.1
+Iter 39 | Loss: 15.1394 | nu_q: 13.7 | nu_0: 1.1
+Iter 40 | Loss: 14.8831 | nu_q: 14.1 | nu_0: 1.1
+Iter 41 | Loss: 14.6508 | nu_q: 14.4 | nu_0: 1.1
+Iter 42 | Loss: 14.4215 | nu_q: 14.7 | nu_0: 1.1
+Iter 43 | Loss: 14.1907 | nu_q: 15.0 | nu_0: 1.1
+Iter 44 | Loss: 14.0008 | nu_q: 15.3 | nu_0: 1.1
+Iter 45 | Loss: 13.7745 | nu_q: 15.6 | nu_0: 1.1
+Iter 46 | Loss: 13.5931 | nu_q: 15.9 | nu_0: 1.1
+Iter 47 | Loss: 13.4345 | nu_q: 16.1 | nu_0: 1.1
+Iter 48 | Loss: 13.2307 | nu_q: 16.4 | nu_0: 1.1
+Iter 49 | Loss: 13.0497 | nu_q: 16.7 | nu_0: 1.1
+Iter 50 | Loss: 12.8605 | nu_q: 17.0 | nu_0: 1.1
+Iter 51 | Loss: 12.6137 | nu_q: 17.3 | nu_0: 1.1
+Iter 52 | Loss: 12.3225 | nu_q: 17.7 | nu_0: 1.1
+Iter 53 | Loss: 12.0875 | nu_q: 17.9 | nu_0: 1.1
+Iter 54 | Loss: 11.7669 | nu_q: 18.2 | nu_0: 1.1
+Iter 55 | Loss: 10.8487 | nu_q: 18.7 | nu_0: 1.1
+Iter 56 | Loss: 9.8254 | nu_q: 19.1 | nu_0: 1.1
+Iter 57 | Loss: 9.7076 | nu_q: 19.4 | nu_0: 1.1
+Iter 58 | Loss: 9.6056 | nu_q: 19.6 | nu_0: 1.1
+Iter 59 | Loss: 9.5086 | nu_q: 19.9 | nu_0: 1.1
+Iter 60 | Loss: 9.4023 | nu_q: 20.2 | nu_0: 1.1
+Iter 61 | Loss: 9.3020 | nu_q: 20.5 | nu_0: 1.1
+Iter 62 | Loss: 9.2130 | nu_q: 20.8 | nu_0: 1.1
+Iter 63 | Loss: 9.1117 | nu_q: 21.1 | nu_0: 1.1
+Iter 64 | Loss: 9.0222 | nu_q: 21.3 | nu_0: 1.1
+Iter 65 | Loss: 8.9408 | nu_q: 21.6 | nu_0: 1.1
+Iter 66 | Loss: 8.8615 | nu_q: 21.9 | nu_0: 1.1
+Iter 67 | Loss: 8.7801 | nu_q: 22.2 | nu_0: 1.1
+Iter 68 | Loss: 8.7056 | nu_q: 22.4 | nu_0: 1.1
+Iter 69 | Loss: 8.6245 | nu_q: 22.7 | nu_0: 1.1
+Iter 70 | Loss: 8.5519 | nu_q: 23.0 | nu_0: 1.1
+Iter 71 | Loss: 8.4823 | nu_q: 23.3 | nu_0: 1.1
+Iter 72 | Loss: 8.4178 | nu_q: 23.6 | nu_0: 1.1
+Iter 73 | Loss: 8.3551 | nu_q: 23.8 | nu_0: 1.1
+Iter 74 | Loss: 8.2953 | nu_q: 24.1 | nu_0: 1.1
+Iter 75 | Loss: 8.2373 | nu_q: 24.4 | nu_0: 1.1
+Iter 76 | Loss: 8.1766 | nu_q: 24.6 | nu_0: 1.1
+Iter 77 | Loss: 8.1208 | nu_q: 24.9 | nu_0: 1.1
+Iter 78 | Loss: 8.0670 | nu_q: 25.1 | nu_0: 1.1
+Iter 79 | Loss: 8.0100 | nu_q: 25.4 | nu_0: 1.1
+Iter 80 | Loss: 7.9542 | nu_q: 25.7 | nu_0: 1.1
+Iter 81 | Loss: 7.9033 | nu_q: 25.9 | nu_0: 1.1
+Iter 82 | Loss: 7.8533 | nu_q: 26.2 | nu_0: 1.1
+Iter 83 | Loss: 7.8034 | nu_q: 26.5 | nu_0: 1.1
+Iter 84 | Loss: 7.7554 | nu_q: 26.7 | nu_0: 1.1
+Iter 85 | Loss: 7.7114 | nu_q: 27.0 | nu_0: 1.1
+Iter 86 | Loss: 7.6680 | nu_q: 27.2 | nu_0: 1.1
+Iter 87 | Loss: 7.6248 | nu_q: 27.5 | nu_0: 1.1
+Iter 88 | Loss: 7.5837 | nu_q: 27.8 | nu_0: 1.1
+Iter 89 | Loss: 7.5420 | nu_q: 28.0 | nu_0: 1.1
+Iter 90 | Loss: 7.5047 | nu_q: 28.3 | nu_0: 1.1
+Iter 91 | Loss: 7.4687 | nu_q: 28.5 | nu_0: 1.1
+Iter 92 | Loss: 7.4318 | nu_q: 28.8 | nu_0: 1.1
+Iter 93 | Loss: 7.3966 | nu_q: 29.0 | nu_0: 1.1
+Iter 94 | Loss: 7.3632 | nu_q: 29.2 | nu_0: 1.1
+Iter 95 | Loss: 7.3298 | nu_q: 29.5 | nu_0: 1.1
+Iter 96 | Loss: 7.2971 | nu_q: 29.7 | nu_0: 1.1
+Iter 97 | Loss: 7.2668 | nu_q: 30.0 | nu_0: 1.1
+Iter 98 | Loss: 7.2387 | nu_q: 30.2 | nu_0: 1.1
+Iter 99 | Loss: 7.2109 | nu_q: 30.4 | nu_0: 1.1
+Iter 100 | Loss: 7.1839 | nu_q: 30.6 | nu_0: 1.1
+Iter 101 | Loss: 7.1565 | nu_q: 30.9 | nu_0: 1.1
+Iter 102 | Loss: 7.1302 | nu_q: 31.1 | nu_0: 1.1
+Iter 103 | Loss: 7.1049 | nu_q: 31.3 | nu_0: 1.1
+Iter 104 | Loss: 7.0797 | nu_q: 31.6 | nu_0: 1.1
+Iter 105 | Loss: 7.0558 | nu_q: 31.8 | nu_0: 1.1
+Iter 106 | Loss: 7.0325 | nu_q: 32.0 | nu_0: 1.1
+Iter 107 | Loss: 7.0101 | nu_q: 32.2 | nu_0: 1.1
+Iter 108 | Loss: 6.9887 | nu_q: 32.4 | nu_0: 1.1
+Iter 109 | Loss: 6.9682 | nu_q: 32.7 | nu_0: 1.1
+Iter 110 | Loss: 6.9483 | nu_q: 32.9 | nu_0: 1.1
+Iter 111 | Loss: 6.9285 | nu_q: 33.1 | nu_0: 1.1
+Iter 112 | Loss: 6.9089 | nu_q: 33.3 | nu_0: 1.1
+Iter 113 | Loss: 6.8894 | nu_q: 33.5 | nu_0: 1.1
+Iter 114 | Loss: 6.8709 | nu_q: 33.7 | nu_0: 1.1
+Iter 115 | Loss: 6.8532 | nu_q: 33.9 | nu_0: 1.1
+Iter 116 | Loss: 6.8357 | nu_q: 34.1 | nu_0: 1.1
+Iter 117 | Loss: 6.8189 | nu_q: 34.3 | nu_0: 1.1
+Iter 118 | Loss: 6.8032 | nu_q: 34.5 | nu_0: 1.1
+Iter 119 | Loss: 6.7876 | nu_q: 34.7 | nu_0: 1.1
+Iter 120 | Loss: 6.7725 | nu_q: 34.9 | nu_0: 1.1
+Iter 121 | Loss: 6.7579 | nu_q: 35.1 | nu_0: 1.1
+Iter 122 | Loss: 6.7437 | nu_q: 35.3 | nu_0: 1.1
+Iter 123 | Loss: 6.7300 | nu_q: 35.5 | nu_0: 1.1
+Iter 124 | Loss: 6.7168 | nu_q: 35.7 | nu_0: 1.1
+Iter 125 | Loss: 6.7037 | nu_q: 35.9 | nu_0: 1.1
+Iter 126 | Loss: 6.6909 | nu_q: 36.1 | nu_0: 1.1
+Iter 127 | Loss: 6.6786 | nu_q: 36.3 | nu_0: 1.1
+Iter 128 | Loss: 6.6665 | nu_q: 36.4 | nu_0: 1.1
+Iter 129 | Loss: 6.6551 | nu_q: 36.6 | nu_0: 1.1
+Iter 130 | Loss: 6.6439 | nu_q: 36.8 | nu_0: 1.1
+Iter 131 | Loss: 6.6329 | nu_q: 37.0 | nu_0: 1.1
+Iter 132 | Loss: 6.6222 | nu_q: 37.1 | nu_0: 1.1
+Iter 133 | Loss: 6.6116 | nu_q: 37.3 | nu_0: 1.1
+Iter 134 | Loss: 6.6015 | nu_q: 37.5 | nu_0: 1.1
+Iter 135 | Loss: 6.5914 | nu_q: 37.7 | nu_0: 1.1
+Iter 136 | Loss: 6.5821 | nu_q: 37.8 | nu_0: 1.1
+Iter 137 | Loss: 6.5730 | nu_q: 38.0 | nu_0: 1.1
+Iter 138 | Loss: 6.5639 | nu_q: 38.2 | nu_0: 1.1
+Iter 139 | Loss: 6.5551 | nu_q: 38.3 | nu_0: 1.1
+Iter 140 | Loss: 6.5466 | nu_q: 38.5 | nu_0: 1.1
+Iter 141 | Loss: 6.5383 | nu_q: 38.7 | nu_0: 1.1
+Iter 142 | Loss: 6.5301 | nu_q: 38.8 | nu_0: 1.1
+Iter 143 | Loss: 6.5223 | nu_q: 39.0 | nu_0: 1.1
+Iter 144 | Loss: 6.5148 | nu_q: 39.1 | nu_0: 1.1
+Iter 145 | Loss: 6.5074 | nu_q: 39.3 | nu_0: 1.1
+Iter 146 | Loss: 6.5003 | nu_q: 39.4 | nu_0: 1.1
+Iter 147 | Loss: 6.4936 | nu_q: 39.6 | nu_0: 1.1
+Iter 148 | Loss: 6.4867 | nu_q: 39.7 | nu_0: 1.1
+Iter 149 | Loss: 6.4801 | nu_q: 39.9 | nu_0: 1.1
+Iter 150 | Loss: 6.4737 | nu_q: 40.0 | nu_0: 1.1
+Iter 151 | Loss: 6.4676 | nu_q: 40.2 | nu_0: 1.1
+Iter 152 | Loss: 6.4616 | nu_q: 40.3 | nu_0: 1.1
+Iter 153 | Loss: 6.4559 | nu_q: 40.5 | nu_0: 1.1
+Iter 154 | Loss: 6.4502 | nu_q: 40.6 | nu_0: 1.1
+Iter 155 | Loss: 6.4448 | nu_q: 40.7 | nu_0: 1.1
+Iter 156 | Loss: 6.4394 | nu_q: 40.9 | nu_0: 1.1
+Iter 157 | Loss: 6.4342 | nu_q: 41.0 | nu_0: 1.1
+Iter 158 | Loss: 6.4291 | nu_q: 41.1 | nu_0: 1.1
+Iter 159 | Loss: 6.4243 | nu_q: 41.3 | nu_0: 1.1
+Iter 160 | Loss: 6.4194 | nu_q: 41.4 | nu_0: 1.1
+Iter 161 | Loss: 6.4146 | nu_q: 41.5 | nu_0: 1.1
+Iter 162 | Loss: 6.4101 | nu_q: 41.7 | nu_0: 1.1
+Iter 163 | Loss: 6.4058 | nu_q: 41.8 | nu_0: 1.1
+Iter 164 | Loss: 6.4015 | nu_q: 41.9 | nu_0: 1.1
+Iter 165 | Loss: 6.3974 | nu_q: 42.0 | nu_0: 1.1
+Iter 166 | Loss: 6.3934 | nu_q: 42.2 | nu_0: 1.1
+Iter 167 | Loss: 6.3896 | nu_q: 42.3 | nu_0: 1.1
+Iter 168 | Loss: 6.3859 | nu_q: 42.4 | nu_0: 1.1
+Iter 169 | Loss: 6.3822 | nu_q: 42.5 | nu_0: 1.1
+Iter 170 | Loss: 6.3788 | nu_q: 42.6 | nu_0: 1.1
+Iter 171 | Loss: 6.3754 | nu_q: 42.8 | nu_0: 1.1
+Iter 172 | Loss: 6.3720 | nu_q: 42.9 | nu_0: 1.1
+Iter 173 | Loss: 6.3688 | nu_q: 43.0 | nu_0: 1.1
+Iter 174 | Loss: 6.3656 | nu_q: 43.1 | nu_0: 1.1
+Iter 175 | Loss: 6.3625 | nu_q: 43.2 | nu_0: 1.1
+Iter 176 | Loss: 6.3595 | nu_q: 43.3 | nu_0: 1.1
+Iter 177 | Loss: 6.3565 | nu_q: 43.4 | nu_0: 1.1
+Iter 178 | Loss: 6.3538 | nu_q: 43.5 | nu_0: 1.1
+Iter 179 | Loss: 6.3510 | nu_q: 43.6 | nu_0: 1.1
+Iter 180 | Loss: 6.3484 | nu_q: 43.7 | nu_0: 1.1
+Iter 181 | Loss: 6.3460 | nu_q: 43.8 | nu_0: 1.1
+Iter 182 | Loss: 6.3435 | nu_q: 43.9 | nu_0: 1.1
+Iter 183 | Loss: 6.3411 | nu_q: 44.0 | nu_0: 1.1
+Iter 184 | Loss: 6.3388 | nu_q: 44.1 | nu_0: 1.1
+Iter 185 | Loss: 6.3365 | nu_q: 44.2 | nu_0: 1.1
+Iter 186 | Loss: 6.3343 | nu_q: 44.3 | nu_0: 1.1
+Iter 187 | Loss: 6.3321 | nu_q: 44.4 | nu_0: 1.1
+Iter 188 | Loss: 6.3300 | nu_q: 44.5 | nu_0: 1.1
+Iter 189 | Loss: 6.3280 | nu_q: 44.6 | nu_0: 1.1
+Iter 190 | Loss: 6.3260 | nu_q: 44.7 | nu_0: 1.1
+Iter 191 | Loss: 6.3240 | nu_q: 44.8 | nu_0: 1.1
+Iter 192 | Loss: 6.3223 | nu_q: 44.9 | nu_0: 1.1
+Iter 193 | Loss: 6.3204 | nu_q: 45.0 | nu_0: 1.1
+Iter 194 | Loss: 6.3186 | nu_q: 45.1 | nu_0: 1.1
+Iter 195 | Loss: 6.3168 | nu_q: 45.2 | nu_0: 1.1
+Iter 196 | Loss: 6.3152 | nu_q: 45.2 | nu_0: 1.1
+Iter 197 | Loss: 6.3135 | nu_q: 45.3 | nu_0: 1.1
+Iter 198 | Loss: 6.3119 | nu_q: 45.4 | nu_0: 1.1
+Iter 199 | Loss: 6.3104 | nu_q: 45.5 | nu_0: 1.1
+Iter 200 | Loss: 6.3090 | nu_q: 45.6 | nu_0: 1.1
+Iter 201 | Loss: 6.3075 | nu_q: 45.7 | nu_0: 1.1
+Iter 202 | Loss: 6.3062 | nu_q: 45.7 | nu_0: 1.1
+Iter 203 | Loss: 6.3050 | nu_q: 45.8 | nu_0: 1.1
+Iter 204 | Loss: 6.3037 | nu_q: 45.9 | nu_0: 1.1
+Iter 205 | Loss: 6.3025 | nu_q: 45.9 | nu_0: 1.1
+Iter 206 | Loss: 6.3013 | nu_q: 46.0 | nu_0: 1.1
+Iter 207 | Loss: 6.3001 | nu_q: 46.1 | nu_0: 1.1
+Iter 208 | Loss: 6.2990 | nu_q: 46.2 | nu_0: 1.1
+Iter 209 | Loss: 6.2979 | nu_q: 46.2 | nu_0: 1.1
+Iter 210 | Loss: 6.2969 | nu_q: 46.3 | nu_0: 1.1
+Iter 211 | Loss: 6.2959 | nu_q: 46.4 | nu_0: 1.1
+Iter 212 | Loss: 6.2949 | nu_q: 46.4 | nu_0: 1.1
+Iter 213 | Loss: 6.2939 | nu_q: 46.5 | nu_0: 1.1
+Iter 214 | Loss: 6.2929 | nu_q: 46.6 | nu_0: 1.1
+Iter 215 | Loss: 6.2920 | nu_q: 46.6 | nu_0: 1.1
+Iter 216 | Loss: 6.2910 | nu_q: 46.7 | nu_0: 1.1
+Iter 217 | Loss: 6.2902 | nu_q: 46.8 | nu_0: 1.1
+Iter 218 | Loss: 6.2893 | nu_q: 46.8 | nu_0: 1.1
+Iter 219 | Loss: 6.2885 | nu_q: 46.9 | nu_0: 1.1
+Iter 220 | Loss: 6.2876 | nu_q: 47.0 | nu_0: 1.1
+Iter 221 | Loss: 6.2869 | nu_q: 47.0 | nu_0: 1.1
+Iter 222 | Loss: 6.2861 | nu_q: 47.1 | nu_0: 1.1
+Iter 223 | Loss: 6.2853 | nu_q: 47.1 | nu_0: 1.1
+Iter 224 | Loss: 6.2847 | nu_q: 47.2 | nu_0: 1.1
+Iter 225 | Loss: 6.2840 | nu_q: 47.2 | nu_0: 1.1
+Iter 226 | Loss: 6.2833 | nu_q: 47.3 | nu_0: 1.1
+Iter 227 | Loss: 6.2826 | nu_q: 47.4 | nu_0: 1.1
+Iter 228 | Loss: 6.2820 | nu_q: 47.4 | nu_0: 1.1
+Iter 229 | Loss: 6.2814 | nu_q: 47.5 | nu_0: 1.1
+Iter 230 | Loss: 6.2808 | nu_q: 47.5 | nu_0: 1.1
+Iter 231 | Loss: 6.2802 | nu_q: 47.6 | nu_0: 1.1
+Iter 232 | Loss: 6.2796 | nu_q: 47.6 | nu_0: 1.1
+Iter 233 | Loss: 6.2791 | nu_q: 47.7 | nu_0: 1.1
+Iter 234 | Loss: 6.2786 | nu_q: 47.7 | nu_0: 1.1
+Iter 235 | Loss: 6.2781 | nu_q: 47.8 | nu_0: 1.1
+Iter 236 | Loss: 6.2776 | nu_q: 47.8 | nu_0: 1.1
+Iter 237 | Loss: 6.2771 | nu_q: 47.9 | nu_0: 1.1
+Iter 238 | Loss: 6.2766 | nu_q: 47.9 | nu_0: 1.1
+Iter 239 | Loss: 6.2762 | nu_q: 48.0 | nu_0: 1.1
+Iter 240 | Loss: 6.2758 | nu_q: 48.0 | nu_0: 1.1
+Iter 241 | Loss: 6.2754 | nu_q: 48.1 | nu_0: 1.1
+Iter 242 | Loss: 6.2749 | nu_q: 48.1 | nu_0: 1.1
+Iter 243 | Loss: 6.2745 | nu_q: 48.1 | nu_0: 1.1
+Iter 244 | Loss: 6.2741 | nu_q: 48.2 | nu_0: 1.1
+Iter 245 | Loss: 6.2737 | nu_q: 48.2 | nu_0: 1.1
+Iter 246 | Loss: 6.2734 | nu_q: 48.3 | nu_0: 1.1
+Iter 247 | Loss: 6.2730 | nu_q: 48.3 | nu_0: 1.1
+Iter 248 | Loss: 6.2727 | nu_q: 48.4 | nu_0: 1.1
+Iter 249 | Loss: 6.2723 | nu_q: 48.4 | nu_0: 1.1
+Iter 250 | Loss: 6.2720 | nu_q: 48.4 | nu_0: 1.1
+Iter 251 | Loss: 6.2717 | nu_q: 48.5 | nu_0: 1.1
+Iter 252 | Loss: 6.2715 | nu_q: 48.5 | nu_0: 1.1
+Iter 253 | Loss: 6.2712 | nu_q: 48.5 | nu_0: 1.1
+Iter 254 | Loss: 6.2709 | nu_q: 48.6 | nu_0: 1.1
+Iter 255 | Loss: 6.2706 | nu_q: 48.6 | nu_0: 1.1
+Iter 256 | Loss: 6.2703 | nu_q: 48.7 | nu_0: 1.1
+Iter 257 | Loss: 6.2701 | nu_q: 48.7 | nu_0: 1.1
+Iter 258 | Loss: 6.2698 | nu_q: 48.7 | nu_0: 1.1
+Iter 259 | Loss: 6.2696 | nu_q: 48.8 | nu_0: 1.1
+Iter 260 | Loss: 6.2694 | nu_q: 48.8 | nu_0: 1.1
+Iter 261 | Loss: 6.2692 | nu_q: 48.8 | nu_0: 1.1
+Iter 262 | Loss: 6.2690 | nu_q: 48.9 | nu_0: 1.1
+Iter 263 | Loss: 6.2688 | nu_q: 48.9 | nu_0: 1.1
+Iter 264 | Loss: 6.2686 | nu_q: 48.9 | nu_0: 1.1
+Iter 265 | Loss: 6.2686 | nu_q: 48.9 | nu_0: 1.1
+Converged at iteration 265 </code></pre>
 <pre class="r"><code>b_res &lt;- susie_love_small_nu$b_res
 R_q   &lt;- susie_love_small_nu$R_q
 
@@ -1216,7 +1178,7 @@ susie_plot_alpha(
   b = beta_true,
   main = paste0(&quot;SuSiE-LovE with small nu0 = &quot;, nu_0)
 )</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-1-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-1-1">
 Past versions of unnamed-chunk-1-1.png
@@ -1284,7 +1246,7 @@ par(mfrow = c(1, 2))
 ## first 100 x 100 values
 image(R_null[1:100, 1:100], main = &quot;Null cov mat&quot;, col = heat.colors(20), zlim = zlim)
 image(R_q[1:100, 1:100], main = &quot;Learned cov mat&quot;, col = heat.colors(20), zlim = zlim)</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-2-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-2-1">
 Past versions of unnamed-chunk-2-1.png
@@ -1329,7 +1291,7 @@ matrix</p>
 envals = eig$values
 
 plot(c(1:J), envals, pch = 16)</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-3-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
 Past versions of unnamed-chunk-3-1.png
@@ -1368,15 +1330,15 @@ dodat-stats
 </div>
 </div>
 <pre class="r"><code>print(envals[c(1:10)])</code></pre>
-<pre><code> [1] 309.80274450  10.29975818   0.06883379   0.05771295   0.05052953
- [6]   0.04649216   0.04263521   0.04221553   0.03919536   0.03559714</code></pre>
+<pre><code> [1] 297.53827959   4.92194452   0.04409401   0.03734692   0.03570464
+ [6]   0.03366473   0.03241327   0.02996574   0.02845524   0.02729568</code></pre>
 <p>Indeed <span class="math inline">\(R_q\)</span> has rank close to 1.
 Rank of the guessed null matrix:</p>
 <pre class="r"><code>eig_null = eigen(R_null)
 envals_null = eig_null$values
 
 plot(c(1:J), envals_null, pch = 16)</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-4-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
 Past versions of unnamed-chunk-4-1.png
@@ -1415,8 +1377,8 @@ dodat-stats
 </div>
 </div>
 <pre class="r"><code>print(envals_null[c(1:10)])</code></pre>
-<pre><code> [1] 11.5335469  1.2312461  1.1973052  0.7955000  0.5252321  0.5055150
- [7]  0.5046940  0.5039532  0.5024649  0.5019058</code></pre>
+<pre><code> [1] 5.1899984 0.5055044 0.5033606 0.5031250 0.5021538 0.5007625 0.5007392
+ [8] 0.5004072 0.5003406 0.5002980</code></pre>
 <p>It is also close to 1. I am still investigate to see what is the form
 of this matrix <span class="math inline">\(R_q\)</span>.</p>
 </div>
@@ -1429,7 +1391,7 @@ catches. Indeed the value is very close to <span
 class="math inline">\(v\)</span>.</p>
 <pre class="r"><code>plot(c(1:J), R_q[true_SNP[1], ] * beta_true[true_SNP[1]], col = &#39;red&#39;)
 points(c(1:J), v, col=&#39;blue&#39;)</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-5-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
 Past versions of unnamed-chunk-5-1.png
@@ -1472,7 +1434,7 @@ dodat-stats
 <h3>Other rows</h3>
 <p>For all other rows it has this weird behaviour:</p>
 <pre class="r"><code>plot(c(1:J), R_q[1, ])</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-6-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
 Past versions of unnamed-chunk-6-1.png
@@ -1512,7 +1474,7 @@ dodat-stats
 </div>
 <pre class="r"><code>plot(c(1:J), R_q[2, ], col = &#39;black&#39;)
 points(c(1:J), R_q[3, ] / R_q[3, 1] * R_q[2, 1], col = &#39;red&#39;)</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-7-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
 Past versions of unnamed-chunk-7-1.png
@@ -1552,7 +1514,7 @@ dodat-stats
 </div>
 <pre class="r"><code>plot(c(1:J), R_q[2, ], col = &#39;black&#39;)
 points(c(1:J), R_q[3, ] / R_q[3, 1] * R_q[2, 1], col = &#39;red&#39;)</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-8-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
 Past versions of unnamed-chunk-8-1.png
@@ -1594,7 +1556,7 @@ dodat-stats
 row, the biggest value is the same as the corresponding value on the
 diagonal of R).</p>
 <pre class="r"><code>plot(c(1:J), R_null[1, ])</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-9-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
 Past versions of unnamed-chunk-9-1.png
@@ -1635,7 +1597,7 @@ dodat-stats
 <pre class="r"><code>which.max(R_null[1, ])</code></pre>
 <pre><code>[1] 1</code></pre>
 <pre class="r"><code>plot(c(1:J), R_null[2, ])</code></pre>
-<p><img src="figure/small_nu.Rmd/unnamed-chunk-10-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/small_nu.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
 Past versions of unnamed-chunk-10-1.png
@@ -1694,33 +1656,33 @@ the second single effect).</p>
 <pre class="r"><code>b_bar = colSums(b_res$alpha * b_res$mu)
 leftover_signal = v - R_q %*% b_bar
 t(leftover_signal)[1:100]</code></pre>
-<pre><code>  [1] -3.416484e-05 -9.307484e-06  3.991799e-05 -2.009220e-05  1.825153e-05
-  [6]  1.685415e-04  1.756605e-05  1.916461e-04  2.606008e-05  4.956266e-05
- [11] -1.131101e-04 -1.793047e-04  3.724717e-05 -1.565473e-05  1.302340e-04
- [16]  8.680527e-07 -8.680527e-07 -6.400922e-05 -1.843417e-05 -9.371992e-06
- [21] -3.802476e-05  1.175808e-04 -4.532212e-06  1.637551e-05 -1.184006e-04
- [26] -1.220487e-04  6.621541e-05 -4.358307e-05 -4.358307e-05 -4.358307e-05
- [31] -5.879825e-05 -3.539078e-05  2.504369e-05  1.452949e-05  1.081872e-04
- [36] -1.066217e-04  1.979698e-04  5.041477e-05  2.841629e-04  4.538477e-05
- [41]  4.560958e-05 -4.262171e-05  5.336149e-05 -1.440413e-05 -1.440413e-05
- [46]  2.735869e-04  1.096968e-04 -2.174253e-04 -1.338238e-04  1.259975e-04
- [51] -9.727253e-05  2.400447e-04 -1.422813e-04  2.400447e-04 -5.288356e-05
- [56] -1.244755e-04  3.135817e-04 -1.251675e-04  3.135817e-04 -2.038354e-04
- [61] -3.162175e-04  3.111039e-04  3.115850e-04  3.113376e-04 -2.004207e-04
- [66] -2.132698e-04 -2.144176e-04 -2.912044e-04  2.131536e-04  1.466173e-04
- [71]  2.259719e-04 -7.688964e-05  2.339863e-04 -3.195494e-04  2.374307e-04
- [76] -3.193092e-04 -7.863668e-05  5.471411e-04  5.618983e-04  3.023746e-04
- [81] -1.027099e-04 -4.480454e-04  4.480454e-04  5.380968e-04 -1.645032e-04
- [86] -2.919930e-04 -6.681864e-05  1.115679e-04 -3.108903e-05  3.814156e-04
- [91] -1.216809e-04 -2.870467e-04 -1.492786e-05 -8.574527e-05  3.799656e-04
- [96] -8.804195e-05  4.490873e-05 -2.069363e-04  2.063256e-04 -7.656091e-05</code></pre>
+<pre><code>  [1]  1.713581e-05 -1.593786e-05  1.853939e-05 -5.206653e-05  4.899160e-05
+  [6]  4.854389e-06 -5.203269e-05 -5.067556e-06  1.082898e-05  1.179076e-05
+ [11] -1.679441e-05  2.817713e-05  7.267968e-06  5.672244e-06 -9.446932e-06
+ [16]  3.909503e-06 -1.673719e-05 -1.133808e-05 -1.198765e-05  2.401126e-05
+ [21]  1.184012e-05 -1.144847e-05  1.144847e-05 -2.433635e-05  7.007485e-06
+ [26]  2.433635e-05 -2.452605e-05 -5.744697e-06 -2.444970e-05  2.641737e-05
+ [31]  2.641737e-05 -7.096190e-06  2.641737e-05 -5.358652e-06 -8.953669e-06
+ [36]  1.647290e-05 -3.781548e-05  8.946672e-06 -3.039442e-05 -2.843174e-05
+ [41]  3.221137e-05 -2.553014e-05  2.927074e-05  2.788293e-05  8.958093e-07
+ [46]  3.288635e-05 -3.638091e-05 -1.099606e-05 -1.124788e-05  2.957530e-05
+ [51] -4.138134e-05  4.619290e-05  1.053362e-05  1.302398e-05  1.843453e-05
+ [56] -2.876638e-05 -6.491396e-06  3.645633e-05 -2.902508e-05  2.478677e-06
+ [61] -5.262105e-05  5.283639e-05 -5.322874e-05 -5.322874e-05  4.374854e-05
+ [66] -1.286614e-05 -1.286614e-05  3.021461e-05 -6.127811e-05  6.127810e-05
+ [71]  6.127811e-05 -6.127812e-05  3.863917e-05  3.367338e-05 -2.915577e-07
+ [76] -1.349842e-05 -2.663024e-05  7.290104e-06 -2.236134e-05  5.963030e-06
+ [81]  9.084165e-06  4.652635e-06 -2.315219e-05  2.312777e-05 -2.320590e-05
+ [86] -1.287738e-05 -2.823210e-05  2.564397e-05 -2.180808e-05  7.036099e-06
+ [91] -2.563365e-05 -6.430720e-07 -1.163046e-06  2.320684e-05  3.367546e-05
+ [96]  4.118281e-05 -4.118281e-05 -4.118281e-05  4.118281e-05 -4.160751e-05</code></pre>
 <p>One simple way to make inference about <span
 class="math inline">\(\eta\)</span> (the multiplier of <span
 class="math inline">\(vv^\top\)</span>) in <span
 class="math inline">\(R_q\)</span> is as follows:</p>
 <pre class="r"><code>eta = as.numeric(1 / v %*% solve(R_q + 1e-10 * diag(J), v))
 eta</code></pre>
-<pre><code>[1] 123.5314</code></pre>
+<pre><code>[1] 80.46958</code></pre>
 <p>After having this <span class="math inline">\(\eta\)</span>, the
 vector <span class="math inline">\(u = (u_j)_{j=1}^{J}\)</span> is
 constructed so that <span class="math display">\[\text{diag}(u u^\top +
@@ -1765,22 +1727,22 @@ class="math inline">\(\eta = 1 / (\beta_1 * v_k)\)</span>.</p></li>
 <p>We can check this</p>
 <pre class="r"><code>u = uuT[1, ] / sqrt(abs(uuT[1, 1]))
 u %*% v    ## should near 0; subject to the error due to the low-rank part (R_conservative is still a full rank matrix anyway)</code></pre>
-<pre><code>          [,1]
-[1,] -1.614224</code></pre>
+<pre><code>           [,1]
+[1,] -0.1669086</code></pre>
 <pre class="r"><code>k = true_SNP[1]
 u[k] </code></pre>
-<pre><code>[1] 6.69653e-05</code></pre>
+<pre><code>[1] -7.01562e-05</code></pre>
 <p>This u_k is near 0 as it is significantly smaller than other u</p>
 <pre class="r"><code>u[1]</code></pre>
-<pre><code>[1] 0.4089211</code></pre>
+<pre><code>[1] 0.5058056</code></pre>
 <pre class="r"><code>u[2]</code></pre>
-<pre><code>[1] 0.4870064</code></pre>
+<pre><code>[1] 0.4639299</code></pre>
 <pre class="r"><code>u[3]</code></pre>
-<pre><code>[1] -0.3118501</code></pre>
+<pre><code>[1] 0.4946102</code></pre>
 <p>Finally we check the identity of <span
 class="math inline">\(\eta\)</span>:</p>
 <pre class="r"><code>eta * v[k] * beta_true[k]  ## should near 1</code></pre>
-<pre><code>[1] 0.9849228</code></pre>
+<pre><code>[1] 0.8862974</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1790,13 +1752,13 @@ Session information
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 4.5.3 (2026-03-11)
-Platform: aarch64-apple-darwin20
-Running under: macOS Tahoe 26.3.1
+<pre><code>R version 4.3.2 (2023-10-31)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS 26.2
 
 Matrix products: default
 BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
-LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -1808,30 +1770,24 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] susieR_0.14.2   susielove_0.1.0 workflowr_1.7.2
+[1] susieR_0.14.2   susielove_0.1.0
 
 loaded via a namespace (and not attached):
- [1] generics_0.1.4     sass_0.4.10        stringi_1.8.7      lattice_0.22-9    
- [5] digest_0.6.39      magrittr_2.0.4     evaluate_1.0.5     grid_4.5.3        
+ [1] sass_0.4.10        generics_0.1.4     stringi_1.8.7      lattice_0.22-7    
+ [5] digest_0.6.39      magrittr_2.0.3     evaluate_1.0.5     grid_4.3.2        
  [9] RColorBrewer_1.1-3 fastmap_1.2.0      plyr_1.8.9         rprojroot_2.1.1   
-[13] jsonlite_2.0.0     Matrix_1.7-4       processx_3.8.6     whisker_0.4.1     
-[17] reshape_0.8.10     mixsqp_0.3-54      ps_1.9.1           promises_1.5.0    
-[21] httr_1.4.7         scales_1.4.0       jquerylib_0.1.4    cli_3.6.5         
-[25] rlang_1.1.6        crayon_1.5.3       cachem_1.1.0       yaml_2.3.12       
-[29] otel_0.2.0         tools_4.5.3        dplyr_1.1.4        ggplot2_4.0.2     
-[33] httpuv_1.6.16      here_1.0.2         reticulate_1.44.1  vctrs_0.6.5       
-[37] R6_2.6.1           png_0.1-8          matrixStats_1.5.0  lifecycle_1.0.4   
-[41] git2r_0.36.2       stringr_1.6.0      fs_1.6.6           irlba_2.3.5.1     
-[45] pkgconfig_2.0.3    callr_3.7.6        pillar_1.11.1      bslib_0.9.0       
-[49] later_1.4.4        gtable_0.3.6       glue_1.8.0         Rcpp_1.1.0        
-[53] tidyselect_1.2.1   xfun_0.55          tibble_3.3.0       rstudioapi_0.17.1 
-[57] knitr_1.51         farver_2.1.2       htmltools_0.5.9    rmarkdown_2.30    
-[61] compiler_4.5.3     getPass_0.2-4      S7_0.2.1          </code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
+[13] workflowr_1.7.1    jsonlite_2.0.0     Matrix_1.6-1.1     whisker_0.4.1     
+[17] reshape_0.8.10     mixsqp_0.3-54      promises_1.5.0     scales_1.4.0      
+[21] jquerylib_0.1.4    cli_3.6.5          rlang_1.1.6        crayon_1.5.3      
+[25] withr_3.0.2        cachem_1.1.0       yaml_2.3.10        otel_0.2.0        
+[29] tools_4.3.2        dplyr_1.1.4        ggplot2_3.5.2      httpuv_1.6.16     
+[33] reticulate_1.42.0  vctrs_0.6.5        R6_2.6.1           png_0.1-8         
+[37] matrixStats_1.5.0  lifecycle_1.0.4    git2r_0.36.2       stringr_1.6.0     
+[41] fs_1.6.6           irlba_2.3.5.1      pkgconfig_2.0.3    pillar_1.11.1     
+[45] bslib_0.9.0        later_1.4.2        gtable_0.3.6       glue_1.8.0        
+[49] Rcpp_1.1.0         xfun_0.52          tibble_3.3.0       tidyselect_1.2.1  
+[53] rstudioapi_0.17.1  knitr_1.50         farver_2.1.2       htmltools_0.5.8.1 
+[57] rmarkdown_2.29     compiler_4.3.2    </code></pre>
 </div>
 </div>
 

@@ -525,6 +525,7 @@ susie_plot_alpha(
 )
 
 ```
+
 Let's try again with fixed and small $\nu_0$: It indeed leads to conservative behavior. But how to produce this small $\nu_0$???
 
 ```{r}

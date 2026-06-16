@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Dat Do" />
+
+<meta name="date" content="2026-06-16" />
+
+<title>Choosing rank k: eigenvalue elbow, KL cliff, and fit error</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">susie_love_experiments</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dodat-stats/susie_love_experiments">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Choosing rank k: eigenvalue elbow, KL
+cliff, and fit error</h1>
+<h4 class="author">Dat Do</h4>
+<h4 class="date">2026-06-16</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-06-16
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>susie_love_experiments/</code>
+<span class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260419code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260419)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260419code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260419)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree9fd409d7c7564bcd5cb8846234dc961256919a8dtargetblank9fd409da">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/9fd409d7c7564bcd5cb8846234dc961256919a8d" target="_blank">9fd409d</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstree9fd409d7c7564bcd5cb8846234dc961256919a8dtargetblank9fd409da"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/9fd409d7c7564bcd5cb8846234dc961256919a8d" target="_blank">9fd409d</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/rank_k_selection.Rmd
+
+Unstaged changes:
+    Modified:   analysis/algorithmic-approach.Rmd
+    Modified:   analysis/mismatch_fix_delta_approach.Rmd
+    Modified:   analysis/small_nu.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="aim" class="section level1">
+<h1>1. Aim</h1>
+<p>The rank <span class="math inline">\(k\)</span> of the low-rank part
+of <span class="math inline">\(R_q = FF^\top + D\)</span> controls a
+fundamental tension in <code>susie_XL</code>:</p>
+<ul>
+<li><strong>Too small</strong>: the variational family cannot
+approximate the prior mean <span class="math inline">\(\bar{R}\)</span>,
+so <span class="math inline">\(\mathrm{KL}(q \| \text{prior})\)</span>
+is huge. Because this KL grows with <span
+class="math inline">\(\nu_0\)</span>, it penalises large <span
+class="math inline">\(\nu_0\)</span> and forces the learned
+degree-of-freedom downward — which is actually the <em>correct</em>
+behaviour under LD mismatch.</li>
+<li><strong>Too large</strong>: <span class="math inline">\(R_q\)</span>
+can exactly match <span class="math inline">\(\bar{R} \approx
+R_0\)</span>, the KL collapses to zero, the ELBO is dominated by the
+SuSiE fit term, and <span class="math inline">\(\nu_0\)</span> inflates
+without correction — producing false positives.</li>
+</ul>
+<p>We investigate four candidate rules for choosing <span
+class="math inline">\(k\)</span> automatically:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Exp A — Eigenvalue elbow</strong>: scree plot of <span
+class="math inline">\(R_0\)</span>; pick <span
+class="math inline">\(k\)</span> where eigenvalues become negligible (95
+% / 99 % cumulative variance thresholds).</li>
+<li><strong>Exp B — KL cliff</strong>: fix <span
+class="math inline">\(\nu = N_0\)</span> and sweep <span
+class="math inline">\(k\)</span>; find the rank where <span
+class="math inline">\(\mathrm{KL}(q \| \text{prior})\)</span> drops
+sharply.</li>
+<li><strong>Exp C — Fit error</strong>: for each <span
+class="math inline">\(k\)</span>, run SuSiE with <span
+class="math inline">\(R_q\)</span> as the LD matrix, then compute the
+squared residual <span class="math inline">\(N \|v - R_q \hat{b}\|^2 /
+J\)</span>. This measures how well the fine-mapping fits the observed
+signal under each rank constraint.</li>
+<li><strong>Exp D — Chosen L</strong>: for each <span
+class="math inline">\(k\)</span>, count the number of credible sets
+SuSiE returns when fit with <span class="math inline">\(R_q\)</span>.
+Tracks how rank constrains SuSiE’s ability to resolve distinct
+signals.</li>
+</ol>
+<p>Both experiments are run for:</p>
+<ul>
+<li><strong>Low-mismatch</strong> (<code>sim_2pop</code>, T_split = 25,
+<span class="math inline">\(J = 500\)</span>, <span
+class="math inline">\(N_0 = 500\)</span>)</li>
+<li><strong>High-mismatch</strong> (<code>sim_asn_eur</code>, CHB GWAS +
+EUR reference, <span class="math inline">\(J = 500\)</span>, <span
+class="math inline">\(N_0 = 500\)</span>)</li>
+</ul>
+</div>
+<div id="helper-functions" class="section level1">
+<h1>2. Helper functions</h1>
+<pre class="r"><code>library(susielove)
+library(susieR)
+#&gt; Warning: package &#39;susieR&#39; was built under R version 4.3.3
+
+# KL(IW(nu*R_q, nu+J+1) || IW(nu*R_bar, nu+J+1)) at nu_q = nu_0 = nu
+# = (nu+J+1)/2 * [log|R_q| - log|R_bar| + tr(R_bar R_q^{-1}) - J]
+compute_KL_IW &lt;- function(Z, k, nu, R_bar, diag_R) {
+  J          &lt;- nrow(R_bar)
+  s          &lt;- 1 + rowSums(Z^2)
+  alpha_diag &lt;- sqrt(diag_R / s)
+  F_mat      &lt;- Z * alpha_diag
+  D_inv_diag &lt;- s / diag_R
+
+  M            &lt;- diag(k) + t(F_mat) %*% (F_mat * D_inv_diag)
+  chol_M       &lt;- chol(M)
+  log_det_Rq   &lt;- sum(log(diag_R / s)) + 2 * sum(log(diag(chol_M)))
+  log_det_Rbar &lt;- 2 * sum(log(diag(chol(R_bar))))
+
+  M_inv      &lt;- chol2inv(chol_M)
+  D_inv_F    &lt;- F_mat * D_inv_diag
+  term1      &lt;- sum(diag(R_bar) * D_inv_diag)
+  A          &lt;- crossprod(D_inv_F, R_bar %*% D_inv_F)
+  tr_Rbar_Rq &lt;- term1 - sum(A * M_inv)
+
+  (nu + J + 1) / 2 * (log_det_Rq - log_det_Rbar + tr_Rbar_Rq - J)
+}
+
+# SuSiE-based fit error and chosen L: run susie_suff_stat with R_q as LD,
+# return N * ||v - R_q b_hat||^2 / J and number of credible sets
+compute_fit_susie &lt;- function(Z, k, diag_R, v, N, L = 5) {
+  s          &lt;- 1 + rowSums(Z^2)
+  alpha_diag &lt;- sqrt(diag_R / s)
+  F_mat      &lt;- Z * alpha_diag
+  D_diag     &lt;- alpha_diag^2
+
+  R_q &lt;- tcrossprod(F_mat) + diag(D_diag)
+
+  fit_xl &lt;- suppressWarnings(
+    susieR::susie_suff_stat(XtX = N * R_q, Xty = N * v,
+                             n = N, yty = N, L = L)
+  )
+  b_hat   &lt;- colSums(fit_xl$alpha * fit_xl$mu)
+  epsilon &lt;- v - R_q %*% b_hat
+  n_cs    &lt;- length(fit_xl$sets$cs)
+
+  list(fit_error = N * sum(epsilon^2) / length(v), n_cs = n_cs)
+}
+
+# Sweep k: compute KL, SuSiE fit error, and chosen L for each value in k_grid
+run_k_sweep &lt;- function(R_bar, nu_fixed, diag_R, v, k_grid, N,
+                        max_iter_init = 200, L = 5) {
+  J       &lt;- length(v)
+  results &lt;- data.frame(k = k_grid, KL = NA_real_, fit_error = NA_real_,
+                        n_cs = NA_integer_)
+  for (i in seq_along(k_grid)) {
+    ki        &lt;- k_grid[i]
+    z         &lt;- susielove:::initialize_Z_from_prior_R(
+                   R_bar, nu_fixed, nu_fixed, diag_R, ki,
+                   max_iter_init = max_iter_init)
+    Z         &lt;- matrix(z, nrow = J, ncol = ki)
+    susie_res &lt;- compute_fit_susie(Z, ki, diag_R, v, N, L = L)
+    results$KL[i]         &lt;- compute_KL_IW(Z, ki, nu_fixed, R_bar, diag_R)
+    results$fit_error[i]  &lt;- susie_res$fit_error
+    results$n_cs[i]       &lt;- susie_res$n_cs
+  }
+  results
+}
+
+# k at which cumulative % explained variance &gt;= threshold
+eigen_k_thresh &lt;- function(eig_vals, threshold) {
+  pct_cum &lt;- cumsum(eig_vals) / sum(eig_vals)
+  which(pct_cum &gt;= threshold)[1]
+}
+
+# k right after the largest single-step drop in log(KL)
+kl_cliff_k &lt;- function(sweep_df) {
+  log_kl &lt;- log(pmax(sweep_df$KL, 1e-10))
+  drops  &lt;- diff(log_kl)
+  sweep_df$k[which.min(drops) + 1]
+}</code></pre>
+<hr />
+</div>
+<div id="low-mismatch-scenario" class="section level1">
+<h1>3. Low-mismatch scenario</h1>
+<p>Same-population two-epoch split (<code>sim_2pop</code>, T_split = 25,
+<span class="math inline">\(N_0 = 500\)</span>, <span
+class="math inline">\(J = 500\)</span>).</p>
+<div id="simulate-data" class="section level2">
+<h2>3.1 Simulate data</h2>
+<pre class="r"><code>seed    &lt;- 1
+T_split &lt;- 25
+chrom   &lt;- &quot;chr22&quot;
+start   &lt;- 20e6
+end     &lt;- 21e6
+N       &lt;- 25000L
+N0      &lt;- 500L
+J       &lt;- 500L
+h2      &lt;- 0.01
+
+res_low        &lt;- sim_2pop(chrom, start, end,
+                            T_split = T_split,
+                            n_gwas  = N,
+                            n_ref   = N0,
+                            J       = J,
+                            h2      = h2,
+                            seed    = seed)
+v_low      &lt;- res_low$v
+R_low      &lt;- res_low$R
+R0_low     &lt;- res_low$R0
+beta_low   &lt;- res_low$beta_true
+causal_low &lt;- res_low$causal_SNPs_loc
+
+# diagonal correction (match test-new-optimization-delta-ver)
+d0_inv_sqrt &lt;- 1 / sqrt(diag(R0_low))
+LD0         &lt;- diag(d0_inv_sqrt) %*% R0_low %*% diag(d0_inv_sqrt)
+d_sqrt      &lt;- sqrt(diag(R_low))
+R_tilde_low &lt;- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+diag_R_low &lt;- diag(R_low)
+R_out_low  &lt;- R_tilde_low
+
+# prior mean at nu_0 = N0, delta = 1
+R_bar_low &lt;- (1 - 1/N0) * R_out_low + (1/N0) * diag(diag_R_low)
+nu_low    &lt;- N0
+
+plot(v_low, pch = 16, cex = 0.4,
+     main = &quot;Summary statistics — low mismatch (T_split=25)&quot;)
+points(causal_low, v_low[causal_low], pch = 16, col = &quot;red&quot;, cex = 1.2)</code></pre>
+<p><img src="figure/rank_k_selection.Rmd/sim-low-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp-a-eigenvalue-elbow-of-r_textout" class="section level2">
+<h2>3.2 Exp A — Eigenvalue elbow of <span
+class="math inline">\(R_{\text{out}}\)</span></h2>
+<pre class="r"><code>eig_low  &lt;- eigen(R_out_low, symmetric = TRUE, only.values = TRUE)$values
+eig_low  &lt;- pmax(eig_low, 0)
+
+k_95_low &lt;- eigen_k_thresh(eig_low, 0.95)
+k_99_low &lt;- eigen_k_thresh(eig_low, 0.99)
+
+cat(&quot;k at 95% variance:&quot;, k_95_low, &quot;\n&quot;)
+#&gt; k at 95% variance: 70
+cat(&quot;k at 99% variance:&quot;, k_99_low, &quot;\n&quot;)
+#&gt; k at 99% variance: 130</code></pre>
+</div>
+<div id="exp-b-kl-cliff-and-exp-c-susie-fit-error-vs-k"
+class="section level2">
+<h2>3.3 Exp B — KL cliff and Exp C — SuSiE fit error vs <span
+class="math inline">\(k\)</span></h2>
+<p>We fix <span class="math inline">\(\nu = N_0 =\)</span> 500 and sweep
+<span class="math inline">\(k\)</span> up to <span
+class="math inline">\(\min(N_0, J) - 10 =\)</span> 490. For each <span
+class="math inline">\(k\)</span> we find the best rank-<span
+class="math inline">\(k\)</span>-plus-diagonal <span
+class="math inline">\(R_q\)</span> via
+<code>initialize_Z_from_prior_R</code>, compute the IW KL divergence,
+and run SuSiE with that <span class="math inline">\(R_q\)</span> to
+compute <span class="math inline">\(N\|v - R_q\hat{b}\|^2 /
+J\)</span>.</p>
+<pre class="r"><code>k_grid_low &lt;- c(10, 25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400, 450, 490)
+
+sweep_low &lt;- run_k_sweep(R_bar_low, nu_low, diag_R_low, v_low,
+                          k_grid_low, N, max_iter_init = 200)
+print(sweep_low)
+#&gt;      k           KL fit_error n_cs
+#&gt; 1   10 7.571755e+05 1.1369973    3
+#&gt; 2   25 5.935454e+05 1.0834879    4
+#&gt; 3   50 4.072290e+05 0.9830027    3
+#&gt; 4   75 2.791116e+05 1.0180898    2
+#&gt; 5  100 1.906783e+05 0.9889182    2
+#&gt; 6  125 1.292188e+05 0.9687061    2
+#&gt; 7  150 8.478766e+04 0.9683890    2
+#&gt; 8  200 3.097225e+04 0.9658513    2
+#&gt; 9  250 7.737304e+03 0.9659975    2
+#&gt; 10 300 8.730438e+02 0.9659535    2
+#&gt; 11 350 3.693423e+01 0.9659879    2
+#&gt; 12 400 1.202011e+01 0.9658459    2
+#&gt; 13 450 1.038329e+01 0.9659398    2
+#&gt; 14 490 5.142743e-01 0.9661718    2</code></pre>
+<pre class="r"><code>par(mfrow = c(1, 2))
+
+plot(seq_along(eig_low), eig_low, pch = 16, cex = 0.35,
+     xlab = &quot;Index&quot;, ylab = &quot;Eigenvalue&quot;,
+     main = &quot;Scree plot — low mismatch&quot;)
+abline(v = k_95_low, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_low, col = &quot;darkgreen&quot;, lty = 2)
+legend(&quot;topright&quot;,
+       legend = c(paste0(&quot;95%: k=&quot;, k_95_low),
+                  paste0(&quot;99%: k=&quot;, k_99_low)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;), lty = 2, cex = 0.8)
+
+plot(sweep_low$k, sweep_low$KL, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;KL(q || prior)&quot;,
+     main = &quot;KL vs k — low mismatch&quot;)
+abline(v = k_95_low, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_low, col = &quot;darkgreen&quot;, lty = 2)
+legend(&quot;topright&quot;,
+       legend = c(paste0(&quot;95% eig: k=&quot;, k_95_low),
+                  paste0(&quot;99% eig: k=&quot;, k_99_low)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;), lty = 2, cex = 0.8)</code></pre>
+<p><img src="figure/rank_k_selection.Rmd/plot-scree-kl-low-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>
+par(mfrow = c(1, 1))</code></pre>
+</div>
+<div id="exp-cd-fit-error-and-chosen-l" class="section level2">
+<h2>3.4 Exp C+D — Fit error and Chosen L</h2>
+<pre class="r"><code>par(mfrow = c(1, 2))
+
+plot(sweep_low$k, sweep_low$fit_error, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;N * ||v - R_q * b_hat||^2 / J&quot;,
+     main = &quot;SuSiE fit error vs k — low mismatch&quot;)
+abline(v = k_95_low, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_low, col = &quot;darkgreen&quot;, lty = 2)
+legend(&quot;topright&quot;,
+       legend = c(paste0(&quot;95% eig: k=&quot;, k_95_low),
+                  paste0(&quot;99% eig: k=&quot;, k_99_low)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;), lty = 2, cex = 0.8)
+
+plot(sweep_low$k, sweep_low$n_cs, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;Number of credible sets&quot;,
+     main = &quot;Chosen L vs k — low mismatch&quot;,
+     ylim = c(0, max(sweep_low$n_cs, na.rm = TRUE) + 1))
+abline(v = k_95_low, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_low, col = &quot;darkgreen&quot;, lty = 2)</code></pre>
+<p><img src="figure/rank_k_selection.Rmd/plot-fit-cs-low-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>
+par(mfrow = c(1, 1))</code></pre>
+</div>
+<div id="summary-low-mismatch" class="section level2">
+<h2>3.5 Summary — low mismatch</h2>
+<pre class="r"><code>k_kl_low &lt;- kl_cliff_k(sweep_low)
+
+cat(&quot;Eigenvalue 95%:   k =&quot;, k_95_low, &quot;\n&quot;)
+#&gt; Eigenvalue 95%:   k = 70
+cat(&quot;Eigenvalue 99%:   k =&quot;, k_99_low, &quot;\n&quot;)
+#&gt; Eigenvalue 99%:   k = 130
+cat(&quot;KL cliff:         k =&quot;, k_kl_low, &quot;\n&quot;)
+#&gt; KL cliff:         k = 350
+cat(&quot;Fit error range: [&quot;, round(min(sweep_low$fit_error), 2),
+    &quot;,&quot;, round(max(sweep_low$fit_error), 2), &quot;]\n&quot;)
+#&gt; Fit error range: [ 0.97 , 1.14 ]
+cat(&quot;Fit error % variation:&quot;,
+    round(100 * diff(range(sweep_low$fit_error)) / mean(sweep_low$fit_error), 1),
+    &quot;%\n&quot;)
+#&gt; Fit error % variation: 17.2 %</code></pre>
+<hr />
+</div>
+</div>
+<div id="high-mismatch-scenario" class="section level1">
+<h1>4. High-mismatch scenario</h1>
+<p>CHB GWAS + EUR reference (<code>sim_asn_eur</code>, <span
+class="math inline">\(N_0 = 500\)</span>, <span class="math inline">\(J
+= 500\)</span>). Mirrors <code>mismatch_fix_delta_approach</code>.</p>
+<div id="simulate-data-1" class="section level2">
+<h2>4.1 Simulate data</h2>
+<pre class="r"><code>sim_asn_eur &lt;- function(chrom, start, end, n_gwas, n_ref, J, h2, seed) {
+  stdpopsim &lt;- reticulate::import(&quot;stdpopsim&quot;)
+  msprime   &lt;- reticulate::import(&quot;msprime&quot;)
+  set.seed(seed)
+
+  species    &lt;- stdpopsim$get_species(&quot;HomSap&quot;)
+  contig     &lt;- species$get_contig(chrom,
+                                    left  = as.integer(start),
+                                    right = as.integer(end))
+  demo_model &lt;- species$get_demographic_model(&quot;OutOfAfrica_3G09&quot;)
+  demography &lt;- demo_model$model
+
+  ts &lt;- msprime$sim_ancestry(
+    samples = reticulate::dict(CHB = as.integer(n_gwas), CEU = as.integer(n_ref)),
+    demography = demography,
+    recombination_rate = contig$recombination_map,
+    random_seed = as.integer(seed)
+  )
+  ts &lt;- msprime$sim_mutations(ts, rate = 1.29e-8, random_seed = as.integer(seed))
+
+  chb_id &lt;- NULL; ceu_id &lt;- NULL
+  for (p in reticulate::iterate(ts$populations())) {
+    if (!is.null(p$metadata) &amp;&amp; p$metadata$name == &quot;CHB&quot;) chb_id &lt;- p$id
+    if (!is.null(p$metadata) &amp;&amp; p$metadata$name == &quot;CEU&quot;) ceu_id &lt;- p$id
+  }
+  G_all        &lt;- ts$genotype_matrix()
+  samples_gwas &lt;- ts$samples(population = as.integer(chb_id))
+  samples_ref  &lt;- ts$samples(population = as.integer(ceu_id))
+
+  to_diploid &lt;- function(hap_idx) {
+    idx   &lt;- as.integer(hap_idx) + 1
+    g_hap &lt;- G_all[, idx, drop = FALSE]
+    t(g_hap[, seq(1, ncol(g_hap), 2)] + g_hap[, seq(2, ncol(g_hap), 2)])
+  }
+  G_gwas &lt;- to_diploid(samples_gwas)
+  G_ref  &lt;- to_diploid(samples_ref)
+
+  maf_gwas    &lt;- colMeans(G_gwas) / 2
+  maf_ref     &lt;- colMeans(G_ref)  / 2
+  common_mask &lt;- (maf_gwas &gt; 0.05) &amp; (maf_gwas &lt; 0.95) &amp;
+                 (maf_ref  &gt; 0.05) &amp; (maf_ref  &lt; 0.95)
+  n_common    &lt;- sum(common_mask)
+  if (n_common &lt; J)
+    stop(paste0(&quot;Only &quot;, n_common, &quot; common variants, need J=&quot;, J))
+  G_gwas &lt;- G_gwas[, common_mask, drop = FALSE]
+  G_ref  &lt;- G_ref[,  common_mask, drop = FALSE]
+
+  J_all     &lt;- min(ncol(G_gwas), J)
+  max_start &lt;- J_all - J
+  start_idx &lt;- if (max_start &gt; 0) sample(0:max_start, 1) else 0
+  idx       &lt;- (start_idx + 1):(start_idx + J)
+  G  &lt;- G_gwas[, idx, drop = FALSE]
+  G0 &lt;- G_ref[,  idx, drop = FALSE]
+
+  X           &lt;- sweep(G,  2, colMeans(G),  &quot;-&quot;)
+  G0_centered &lt;- sweep(G0, 2, colMeans(G0), &quot;-&quot;)
+  R0 &lt;- stats::cov(G0_centered); R0[is.na(R0)] &lt;- 0
+  R  &lt;- stats::cov(X);           R[is.na(R)]   &lt;- 0
+
+  first_causal    &lt;- sample(1:J, 1)
+  second_causal   &lt;- which.min(R[first_causal, ]^2)
+  causal_SNPs_loc &lt;- c(first_causal, second_causal)
+  beta_true       &lt;- rep(0, J)
+  beta_true[causal_SNPs_loc] &lt;- stats::runif(2) + 0.01
+  var_expl  &lt;- sum((X %*% beta_true)^2 / nrow(X))
+  beta_true &lt;- beta_true * sqrt(h2 / var_expl)
+
+  y     &lt;- (X %*% beta_true) + sqrt(1 - h2) * stats::rnorm(nrow(X))
+  y_std &lt;- sqrt(sum((y - mean(y))^2) / nrow(X))
+  y     &lt;- (y - mean(y)) / y_std
+  v     &lt;- as.vector(t(X) %*% y / nrow(X))
+
+  list(v = v, R = R, R0 = R0, beta_true = beta_true,
+       causal_SNPs_loc = causal_SNPs_loc)
+}</code></pre>
+<pre class="r"><code>N_hi  &lt;- 25000L
+N0_hi &lt;- 500L
+J_hi  &lt;- 500L
+
+res_high    &lt;- sim_asn_eur(&quot;chr22&quot;, 20e6, 21e6,
+                            n_gwas = N_hi, n_ref = N0_hi,
+                            J = J_hi, h2 = 0.01, seed = 2)
+v_high      &lt;- res_high$v
+R_high      &lt;- res_high$R
+R0_high     &lt;- res_high$R0
+beta_high   &lt;- res_high$beta_true
+causal_high &lt;- res_high$causal_SNPs_loc
+
+# standardise to correlation scale (match mismatch_fix_delta_approach)
+d_hi    &lt;- 1 / sqrt(diag(R_high))
+v_high  &lt;- d_hi * v_high
+R_high  &lt;- cov2cor(R_high)
+R0_high &lt;- cov2cor(R0_high)
+
+diag_R_high &lt;- rep(1, J_hi)
+R_out_high  &lt;- R0_high
+R_bar_high  &lt;- (1 - 1/N0_hi) * R0_high + (1/N0_hi) * diag(J_hi)
+nu_high     &lt;- N0_hi
+
+plot(v_high, pch = 16, cex = 0.4,
+     main = &quot;Summary statistics — high mismatch (CHB/EUR)&quot;)
+points(causal_high, v_high[causal_high], pch = 16, col = &quot;red&quot;, cex = 1.2)</code></pre>
+<p><img src="figure/rank_k_selection.Rmd/sim-high-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp-a-eigenvalue-elbow-of-r_0" class="section level2">
+<h2>4.2 Exp A — Eigenvalue elbow of <span
+class="math inline">\(R_0\)</span></h2>
+<pre class="r"><code>eig_high  &lt;- eigen(R0_high, symmetric = TRUE, only.values = TRUE)$values
+eig_high  &lt;- pmax(eig_high, 0)
+
+k_95_high &lt;- eigen_k_thresh(eig_high, 0.95)
+k_99_high &lt;- eigen_k_thresh(eig_high, 0.99)
+
+cat(&quot;k at 95% variance:&quot;, k_95_high, &quot;\n&quot;)
+#&gt; k at 95% variance: 77
+cat(&quot;k at 99% variance:&quot;, k_99_high, &quot;\n&quot;)
+#&gt; k at 99% variance: 147</code></pre>
+</div>
+<div id="exp-b-kl-cliff-and-exp-c-susie-fit-error-vs-k-1"
+class="section level2">
+<h2>4.3 Exp B — KL cliff and Exp C — SuSiE fit error vs <span
+class="math inline">\(k\)</span></h2>
+<pre class="r"><code>k_grid_high &lt;- c(10, 25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400, 450, 490)
+
+sweep_high &lt;- run_k_sweep(R_bar_high, nu_high, diag_R_high, v_high,
+                           k_grid_high, N_hi, max_iter_init = 200)
+print(sweep_high)
+#&gt;      k           KL fit_error n_cs
+#&gt; 1   10 6.696297e+05  7.530219    5
+#&gt; 2   25 4.997611e+05  6.396278    5
+#&gt; 3   50 3.102459e+05  6.726707    5
+#&gt; 4   75 2.020111e+05  8.291380    5
+#&gt; 5  100 1.363762e+05  7.991415    5
+#&gt; 6  125 9.311010e+04  8.016111    5
+#&gt; 7  150 6.384709e+04  8.113313    5
+#&gt; 8  200 2.684419e+04  8.132730    5
+#&gt; 9  250 9.011595e+03  8.123460    5
+#&gt; 10 300 1.752649e+03  8.127826    5
+#&gt; 11 350 1.056728e+02  8.115407    5
+#&gt; 12 400 3.796159e+00  8.115415    5
+#&gt; 13 450 4.459070e+00  8.122022    5
+#&gt; 14 490 7.184594e-01  8.120346    5</code></pre>
+<pre class="r"><code>par(mfrow = c(1, 2))
+
+plot(seq_along(eig_high), eig_high, pch = 16, cex = 0.35,
+     xlab = &quot;Index&quot;, ylab = &quot;Eigenvalue&quot;,
+     main = &quot;Scree plot — high mismatch&quot;)
+abline(v = k_95_high, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_high, col = &quot;darkgreen&quot;, lty = 2)
+legend(&quot;topright&quot;,
+       legend = c(paste0(&quot;95%: k=&quot;, k_95_high),
+                  paste0(&quot;99%: k=&quot;, k_99_high)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;), lty = 2, cex = 0.8)
+
+plot(sweep_high$k, sweep_high$KL, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;KL(q || prior)&quot;,
+     main = &quot;KL vs k — high mismatch&quot;)
+abline(v = k_95_high, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_high, col = &quot;darkgreen&quot;, lty = 2)
+legend(&quot;topright&quot;,
+       legend = c(paste0(&quot;95% eig: k=&quot;, k_95_high),
+                  paste0(&quot;99% eig: k=&quot;, k_99_high)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;), lty = 2, cex = 0.8)</code></pre>
+<p><img src="figure/rank_k_selection.Rmd/plot-scree-kl-high-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>
+par(mfrow = c(1, 1))</code></pre>
+</div>
+<div id="exp-cd-fit-error-and-chosen-l-1" class="section level2">
+<h2>4.4 Exp C+D — Fit error and Chosen L</h2>
+<pre class="r"><code>par(mfrow = c(1, 2))
+
+plot(sweep_high$k, sweep_high$fit_error, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;N * ||v - R_q * b_hat||^2 / J&quot;,
+     main = &quot;SuSiE fit error vs k — high mismatch&quot;)
+abline(v = k_95_high, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_high, col = &quot;darkgreen&quot;, lty = 2)
+legend(&quot;topleft&quot;,
+       legend = c(paste0(&quot;95% eig: k=&quot;, k_95_high),
+                  paste0(&quot;99% eig: k=&quot;, k_99_high)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;), lty = 2, cex = 0.8)
+
+plot(sweep_high$k, sweep_high$n_cs, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;Number of credible sets&quot;,
+     main = &quot;Chosen L vs k — high mismatch&quot;,
+     ylim = c(0, max(sweep_high$n_cs, na.rm = TRUE) + 1))
+abline(v = k_95_high, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_high, col = &quot;darkgreen&quot;, lty = 2)</code></pre>
+<p><img src="figure/rank_k_selection.Rmd/plot-fit-cs-high-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>
+par(mfrow = c(1, 1))</code></pre>
+</div>
+<div id="summary-high-mismatch" class="section level2">
+<h2>4.5 Summary — high mismatch</h2>
+<pre class="r"><code>k_kl_high &lt;- kl_cliff_k(sweep_high)
+
+cat(&quot;Eigenvalue 95%:   k =&quot;, k_95_high, &quot;\n&quot;)
+#&gt; Eigenvalue 95%:   k = 77
+cat(&quot;Eigenvalue 99%:   k =&quot;, k_99_high, &quot;\n&quot;)
+#&gt; Eigenvalue 99%:   k = 147
+cat(&quot;KL cliff:         k =&quot;, k_kl_high, &quot;\n&quot;)
+#&gt; KL cliff:         k = 400
+cat(&quot;Fit error range: [&quot;, round(min(sweep_high$fit_error), 2),
+    &quot;,&quot;, round(max(sweep_high$fit_error), 2), &quot;]\n&quot;)
+#&gt; Fit error range: [ 6.4 , 8.29 ]
+cat(&quot;Fit error % variation:&quot;,
+    round(100 * diff(range(sweep_high$fit_error)) / mean(sweep_high$fit_error), 1),
+    &quot;%\n&quot;)
+#&gt; Fit error % variation: 24.1 %</code></pre>
+<hr />
+</div>
+</div>
+<div id="comparison-across-scenarios" class="section level1">
+<h1>5. Comparison across scenarios</h1>
+<pre class="r"><code>tab &lt;- data.frame(
+  Criterion     = c(&quot;Eigenvalue 95%&quot;, &quot;Eigenvalue 99%&quot;, &quot;KL cliff&quot;),
+  Low_mismatch  = c(k_95_low,  k_99_low,  k_kl_low),
+  High_mismatch = c(k_95_high, k_99_high, k_kl_high)
+)
+knitr::kable(tab,
+             col.names = c(&quot;Criterion&quot;, &quot;Low mismatch k&quot;, &quot;High mismatch k&quot;),
+             align     = &quot;lcc&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Criterion</th>
+<th align="center">Low mismatch k</th>
+<th align="center">High mismatch k</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Eigenvalue 95%</td>
+<td align="center">70</td>
+<td align="center">77</td>
+</tr>
+<tr class="even">
+<td align="left">Eigenvalue 99%</td>
+<td align="center">130</td>
+<td align="center">147</td>
+</tr>
+<tr class="odd">
+<td align="left">KL cliff</td>
+<td align="center">350</td>
+<td align="center">400</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>par(mfrow = c(1, 2))
+
+kl_rel_low  &lt;- sweep_low$KL  / sweep_low$KL[1]
+kl_rel_high &lt;- sweep_high$KL / sweep_high$KL[1]
+
+plot(sweep_low$k, kl_rel_low, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;KL / KL(k=10)&quot;,
+     main = &quot;Relative KL — low mismatch&quot;, ylim = c(0, 1))
+abline(v = k_95_low, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_low, col = &quot;darkgreen&quot;, lty = 2)
+abline(v = k_kl_low, col = &quot;purple&quot;,    lty = 1, lwd = 2)
+legend(&quot;topright&quot;,
+       legend = c(paste0(&quot;95% eig: k=&quot;, k_95_low),
+                  paste0(&quot;99% eig: k=&quot;, k_99_low),
+                  paste0(&quot;KL cliff: k=&quot;, k_kl_low)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;, &quot;purple&quot;),
+       lty = c(2, 2, 1), cex = 0.8)
+
+plot(sweep_high$k, kl_rel_high, type = &quot;b&quot;, pch = 16,
+     xlab = &quot;k&quot;, ylab = &quot;KL / KL(k=10)&quot;,
+     main = &quot;Relative KL — high mismatch&quot;, ylim = c(0, 1))
+abline(v = k_95_high, col = &quot;red&quot;,       lty = 2)
+abline(v = k_99_high, col = &quot;darkgreen&quot;, lty = 2)
+abline(v = k_kl_high, col = &quot;purple&quot;,    lty = 1, lwd = 2)
+legend(&quot;topright&quot;,
+       legend = c(paste0(&quot;95% eig: k=&quot;, k_95_high),
+                  paste0(&quot;99% eig: k=&quot;, k_99_high),
+                  paste0(&quot;KL cliff: k=&quot;, k_kl_high)),
+       col = c(&quot;red&quot;, &quot;darkgreen&quot;, &quot;purple&quot;),
+       lty = c(2, 2, 1), cex = 0.8)</code></pre>
+<p><img src="figure/rank_k_selection.Rmd/comparison-plot-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>
+par(mfrow = c(1, 1))</code></pre>
+<p><strong>Key observations:</strong></p>
+<ol style="list-style-type: decimal">
+<li><p><strong>KL needs far more rank than eigenvalues suggest</strong>:
+the KL cliff occurs at a much larger <span
+class="math inline">\(k\)</span> than either the 95 % or 99 % eigenvalue
+threshold. This means the Frobenius-norm approximation quality of <span
+class="math inline">\(R_q\)</span> (captured by the eigenvalue elbow) is
+not the right lens — the KL divergence between IW distributions is
+governed by the log-determinant and trace terms, which remain large even
+when the entrywise approximation error is already small.</p></li>
+<li><p><strong>Euclidean fit error</strong>: <span
+class="math inline">\(N\|v - R_q\hat{b}\|^2/J\)</span> as a function of
+<span class="math inline">\(k\)</span> reveals how rank constrains
+SuSiE’s ability to explain the observed signal. Whether it is monotone,
+U-shaped, or flat determines whether it can complement the KL criterion
+as a practical selection rule.</p></li>
+<li><p><strong>Practical implication</strong>: the eigenvalue 95–99 %
+rule gives a <span class="math inline">\(k\)</span> that is safe from
+the KL cliff (the KL is still large there, so <span
+class="math inline">\(\nu_0\)</span> is penalised appropriately). Using
+<span class="math inline">\(k\)</span> beyond the 99 % threshold risks
+entering the KL collapse regime and losing mismatch correction.</p></li>
+</ol>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()
+#&gt; R version 4.3.2 (2023-10-31)
+#&gt; Platform: aarch64-apple-darwin20 (64-bit)
+#&gt; Running under: macOS 26.2
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; time zone: America/New_York
+#&gt; tzcode source: internal
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] susieR_0.14.2   susielove_0.1.0
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] sass_0.4.10        generics_0.1.4     stringi_1.8.7      lattice_0.22-7    
+#&gt;  [5] digest_0.6.39      magrittr_2.0.3     evaluate_1.0.5     grid_4.3.2        
+#&gt;  [9] RColorBrewer_1.1-3 fastmap_1.2.0      rprojroot_2.1.1    workflowr_1.7.1   
+#&gt; [13] plyr_1.8.9         jsonlite_2.0.0     Matrix_1.6-1.1     reshape_0.8.10    
+#&gt; [17] mixsqp_0.3-54      promises_1.5.0     scales_1.4.0       jquerylib_0.1.4   
+#&gt; [21] cli_3.6.5          rlang_1.1.6        crayon_1.5.3       withr_3.0.2       
+#&gt; [25] cachem_1.1.0       yaml_2.3.10        otel_0.2.0         tools_4.3.2       
+#&gt; [29] dplyr_1.1.4        ggplot2_3.5.2      httpuv_1.6.16      reticulate_1.42.0 
+#&gt; [33] vctrs_0.6.5        R6_2.6.1           png_0.1-8          matrixStats_1.5.0 
+#&gt; [37] lifecycle_1.0.4    git2r_0.36.2       stringr_1.6.0      fs_1.6.6          
+#&gt; [41] irlba_2.3.5.1      pkgconfig_2.0.3    pillar_1.11.1      bslib_0.9.0       
+#&gt; [45] later_1.4.2        gtable_0.3.6       glue_1.8.0         Rcpp_1.1.0        
+#&gt; [49] xfun_0.52          tibble_3.3.0       tidyselect_1.2.1   rstudioapi_0.17.1 
+#&gt; [53] knitr_1.50         farver_2.1.2       htmltools_0.5.8.1  rmarkdown_2.29    
+#&gt; [57] compiler_4.3.2</code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

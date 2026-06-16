@@ -136,7 +136,8 @@ start <- 20e6
 end   <- 21e6
 N     <- 25000L
 N0 = 500L
-J     <- 500L
+# N0 = 500L
+J     <- 1000L
 h2    <- 0.01
 
 res <- sim_asn_eur(chrom, start, end,

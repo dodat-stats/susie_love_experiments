@@ -14,8 +14,9 @@ editor_options:
 
 ```{r simulate, fig.width=8, fig.height=6}
 library(susielove)
+## seed = 3 -> CS with 2. Interesting result 
 
-seed  <- 1
+seed  <- 4
 T_split <- 25
 chrom <- "chr22"
 start <- 20e6
@@ -170,6 +171,7 @@ envals = eig$values
 
 plot(c(1:J), envals, pch = 16)
 print(envals[c(1:10)])
+
 ```
 
 Indeed $R_q$ has rank close to 1. Rank of the guessed null matrix:
@@ -186,6 +188,11 @@ It is also close to 1. I am still investigate to see what is the form of
 this matrix $R_q$.
 
 ## More visualization of the learned Rq
+
+### Second eigenvector
+```{r}
+plot(c(1:J), eig$vectors[2, ], pch = 16)
+```
 
 ### Row of Rq at the true SNP
 

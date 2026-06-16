@@ -1,0 +1,154 @@
+---
+title: "Test new grid-based optimization for nu_0"
+author: "Dat Do"
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+date: "2026-06-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## 0. Aim
+
+One of the problem I have been largely ignored is the choosing of rank $k$ in the low-rank part $F$ of the low-rank-plus-diag representation $R_q = F F^\top + D$. Recall the `covariance part` of the loss function:
+
+$$\text{KL}(\text{IW}(\nu_q R_q, \nu_q + J + 1), \text{IW}(\nu_0 R_0 + \delta D_0, \nu_0 + \delta + J + 1)). $$
+Choosing rank $k$ as large as $\text{rank}(R_0)$ ($\leq \min\{N_0, J\}$) can help this part achieving 0 loss, because $\nu_0 R_0 + \delta D_0$ is a low-rank-plus-diag matrix with rank of the low-rank part being $\text{rank}(R_0)$. 
+
+1) In all of the previous experiments, $N_0 = 200$ and $J = 1000$. We choose $k = 200$ and it works fine.
+
+2) I was surprised that when $N_0$ is as large as 1000, the KL gap between $\text{IW}(\nu_q R_q, \nu_q + J + 1)$ with $k=200$ and $\text{IW}(\nu_0 R_0 + \delta D_0, \nu_0 + \delta + J + 1))$ is so huge that it might actually dominate the `fit part` in the loss function, therefore sending the optimized $\nu_0$ to very small. 
+
+
+## 1. Simulate data from a coalescent model
+
+```{r simulate, fig.width=8, fig.height=6}
+library(susielove)
+
+seed  <- 1
+T_split <- 25
+chrom <- "chr22"
+start <- 20e6
+end   <- 21e6
+N     <- 25000L
+N0    <- 1000L
+J     <- 1000L
+h2    <- 0.01
+
+res <- sim_2pop(chrom, start, end,
+                T_split = T_split,
+                n_gwas = N,
+                n_ref = N0,
+                J = J,
+                h2 = h2,
+                seed = seed)
+
+v               <- res$v
+R               <- res$R
+R0              <- res$R0
+beta_true       <- res$beta_true
+causal_SNPs_loc <- res$causal_SNPs_loc
+
+plot(v, pch = 16)
+points(causal_SNPs_loc, v[causal_SNPs_loc], pch = 16, col = "red")
+```
+
+## 2. Try fitting susieR with in-sample and out-of-sample covariance matrices
+
+```{r susie-insample, fig.width=8, fig.height=6}
+library(susieR)
+
+fit <- susie_suff_stat(
+  XtX = N * R,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit, y = "PIP", b = beta_true, main = "In-sample cov mat")
+```
+
+```{r susie-outsample, fig.width=8, fig.height=6}
+library(susieR)
+
+fit_R0 <- susie_suff_stat(
+  XtX = N * R0,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit_R0, y = "PIP", b = beta_true, main = "Out-of-sample cov mat")
+```
+
+
+```{r susie-outsample-diag, fig.width=8, fig.height=6}
+d0_inv_sqrt <- 1 / sqrt(diag(R0))
+LD0 <- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
+d_sqrt <- sqrt(diag(R))
+R_tilde <- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+fit <- susie_suff_stat(
+  XtX = N * R_tilde,
+  Xty = N * v,
+  n = N,
+  yty = N
+)
+susie_plot(fit, y = "PIP", b = beta_true, main = "Out-of-sample cov mat (corrected diagonal)")
+```
+
+
+## 3. Fit susie_XL with new log-space optimization (nu_0_init = 1000)
+
+```{r prep-inputs}
+d0_inv_sqrt <- 1 / sqrt(diag(R0))
+LD0 <- diag(d0_inv_sqrt) %*% R0 %*% diag(d0_inv_sqrt)
+d_sqrt <- sqrt(diag(R))
+R_tilde <- diag(d_sqrt) %*% LD0 %*% diag(d_sqrt)
+
+diag_R <- diag(R)
+R_out  <- R_tilde
+k      <- 200
+delta  <- 1
+```
+
+```{r susie-XL-1000, fig.width=8, fig.height=6}
+nu_0_init <- 1000
+max_iter  <- 30
+
+XL_res_1000 <- susie_XL(v, R_out, diag_R,
+                         delta,
+                         N, L = 5,
+                         k,
+                         nu_0_init     = nu_0_init,
+                         max_iter_init = 100,
+                         step_susie    = 20,
+                         step_R        = 100,
+                         estimate_nu_0 = TRUE,
+                         estimate_delta = FALSE,
+                         max_iter      = max_iter,
+                         tol           = 1e-4)
+
+b_res <- XL_res_1000$b_res
+R_q   <- XL_res_1000$R_q
+
+susie_plot_alpha(
+  alpha = b_res$alpha,
+  R     = cov2cor(R_q),
+  b     = beta_true,
+  main  = paste0("SuSiE-XL (nu_0_init=1000) | nu_0=",
+                 round(XL_res_1000$nu_0, 1),
+                 " | nu_q=", round(XL_res_1000$nu_q, 1))
+)
+```
+
+
+**Observation:** Compare this to the file test-new-optimization-delta-ver (when $N_0 = 200$): The optimized $\nu_0$ was non-trivial in the previous file, and it just converges to the lower bound 1 in this case $N_0 = 1000$...
+
+But why is this the case??
+
