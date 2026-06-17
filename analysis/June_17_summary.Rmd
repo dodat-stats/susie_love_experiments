@@ -1,5 +1,5 @@
 ---
-title: "Test new grid-based optimization for nu_0"
+title: "Project progress summary June 17"
 author: "Dat Do"
 output:
   workflowr::wflow_html:
