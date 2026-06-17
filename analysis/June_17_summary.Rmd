@@ -1,0 +1,100 @@
+---
+title: "Test new grid-based optimization for nu_0"
+author: "Dat Do"
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+date: "2026-06-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Summary
+
+In the last two weeks, we have been discussing lots of ways to choose $\lambda$ (or $\delta$) and $\nu_0$ in the susie-love model. First, I want to summarize what we have learned so far:
+
+## 1. Learned lessons
+
+**L1.** The **null case** (as a special case) remains important: If observing a null observation $v^{(0)} | R \sim \mathcal{N}(0, R / N), \quad R \sim \mathcal{IW}(\nu_0 \bar{R}, \nu_0 + J + 1)$, where $\bar{R} = (1 - \lambda) R_0 + \lambda I$, **then** $\lambda$ **can be learned consistently while** $\nu_0$ **is not**.
+
+**L2.** The **single-effect, noiseless case**: If we can somehow observe a single column of the in-sample $R$ and assuming that $R \sim \mathcal{IW}(\nu_0 \bar{R}, \nu_0 + J + 1)$, where $\bar{R} = (1 - \lambda) R_0 + \lambda I$, then **both** $\nu_0$ **and** $\lambda$ **can be learned consistently** as $J$ becomes large.
+
+**L3.** In the **full susie-love model with parametric VEB inference**: It has a peculiar behavior: It often prefers large $\lambda$ and large $\nu_0$ for all cases (if both are learned), leading to False Positive in many cases.
+
+Note that the inference in the susie-love model is not perfect since we are using a parametric approximation for the true posterior of $R$: Although the correct conditional posterior has the form:
+
+$$\log p(R | b, v, R_0) \propto - a \log |R| - \text{Tr}(R B) - \text{Tr}(R^{-1} V),$$ where $B$ is a PSD matrix depend on $b$ and $V$ is PSD matrix depending on $v$ and $R_0$, we are approximating it using an IW family:
+
+$$\log q(R) = \log \mathcal{IW}(R | \nu_q R_q, \nu_q + J +1) \propto - \dfrac{\nu_q + 2(J + 1)}{2} \log |R| - \dfrac{\nu_0}{2} \text{Tr}(R^{-1} R_q).$$ Hence, we basically omit one term in the correct conditional posterior of $R$, trading for the computational tractability. However, this approximation still retains this important proved theoretical result:
+
+**L4.** When $\nu_0 \to \infty$, the susie result is like fitting the model with $R = \bar{R}$. When $\nu_0 \to 0$ (and large $N$), the susie result is conservative (choose $L = 1$).
+
+## 2. Approaches to choose $\lambda$ and $\nu_0$ in the current inference scheme
+
+**Simulation settings and goals.** To evaluate the performance, we assess them under two simulation settings:
+
+-   **Low mismatch case:** Two populations are diverged a few generations ago (tens of generations) and true $L = 2$. Fitting susieR with the out-of-sample LD often chosen $L$ equals to the in-sample LD or is larger by 1 or 2 CSs, and can often capture both true effects. We want susie-love result to retains the both true effects (high power) and discard the spurious CSs if possible.
+
+-   **High mismatch case:** Totally different LD (EUR vs CHB). Fitting susieR with out-of-sample LD would result in the maximal $L$ in this case. Here we want susielove to set $\nu_0$ to small and only capture $L = 1$.
+
+Here are what we tried and their results:
+
+### 2.1. Approach 1: Auto choose $\lambda$; Learn $\nu_0$ via VEB.
+
+**A1.** I have tried choosing $\lambda$ from some out-of-the-box tool, like setting $\lambda = 1 / (N_0 + 1)$, and using shrinkage suggestion from Wen-Stephens (2010) and Ledoit-Wolf (2004). The downside is the chosen $\lambda$ in all of them only depends on $N_0$. [Here](https://dodat-stats.github.io/susie_love_experiments/various-shrinkage.html) is an overview.
+
+-   [This link](https://dodat-stats.github.io/susie_love_experiments/systematic-compare-shrinkage-methods.html) and [This](https://dodat-stats.github.io/susie_love_experiments/divergence_increase-nu_decrease.html) compares them under the low mismatch case. They perform quite well. We observe that $\nu_0$ does decrease if the divergence increases.
+
+-   However, [this analysis](https://dodat-stats.github.io/susie_love_experiments/high-mismatch-tiny-nu0.html) (Section 1 and 2) shows that it could not really deal with the high mismatch case. The learned $\nu_0$ highly depends on the choice of $\lambda$, which only depends on $N_0$ so it does not look very principal.
+
+### 2.2. Approach 2: Choose `lambda` using the null part of v
+
+**A2.** On June 12, we have been working together on Section 3 of [this analysis](https://dodat-stats.github.io/susie_love_experiments/high-mismatch-tiny-nu0.html), where we choose $\lambda$ based on the null part of $v$ by
+
+(1) Fit the susieR with the out-of-sample LD $R_0$ to get the posterior $\bar{b}$;
+
+(2) subtracted out the signal to get the null part (residual) $v^{(0)} = v - R_0 \bar{b}$;
+
+(3) Learn $\lambda$ from the null part $v^{(0)}$ using MLE (or using the truncated $w_j$; i.e., count the number of $w_j \leq \epsilon$).
+
+**It shows that the estimate `lambda` is larger for more mismatch.** I think this is a positive signal that we can pay more attention to.
+
+After that we choose $\nu_0 = \delta (1 - \lambda) / \lambda$. We notice that the result depends on the magnitude of $\delta$ though (i.e., $\delta = 1$ leads to different result compared to $\delta = .1$).
+
+Matthew suggested that we can choose $\delta$ using EB and the hierarchical out-of-sample $X$. I think that it will lead to small $\delta$, and I have not tried it.
+
+### 2.3. Approach 3: Use the susie-love model with fixing $\delta$ and only learn $\nu_0$.
+
+**A3.** Another strategy that we mentioned in the meeting on June 12, which feels the most principal, is to fix $\delta$ and only learn $\nu_0$ (I have re-read the Slack messages and noticed that Matthew keeps referring to this strategy many times in December). Because $\lambda = \delta / (\delta + \nu_0)$, this strategy leads to a very intuitive relationship: $\nu_0$ is smaller for larger $\lambda$ (both indicate mismatch).
+
+-   [This early investigation](https://dodat-stats.github.io/susie_love_experiments/two_implementations.html) shows that jointly optimizing $\nu_0$ and other parameters (like $R_q, \nu_q, q(b)$) while fixing $\delta$ is bad: The optimal $\nu_0$ rarely moves away from the initialization. Which suggests to choose a few values of $\nu_0$ (on a grid) as initialization for the optimization, and pick the one with highest ELBO.
+
+-   I have implemented a grid search [here](https://dodat-stats.github.io/susie_love_experiments/test-new-optimization-delta-ver.html), where the algorithm only runs for 10 iterations (sort of early stop) for 10 values of $\nu_0$ (with `optimize_nu_0 = FALSE`) on a grid, then choose the best $\nu_0$ as the initialization to do a final optimization (with `optimize_nu_0 = TRUE`). It works well for the low mismatch case.
+
+-   The performance in the high mismatch case can be seen [here](https://dodat-stats.github.io/susie_love_experiments/mismatch_fix_delta_approach.html). It works well (Section 1-2), but with a catch that we need to choose the rank $k$ of the low-rank part in the optimization of $R_q$ (see Section 3).
+
+-   I am currently investigate what is a good choice for the rank $k$ and hope to discuss this.
+
+### 2.4. Approach 4: Just pre-estimate lambda and nu_0
+
+One simple way that I also want to discuss is the following simple procedure:
+
+1.  Fitting susieR to $v$ and the out-of-sample $R_0$ to get the susie result.
+
+2.  Get the null part $v^{(0)} = v - R_0 \bar{b}$ to learn $\lambda$. This should be good (based on **L1.**)
+
+3.  Refit susieR model with $\bar{R} = (1-\lambda) R_0 + \lambda I$.
+
+4.  Get the first-effect part $v^{(1)} = v - \bar{R} \sum_{\ell \geq 2} \bar{b}_{\ell}$ (the strongest signal). Let $j^* = \arg\max \alpha_{1j}$. If $R = \bar{R}$, $v^{(1)} / v^{(1)}_{j^*}$ should corresponds to $j^*$-th column of the unknown in-sample $R$ (with noise of order $1 / N$). We proceed to use the noiseless observed column setting (in **L2.**) to learn $\nu_0$. 
+
+- If $R$ is very near $\bar{R}$, this will approximately correct and $\nu_0$ is large
+
+- If $R$ is very far away from $\bar{R}$, $v^{(1)}$ will not look like any of $\bar{R}$'s column and $\nu_0$ will be small. 
+
+
