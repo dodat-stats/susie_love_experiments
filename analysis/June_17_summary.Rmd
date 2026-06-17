@@ -79,7 +79,8 @@ Matthew suggested that we can choose $\delta$ using EB and the hierarchical out-
 
 -   The performance in the high mismatch case can be seen [here](https://dodat-stats.github.io/susie_love_experiments/mismatch_fix_delta_approach.html). It works well (Section 1-2), but with a catch that we need to choose the rank $k$ of the low-rank part in the optimization of $R_q$ (see Section 3).
 
--   I am currently investigate what is a good choice for the rank $k$ and hope to discuss this.
+-   I am currently investigate what is a good choice for the rank $k$ and hope to discuss this. My suspect is that it is only sensitive for choosing $\nu_0$, but not for learned $R_q$ and $q(b)$. But we have to see.
+
 
 ### 2.4. Approach 4: Just pre-estimate lambda and nu_0
 
