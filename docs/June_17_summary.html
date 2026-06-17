@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Dat Do" />
+
+<meta name="date" content="2026-06-15" />
+
+<title>Test new grid-based optimization for nu_0</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">susie_love_experiments</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dodat-stats/susie_love_experiments">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Test new grid-based optimization for
+nu_0</h1>
+<h4 class="author">Dat Do</h4>
+<h4 class="date">2026-06-15</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-06-17
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>susie_love_experiments/</code>
+<span class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260419code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260419)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260419code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260419)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreed2e52d7045c7d0fe565a8ddd8318df84f236e9b4targetblankd2e52d7a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/d2e52d7045c7d0fe565a8ddd8318df84f236e9b4" target="_blank">d2e52d7</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieloveexperimentstreed2e52d7045c7d0fe565a8ddd8318df84f236e9b4targetblankd2e52d7a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie_love_experiments/tree/d2e52d7045c7d0fe565a8ddd8318df84f236e9b4" target="_blank">d2e52d7</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rproj.user/
+    Ignored:    .claude/
+    Ignored:    analysis/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/k_rank_vs_large_N0.Rmd
+
+Unstaged changes:
+    Deleted:    analysis/1_k_rank_vs_large_N0.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/June_17_summary.Rmd</code>) and
+HTML (<code>docs/June_17_summary.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie_love_experiments/blob/d2e52d7045c7d0fe565a8ddd8318df84f236e9b4/analysis/June_17_summary.Rmd" target="_blank">d2e52d7</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-06-17
+</td>
+<td>
+run
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>In the last two weeks, we have been discussing lots of ways to choose
+<span class="math inline">\(\lambda\)</span> (or <span
+class="math inline">\(\delta\)</span>) and <span
+class="math inline">\(\nu_0\)</span> in the susie-love model. First, I
+want to summarize what we have learned so far:</p>
+<div id="learned-lessons" class="section level2">
+<h2>1. Learned lessons</h2>
+<p><strong>L1.</strong> The <strong>null case</strong> (as a special
+case) remains important: If observing a null observation <span
+class="math inline">\(v^{(0)} | R \sim \mathcal{N}(0, R / N), \quad R
+\sim \mathcal{IW}(\nu_0 \bar{R}, \nu_0 + J + 1)\)</span>, where <span
+class="math inline">\(\bar{R} = (1 - \lambda) R_0 + \lambda I\)</span>,
+<strong>then</strong> <span class="math inline">\(\lambda\)</span>
+<strong>can be learned consistently while</strong> <span
+class="math inline">\(\nu_0\)</span> <strong>is not</strong>.</p>
+<p><strong>L2.</strong> The <strong>single-effect, noiseless
+case</strong>: If we can somehow observe a single column of the
+in-sample <span class="math inline">\(R\)</span> and assuming that <span
+class="math inline">\(R \sim \mathcal{IW}(\nu_0 \bar{R}, \nu_0 + J +
+1)\)</span>, where <span class="math inline">\(\bar{R} = (1 - \lambda)
+R_0 + \lambda I\)</span>, then <strong>both</strong> <span
+class="math inline">\(\nu_0\)</span> <strong>and</strong> <span
+class="math inline">\(\lambda\)</span> <strong>can be learned
+consistently</strong> as <span class="math inline">\(J\)</span> becomes
+large.</p>
+<p><strong>L3.</strong> In the <strong>full susie-love model with
+parametric VEB inference</strong>: It has a peculiar behavior: It often
+prefers large <span class="math inline">\(\lambda\)</span> and large
+<span class="math inline">\(\nu_0\)</span> for all cases (if both are
+learned), leading to False Positive in many cases.</p>
+<p>Note that the inference in the susie-love model is not perfect since
+we are using a parametric approximation for the true posterior of <span
+class="math inline">\(R\)</span>: Although the correct conditional
+posterior has the form:</p>
+<p><span class="math display">\[\log p(R | b, v, R_0) \propto - a \log
+|R| - \text{Tr}(R B) - \text{Tr}(R^{-1} V),\]</span> where <span
+class="math inline">\(B\)</span> is a PSD matrix depend on <span
+class="math inline">\(b\)</span> and <span
+class="math inline">\(V\)</span> is PSD matrix depending on <span
+class="math inline">\(v\)</span> and <span
+class="math inline">\(R_0\)</span>, we are approximating it using an IW
+family:</p>
+<p><span class="math display">\[\log q(R) = \log \mathcal{IW}(R | \nu_q
+R_q, \nu_q + J +1) \propto - \dfrac{\nu_q + 2(J + 1)}{2} \log |R| -
+\dfrac{\nu_0}{2} \text{Tr}(R^{-1} R_q).\]</span> Hence, we basically
+omit one term in the correct conditional posterior of <span
+class="math inline">\(R\)</span>, trading for the computational
+tractability. However, this approximation still retains this important
+proved theoretical result:</p>
+<p><strong>L4.</strong> When <span class="math inline">\(\nu_0 \to
+\infty\)</span>, the susie result is like fitting the model with <span
+class="math inline">\(R = \bar{R}\)</span>. When <span
+class="math inline">\(\nu_0 \to 0\)</span> (and large <span
+class="math inline">\(N\)</span>), the susie result is conservative
+(choose <span class="math inline">\(L = 1\)</span>).</p>
+</div>
+<div
+id="approaches-to-choose-lambda-and-nu_0-in-the-current-inference-scheme"
+class="section level2">
+<h2>2. Approaches to choose <span class="math inline">\(\lambda\)</span>
+and <span class="math inline">\(\nu_0\)</span> in the current inference
+scheme</h2>
+<p><strong>Simulation settings and goals.</strong> To evaluate the
+performance, we assess them under two simulation settings:</p>
+<ul>
+<li><p><strong>Low mismatch case:</strong> Two populations are diverged
+a few generations ago (tens of generations) and true <span
+class="math inline">\(L = 2\)</span>. Fitting susieR with the
+out-of-sample LD often chosen <span class="math inline">\(L\)</span>
+equals to the in-sample LD or is larger by 1 or 2 CSs, and can often
+capture both true effects. We want susie-love result to retains the both
+true effects (high power) and discard the spurious CSs if
+possible.</p></li>
+<li><p><strong>High mismatch case:</strong> Totally different LD (EUR vs
+CHB). Fitting susieR with out-of-sample LD would result in the maximal
+<span class="math inline">\(L\)</span> in this case. Here we want
+susielove to set <span class="math inline">\(\nu_0\)</span> to small and
+only capture <span class="math inline">\(L = 1\)</span>.</p></li>
+</ul>
+<p>Here are what we tried and their results:</p>
+<div id="approach-1-auto-choose-lambda-learn-nu_0-via-veb."
+class="section level3">
+<h3>2.1. Approach 1: Auto choose <span
+class="math inline">\(\lambda\)</span>; Learn <span
+class="math inline">\(\nu_0\)</span> via VEB.</h3>
+<p><strong>A1.</strong> I have tried choosing <span
+class="math inline">\(\lambda\)</span> from some out-of-the-box tool,
+like setting <span class="math inline">\(\lambda = 1 / (N_0 +
+1)\)</span>, and using shrinkage suggestion from Wen-Stephens (2010) and
+Ledoit-Wolf (2004). The downside is the chosen <span
+class="math inline">\(\lambda\)</span> in all of them only depends on
+<span class="math inline">\(N_0\)</span>. <a
+href="https://dodat-stats.github.io/susie_love_experiments/various-shrinkage.html">Here</a>
+is an overview.</p>
+<ul>
+<li><p><a
+href="https://dodat-stats.github.io/susie_love_experiments/systematic-compare-shrinkage-methods.html">This
+link</a> and <a
+href="https://dodat-stats.github.io/susie_love_experiments/divergence_increase-nu_decrease.html">This</a>
+compares them under the low mismatch case. They perform quite well. We
+observe that <span class="math inline">\(\nu_0\)</span> does decrease if
+the divergence increases.</p></li>
+<li><p>However, <a
+href="https://dodat-stats.github.io/susie_love_experiments/high-mismatch-tiny-nu0.html">this
+analysis</a> (Section 1 and 2) shows that it could not really deal with
+the high mismatch case. The learned <span
+class="math inline">\(\nu_0\)</span> highly depends on the choice of
+<span class="math inline">\(\lambda\)</span>, which only depends on
+<span class="math inline">\(N_0\)</span> so it does not look very
+principal.</p></li>
+</ul>
+</div>
+<div id="approach-2-choose-lambda-using-the-null-part-of-v"
+class="section level3">
+<h3>2.2. Approach 2: Choose <code>lambda</code> using the null part of
+v</h3>
+<p><strong>A2.</strong> On June 12, we have been working together on
+Section 3 of <a
+href="https://dodat-stats.github.io/susie_love_experiments/high-mismatch-tiny-nu0.html">this
+analysis</a>, where we choose <span
+class="math inline">\(\lambda\)</span> based on the null part of <span
+class="math inline">\(v\)</span> by</p>
+<ol style="list-style-type: decimal">
+<li><p>Fit the susieR with the out-of-sample LD <span
+class="math inline">\(R_0\)</span> to get the posterior <span
+class="math inline">\(\bar{b}\)</span>;</p></li>
+<li><p>subtracted out the signal to get the null part (residual) <span
+class="math inline">\(v^{(0)} = v - R_0 \bar{b}\)</span>;</p></li>
+<li><p>Learn <span class="math inline">\(\lambda\)</span> from the null
+part <span class="math inline">\(v^{(0)}\)</span> using MLE (or using
+the truncated <span class="math inline">\(w_j\)</span>; i.e., count the
+number of <span class="math inline">\(w_j \leq
+\epsilon\)</span>).</p></li>
+</ol>
+<p><strong>It shows that the estimate <code>lambda</code> is larger for
+more mismatch.</strong> I think this is a positive signal that we can
+pay more attention to.</p>
+<p>After that we choose <span class="math inline">\(\nu_0 = \delta (1 -
+\lambda) / \lambda\)</span>. We notice that the result depends on the
+magnitude of <span class="math inline">\(\delta\)</span> though (i.e.,
+<span class="math inline">\(\delta = 1\)</span> leads to different
+result compared to <span class="math inline">\(\delta =
+.1\)</span>).</p>
+<p>Matthew suggested that we can choose <span
+class="math inline">\(\delta\)</span> using EB and the hierarchical
+out-of-sample <span class="math inline">\(X\)</span>. I think that it
+will lead to small <span class="math inline">\(\delta\)</span>, and I
+have not tried it.</p>
+</div>
+<div
+id="approach-3-use-the-susie-love-model-with-fixing-delta-and-only-learn-nu_0."
+class="section level3">
+<h3>2.3. Approach 3: Use the susie-love model with fixing <span
+class="math inline">\(\delta\)</span> and only learn <span
+class="math inline">\(\nu_0\)</span>.</h3>
+<p><strong>A3.</strong> Another strategy that we mentioned in the
+meeting on June 12, which feels the most principal, is to fix <span
+class="math inline">\(\delta\)</span> and only learn <span
+class="math inline">\(\nu_0\)</span> (I have re-read the Slack messages
+and noticed that Matthew keeps referring to this strategy many times in
+December). Because <span class="math inline">\(\lambda = \delta /
+(\delta + \nu_0)\)</span>, this strategy leads to a very intuitive
+relationship: <span class="math inline">\(\nu_0\)</span> is smaller for
+larger <span class="math inline">\(\lambda\)</span> (both indicate
+mismatch).</p>
+<ul>
+<li><p><a
+href="https://dodat-stats.github.io/susie_love_experiments/two_implementations.html">This
+early investigation</a> shows that jointly optimizing <span
+class="math inline">\(\nu_0\)</span> and other parameters (like <span
+class="math inline">\(R_q, \nu_q, q(b)\)</span>) while fixing <span
+class="math inline">\(\delta\)</span> is bad: The optimal <span
+class="math inline">\(\nu_0\)</span> rarely moves away from the
+initialization. Which suggests to choose a few values of <span
+class="math inline">\(\nu_0\)</span> (on a grid) as initialization for
+the optimization, and pick the one with highest ELBO.</p></li>
+<li><p>I have implemented a grid search <a
+href="https://dodat-stats.github.io/susie_love_experiments/test-new-optimization-delta-ver.html">here</a>,
+where the algorithm only runs for 10 iterations (sort of early stop) for
+10 values of <span class="math inline">\(\nu_0\)</span> (with
+<code>optimize_nu_0 = FALSE</code>) on a grid, then choose the best
+<span class="math inline">\(\nu_0\)</span> as the initialization to do a
+final optimization (with <code>optimize_nu_0 = TRUE</code>). It works
+well for the low mismatch case.</p></li>
+<li><p>The performance in the high mismatch case can be seen <a
+href="https://dodat-stats.github.io/susie_love_experiments/mismatch_fix_delta_approach.html">here</a>.
+It works well (Section 1-2), but with a catch that we need to choose the
+rank <span class="math inline">\(k\)</span> of the low-rank part in the
+optimization of <span class="math inline">\(R_q\)</span> (see Section
+3).</p></li>
+<li><p>I am currently investigate what is a good choice for the rank
+<span class="math inline">\(k\)</span> and hope to discuss
+this.</p></li>
+</ul>
+</div>
+<div id="approach-4-just-pre-estimate-lambda-and-nu_0"
+class="section level3">
+<h3>2.4. Approach 4: Just pre-estimate lambda and nu_0</h3>
+<p>One simple way that I also want to discuss is the following simple
+procedure:</p>
+<ol style="list-style-type: decimal">
+<li><p>Fitting susieR to <span class="math inline">\(v\)</span> and the
+out-of-sample <span class="math inline">\(R_0\)</span> to get the susie
+result.</p></li>
+<li><p>Get the null part <span class="math inline">\(v^{(0)} = v - R_0
+\bar{b}\)</span> to learn <span class="math inline">\(\lambda\)</span>.
+This should be good (based on <strong>L1.</strong>)</p></li>
+<li><p>Refit susieR model with <span class="math inline">\(\bar{R} =
+(1-\lambda) R_0 + \lambda I\)</span>.</p></li>
+<li><p>Get the first-effect part <span class="math inline">\(v^{(1)} = v
+- \bar{R} \sum_{\ell \geq 2} \bar{b}_{\ell}\)</span> (the strongest
+signal). Let <span class="math inline">\(j^* = \arg\max
+\alpha_{1j}\)</span>. If <span class="math inline">\(R =
+\bar{R}\)</span>, <span class="math inline">\(v^{(1)} /
+v^{(1)}_{j^*}\)</span> should corresponds to <span
+class="math inline">\(j^*\)</span>-th column of the unknown in-sample
+<span class="math inline">\(R\)</span> (with noise of order <span
+class="math inline">\(1 / N\)</span>). We proceed to use the noiseless
+observed column setting (in <strong>L2.</strong>) to learn <span
+class="math inline">\(\nu_0\)</span>.</p></li>
+</ol>
+<ul>
+<li><p>If <span class="math inline">\(R\)</span> is very near <span
+class="math inline">\(\bar{R}\)</span>, this will approximately correct
+and <span class="math inline">\(\nu_0\)</span> is large</p></li>
+<li><p>If <span class="math inline">\(R\)</span> is very far away from
+<span class="math inline">\(\bar{R}\)</span>, <span
+class="math inline">\(v^{(1)}\)</span> will not look like any of <span
+class="math inline">\(\bar{R}\)</span>’s column and <span
+class="math inline">\(\nu_0\)</span> will be small.</p></li>
+</ul>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()
+#&gt; R version 4.3.2 (2023-10-31)
+#&gt; Platform: aarch64-apple-darwin20 (64-bit)
+#&gt; Running under: macOS 26.2
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; time zone: America/New_York
+#&gt; tzcode source: internal
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] workflowr_1.7.1
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] vctrs_0.6.5       httr_1.4.7        cli_3.6.5         knitr_1.50       
+#&gt;  [5] rlang_1.1.6       xfun_0.52         stringi_1.8.7     otel_0.2.0       
+#&gt;  [9] processx_3.8.6    promises_1.5.0    jsonlite_2.0.0    glue_1.8.0       
+#&gt; [13] rprojroot_2.1.1   git2r_0.36.2      htmltools_0.5.8.1 httpuv_1.6.16    
+#&gt; [17] ps_1.9.1          sass_0.4.10       rmarkdown_2.29    jquerylib_0.1.4  
+#&gt; [21] tibble_3.3.0      evaluate_1.0.5    fastmap_1.2.0     yaml_2.3.10      
+#&gt; [25] lifecycle_1.0.4   whisker_0.4.1     stringr_1.6.0     compiler_4.3.2   
+#&gt; [29] fs_1.6.6          pkgconfig_2.0.3   Rcpp_1.1.0        rstudioapi_0.17.1
+#&gt; [33] later_1.4.2       digest_0.6.39     R6_2.6.1          pillar_1.11.1    
+#&gt; [37] callr_3.7.6       magrittr_2.0.3    bslib_0.9.0       tools_4.3.2      
+#&gt; [41] cachem_1.1.0      getPass_0.2-4</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
